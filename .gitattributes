@@ -1,0 +1,10 @@
+# Lo que NO viaja al tema instalado. `git archive` lo deja fuera del zip
+# (ver «Cómo se versiona» en el README). Si se añade una carpeta de trabajo
+# al repo, se añade aquí en el mismo commit.
+/tests export-ignore
+/tools export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/README.md export-ignore
+
+* text=auto eol=lf

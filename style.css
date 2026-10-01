@@ -1,0 +1,41 @@
+/*
+Theme Name: Armazón
+Author: David Pérez
+Description: Shared parent block theme. Structure, base theme.json and common modules (carousel, two-click map, cookie consent, WhatsApp button). No branding: each site adds its own in a child theme.
+Requires at least: 7.1
+Tested up to: 7.1
+Requires PHP: 8.1
+Version: 0.1.0
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: armazon
+Domain Path: /languages
+Tags: full-site-editing, block-patterns, translation-ready
+*/
+
+/*
+ * Solo lo que theme.json no sabe expresar. Cada regla dice por qué está aquí.
+ * Cómo se mantiene: si una regla de este fichero llega a poder escribirse en
+ * theme.json (nueva versión de WordPress), se muda allí y se borra de aquí.
+ */
+
+/* Salto al contenido: theme.json no estiliza clases que no son de bloques. */
+.skip-link.screen-reader-text:focus {
+	background: var(--wp--preset--color--base);
+	color: var(--wp--preset--color--contrast);
+	padding: var(--wp--preset--spacing--16);
+	z-index: 100000;
+}
+
+/* Foco visible y coherente en todo: theme.json no tiene estado :focus-visible global. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+/* Respetar «reducir movimiento» en lo que hace el propio navegador. */
+@media (prefers-reduced-motion: reduce) {
+	html:focus-within {
+		scroll-behavior: auto;
+	}
+}
