@@ -6,6 +6,18 @@
  * dentro (imágenes, grupos, tarjetas: cada hijo directo es una diapositiva),
  * flechas anterior/siguiente, puntos opcionales y autoplay SOLO si se pide.
  *
+ * Con una Consulta dentro (0.2.0): si un hijo directo es un core/query, cada
+ * entrada de su post-template (<li>) es una diapositiva. Así una lista que
+ * vive en la base de datos (clientes, opiniones) se pasa en carrusel sin
+ * copiar sus fichas a mano. La consulta y su <ul> se aplanan con
+ * display: contents (style.css) y view.js recorre los <li>.
+ * - Caso frontera: la paginación de la consulta NO va dentro del carrusel
+ *   (sería una diapositiva más); el carrusel enseña las perPage que traiga.
+ * - La trampa: el post-template tiene que ser hijo DIRECTO de la consulta. Si
+ *   se envuelve en un grupo, el grupo es la única diapositiva.
+ * - En el editor la consulta se ve con su disposición normal (en columna): el
+ *   aplanado es solo de la página publicada.
+ *
  * Decisiones:
  * - Sin JavaScript es una fila desplazable con el dedo, la rueda o las flechas
  *   del teclado: el comportamiento es una mejora, no un requisito. Los
@@ -48,7 +60,25 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$armazon_count    = is_countable( $block->inner_blocks ) ? count( $block->inner_blocks ) : 0;
+/*
+ * Diapositivas: cada bloque interno directo, SALVO un core/query, que aporta
+ * una por cada <li> de su post-template (0.2.0). Las de la consulta se
+ * cuentan en el HTML ya pintado: antes de renderizar no se sabe cuántas
+ * entradas trae.
+ */
+$armazon_count = 0;
+foreach ( $block->inner_blocks as $armazon_inner ) {
+	if ( 'core/query' !== $armazon_inner->name ) {
+		++$armazon_count;
+	}
+}
+if ( str_contains( $content, 'wp-block-post-template' ) ) {
+	$armazon_tags = new WP_HTML_Tag_Processor( $content );
+	while ( $armazon_tags->next_tag( array( 'tag_name' => 'LI', 'class_name' => 'wp-block-post' ) ) ) {
+		++$armazon_count;
+	}
+}
+$armazon_track_id = wp_unique_id( 'armazon-carousel-' );
 $armazon_track_id = wp_unique_id( 'armazon-carousel-' );
 $armazon_label    = '' !== trim( (string) $attributes['label'] ) ? $attributes['label'] : __( 'Carousel', 'armazon' );
 

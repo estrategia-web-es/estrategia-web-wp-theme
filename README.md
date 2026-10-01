@@ -5,7 +5,8 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.1.0**.
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.2.0**
+  (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
 - Sin paso de compilación: ni `@wordpress/scripts` ni `node_modules`.
@@ -116,7 +117,7 @@ frontera y la trampa) está **en la cabecera de su `render.php`** (o de
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
-| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
+| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps» | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
@@ -171,6 +172,29 @@ la cabecera de `tests/server.mjs`: `--mount=E:/…:/…` no vale (se usa
 Windows sin dar error; el `--login` no sirve a un navegador nuevo; las rutas
 bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 `?name=`); y matar el padre no mata a los hijos (`taskkill /T`).
+
+## Versiones
+
+Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
+algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
+`block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.2.0 — 02-10-2026 (menor: no obliga a tocar ningún hijo)
+
+- **`armazon/carousel` acepta una Consulta dentro.** Si un hijo directo del
+  carrusel es un `core/query`, cada `<li>` de su post-template es una
+  diapositiva (puntos, flechas, teclado y «Fin» cuentan entradas, no
+  bloques). Sirve para pasar en carrusel una lista que vive en la base de
+  datos —clientes, opiniones— sin copiar fichas a mano. Los carruseles ya
+  guardados no cambian: sin consulta, cada hijo directo sigue siendo una
+  diapositiva. Límites (cabecera de `blocks/carousel/render.php`): sin
+  paginación dentro, el post-template hijo directo de la consulta, y en el
+  editor la consulta se ve en columna. Prueba: `tests/carousel-query.test.mjs`.
+
+### 0.1.0 — 01-10-2026
+
+- Primera versión: plantillas, partes, `theme.json` base y los módulos
+  carrusel, mapa, consentimiento y WhatsApp.
 
 ## Decisiones pendientes
 

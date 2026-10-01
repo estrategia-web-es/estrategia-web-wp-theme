@@ -19,9 +19,22 @@ const reducedMotion = () => window.matchMedia( '(prefers-reduced-motion: reduce)
 const rootOf = ( element ) => element.closest( '.armazon-carousel' );
 const trackOf = ( element ) => rootOf( element ).querySelector( '.armazon-carousel__track' );
 
+/**
+ * Slides of a track: its direct children, except a core/query, which
+ * contributes each <li> of its post-template (see render.php, 0.2.0).
+ */
+const slidesOf = ( track ) =>
+	Array.from( track.children ).flatMap( ( child ) =>
+		child.classList.contains( 'wp-block-query' )
+			? Array.from( child.querySelectorAll( ':scope > .wp-block-post-template > li' ) )
+			: [ child ]
+	);
+
 /** Offsets of each slide relative to the start of the track. */
-const slideOffsets = ( track ) =>
-	Array.from( track.children ).map( ( slide ) => slide.offsetLeft - track.firstElementChild.offsetLeft );
+const slideOffsets = ( track ) => {
+	const slides = slidesOf( track );
+	return slides.map( ( slide ) => slide.offsetLeft - slides[ 0 ].offsetLeft );
+};
 
 const scrollToIndex = ( track, index ) => {
 	const offsets = slideOffsets( track );
@@ -91,7 +104,7 @@ const { state } = store( 'armazon/carousel', {
 				scrollToIndex( track, 0 );
 			} else if ( 'End' === event.key ) {
 				event.preventDefault();
-				scrollToIndex( track, track.children.length - 1 );
+				scrollToIndex( track, slidesOf( track ).length - 1 );
 			}
 		} ),
 		toggleAutoplay() {

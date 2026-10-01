@@ -38,11 +38,22 @@
 	padding-block-end: var(--wp--preset--spacing--8, 0.5rem);
 }
 
-.armazon-carousel__track > * {
+.armazon-carousel__track > *,
+.armazon-carousel__track > .wp-block-query > .wp-block-post-template > li {
 	flex: 0 0 calc((100% - (var(--armazon-carousel-per-view) - 1) * var(--armazon-carousel-gap)) / var(--armazon-carousel-per-view));
 	min-width: 0;
 	margin-block: 0 !important;
 	scroll-snap-align: start;
+}
+
+/*
+ * Una Consulta dentro (0.2.0): la consulta y su <ul> desaparecen como cajas y
+ * cada <li> pasa a ser hija flex de la pista. Va con más especificidad que el
+ * «display: grid» del diseño en rejilla del post-template.
+ */
+.armazon-carousel:not(.is-editing) .armazon-carousel__track > .wp-block-query,
+.armazon-carousel:not(.is-editing) .armazon-carousel__track > .wp-block-query > .wp-block-post-template {
+	display: contents;
 }
 
 .armazon-carousel__track > .wp-block-image img {

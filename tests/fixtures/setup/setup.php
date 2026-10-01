@@ -4,8 +4,9 @@
  * (tests/fixtures/blueprint.json) con runPHP después de cargar WordPress.
  *
  * Deja: enlaces permanentes bonitos, la opción de WhatsApp del sitio, y la
- * página /prueba-modulos/ con los cuatro bloques. Es idempotente: si la
- * página ya existe, la reescribe.
+ * página /prueba-modulos/ con los cuatro bloques; y /prueba-carrusel-consulta/
+ * con seis entradas en un carrusel con core/query. Es idempotente: si la
+ * página o la entrada ya existe, la reescribe.
  *
  * @package armazon
  */
@@ -40,6 +41,44 @@ $page_id  = wp_insert_post(
 		'post_title'   => 'Prueba de módulos',
 		'post_name'    => 'prueba-modulos',
 		'post_content' => wp_slash( $content ),
+	)
+);
+
+// Carrusel con una Consulta dentro (0.2.0): seis entradas y una página cuyo
+// carrusel lleva un core/query; cada <li> de su post-template es diapositiva.
+for ( $i = 1; $i <= 6; $i++ ) {
+	$slug = 'entrada-carrusel-' . $i;
+	$post = get_page_by_path( $slug, OBJECT, 'post' );
+	wp_insert_post(
+		array(
+			'ID'          => $post ? $post->ID : 0,
+			'post_type'   => 'post',
+			'post_status' => 'publish',
+			'post_title'  => 'Entrada carrusel ' . $i,
+			'post_name'   => $slug,
+		)
+	);
+}
+
+$query_content = '<!-- wp:armazon/carousel {"label":"Carrusel con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+	. '<!-- wp:query {"queryId":7,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"carrusel","inherit":false}} -->'
+	. '<div class="wp-block-query"><!-- wp:post-template -->'
+	. '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
+	. '<div class="wp-block-group has-surface-background-color has-background"><!-- wp:post-title /--></div>'
+	. '<!-- /wp:group -->'
+	. '<!-- /wp:post-template --></div>'
+	. '<!-- /wp:query -->'
+	. '<!-- /wp:armazon/carousel -->';
+
+$existing_query = get_page_by_path( 'prueba-carrusel-consulta' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_query ? $existing_query->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de carrusel con consulta',
+		'post_name'    => 'prueba-carrusel-consulta',
+		'post_content' => wp_slash( $query_content ),
 	)
 );
 
