@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"__comment": "armazon/consent — botón «Configurar cookies» que reabre el aviso. El aviso y toda la lógica del consentimiento viven en inc/consent.php (su cabecera es la documentación). Sin editor propio: supports.autoRegister (WP 7.0).",
+	"apiVersion": 3,
+	"name": "armazon/consent",
+	"version": "0.1.0",
+	"title": "Cookie settings link",
+	"category": "widgets",
+	"icon": "shield",
+	"description": "Reopens the cookie consent notice. Renders nothing when the site declares no optional cookie categories.",
+	"keywords": [ "cookies", "consent", "privacy", "gdpr" ],
+	"textdomain": "armazon",
+	"attributes": {
+		"label": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"autoRegister": true,
+		"html": false,
+		"interactivity": true,
+		"typography": { "fontSize": true },
+		"color": { "text": true }
+	},
+	"viewScriptModule": "file:./view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}
