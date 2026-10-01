@@ -1,0 +1,12 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/prueba-modulos/",
+	"steps": [
+		{ "step": "setSiteLanguage", "language": "es_ES" },
+		{ "step": "activateTheme", "themeFolderName": "armazon-hijo-prueba" },
+		{
+			"step": "runPHP",
+			"code": "<?php require_once '/wordpress/wp-load.php'; require '/wordpress/wp-content/armazon-fixtures/setup.php';"
+		}
+	]
+}
