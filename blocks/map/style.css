@@ -1,0 +1,54 @@
+/*
+ * armazon/map — estilos. Solo tokens de theme.json. La proporción del
+ * recuadro se ajusta en el hijo con --armazon-map-ratio (por defecto 16/9).
+ */
+.armazon-map {
+	--armazon-map-ratio: 16 / 9;
+	margin-inline: 0;
+}
+
+.armazon-map__frame {
+	position: relative;
+	aspect-ratio: var(--armazon-map-ratio);
+	overflow: hidden;
+	background: var(--wp--preset--color--surface, #eee);
+	border-radius: 4px;
+}
+
+.armazon-map__image,
+.armazon-map__iframe,
+.armazon-map__placeholder {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	border: 0;
+}
+
+.armazon-map__image {
+	object-fit: cover;
+}
+
+.armazon-map [hidden] {
+	display: none;
+}
+
+.armazon-map__caption {
+	display: grid;
+	gap: var(--wp--preset--spacing--8, 0.5rem);
+	margin-block-start: var(--wp--preset--spacing--16, 1rem);
+}
+
+.armazon-map__address {
+	font-style: normal;
+	font-weight: 600;
+}
+
+.armazon-map__notice {
+	margin: var(--wp--preset--spacing--8, 0.5rem) 0 0;
+	font-size: var(--wp--preset--font-size--small, 0.875rem);
+	color: var(--wp--preset--color--muted, inherit);
+}
+
+.armazon-map__load {
+	cursor: pointer;
+}
