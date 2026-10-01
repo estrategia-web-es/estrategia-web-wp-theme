@@ -15,6 +15,24 @@ add_filter(
 	}
 );
 
+// Un campo de entrada para probar armazon/map enlazado a core/post-meta
+// dentro de una Consulta (tests/map-query.test.mjs). Un tipo propio con sus
+// campos es cosa de un plugin, nunca del padre: aquí solo es la siembra.
+add_action(
+	'init',
+	static function () {
+		register_post_meta(
+			'post',
+			'prueba_direccion',
+			array(
+				'type'         => 'string',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
+	}
+);
+
 add_action(
 	'wp_footer',
 	static function () {

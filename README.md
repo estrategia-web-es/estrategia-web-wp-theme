@@ -118,7 +118,7 @@ frontera y la trampa) está **en la cabecera de su `render.php`** (o de
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
 | `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
-| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps» | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
+| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; dentro de una Consulta, datos por bindings e imagen destacada (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 
@@ -190,6 +190,15 @@ algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
   diapositiva. Límites (cabecera de `blocks/carousel/render.php`): sin
   paginación dentro, el post-template hijo directo de la consulta, y en el
   editor la consulta se ve en columna. Prueba: `tests/carousel-query.test.mjs`.
+- **`armazon/map` dentro de una Consulta.** Sus atributos de texto (dirección,
+  URL de embed, enlace, imagen) aceptan **Block Bindings**, y sin imagen
+  elegida usa la **imagen destacada** de la entrada. Así cada sede de una
+  lista lleva su mapa. Prueba: `tests/map-query.test.mjs`.
+- **`armazon/whatsapp` acepta bindings** en número, mensaje y etiqueta: el
+  número puede salir de los datos de la empresa de un plugin en vez de la
+  opción `armazon_whatsapp_phone`, que sigue funcionando igual.
+- La lista de atributos enlazables está en `inc/blocks.php`
+  (`armazon_bindable_attributes`).
 
 ### 0.1.0 — 01-10-2026
 

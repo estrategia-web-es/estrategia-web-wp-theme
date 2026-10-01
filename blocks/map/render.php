@@ -19,6 +19,11 @@
  * - Sin imagen elegida sale un recuadro neutro con la dirección.
  * - Editor: edit.js (script clásico) por el selector de imagen de la
  *   mediateca, que autoRegister no ofrece; la vista previa es ServerSideRender.
+ * - Dentro de una Consulta (0.2.0): sus atributos de texto aceptan Block
+ *   Bindings (inc/blocks.php), así que la dirección y la URL de embed pueden
+ *   salir de los campos de cada entrada (core/post-meta); y sin imagen
+ *   elegida usa la imagen destacada de la entrada (usesContext postId). Así
+ *   una lista de sedes que vive en la base de datos lleva cada una su mapa.
  *
  * Cómo se mantiene:
  * - Quién: quien toque el padre. Cuándo: si Google cambia el formato de la URL
@@ -96,6 +101,21 @@ if ( $attributes['imageId'] ) {
 			'class'               => 'armazon-map__image',
 			'alt'                 => $attributes['imageAlt'],
 			'loading'             => 'lazy',
+			'data-wp-bind--hidden' => 'context.loaded',
+		)
+	);
+}
+// Dentro de una Consulta (0.2.0), sin imagen elegida en el bloque: la imagen
+// destacada de la entrada (en una sede, su mapa estático).
+if ( '' === $armazon_image && '' === $attributes['imageUrl'] && ! empty( $block->context['postId'] ) && has_post_thumbnail( (int) $block->context['postId'] ) ) {
+	$armazon_image = wp_get_attachment_image(
+		get_post_thumbnail_id( (int) $block->context['postId'] ),
+		'large',
+		false,
+		array(
+			'class'                => 'armazon-map__image',
+			'alt'                  => $attributes['imageAlt'],
+			'loading'              => 'lazy',
 			'data-wp-bind--hidden' => 'context.loaded',
 		)
 	);

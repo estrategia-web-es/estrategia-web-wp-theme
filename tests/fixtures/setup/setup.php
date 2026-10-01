@@ -82,5 +82,58 @@ wp_insert_post(
 	)
 );
 
+// Mapa dentro de una Consulta (0.2.0): dos entradas con su dirección en un
+// campo (prueba_direccion, registrado por el hijo de prueba) y la primera con
+// imagen destacada; el mapa enlaza la dirección con core/post-meta y, sin
+// imagen propia, usa la destacada de la entrada.
+$png        = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+$upload     = wp_upload_bits( 'mapa-estatico-prueba.png', null, $png );
+$attachment = wp_insert_attachment(
+	array(
+		'post_title'     => 'Mapa estático de prueba',
+		'post_mime_type' => 'image/png',
+		'post_status'    => 'inherit',
+	),
+	$upload['file']
+);
+for ( $i = 1; $i <= 2; $i++ ) {
+	$slug    = 'entrada-mapa-' . $i;
+	$post    = get_page_by_path( $slug, OBJECT, 'post' );
+	$post_id = wp_insert_post(
+		array(
+			'ID'          => $post ? $post->ID : 0,
+			'post_type'   => 'post',
+			'post_status' => 'publish',
+			'post_title'  => 'Entrada mapa ' . $i,
+			'post_name'   => $slug,
+			'meta_input'  => array( 'prueba_direccion' => 'Calle de Prueba ' . $i . ', Palma' ),
+		)
+	);
+	if ( 1 === $i ) {
+		set_post_thumbnail( $post_id, $attachment );
+	} else {
+		delete_post_thumbnail( $post_id );
+	}
+}
+
+$map_content = '<!-- wp:query {"queryId":8,"query":{"perPage":2,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"mapa","inherit":false}} -->'
+	. '<div class="wp-block-query"><!-- wp:post-template -->'
+	. '<!-- wp:post-title /-->'
+	. '<!-- wp:armazon/map {"embedUrl":"https://www.google.com/maps/embed?pb=!1m18!1m12","metadata":{"bindings":{"address":{"source":"core/post-meta","args":{"key":"prueba_direccion"}}}}} /-->'
+	. '<!-- /wp:post-template --></div>'
+	. '<!-- /wp:query -->';
+
+$existing_map = get_page_by_path( 'prueba-mapa-consulta' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_map ? $existing_map->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de mapa en una consulta',
+		'post_name'    => 'prueba-mapa-consulta',
+		'post_content' => wp_slash( $map_content ),
+	)
+);
+
 flush_rewrite_rules();
 echo 'armazon-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";

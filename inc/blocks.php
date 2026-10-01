@@ -40,6 +40,42 @@ function armazon_register_blocks(): void {
 add_action( 'init', 'armazon_register_blocks' );
 
 /**
+ * Attributes of the parent's blocks that accept Block Bindings (0.2.0).
+ *
+ * Por qué: el núcleo solo deja enlazar atributos de sus propios bloques
+ * (párrafo, imagen, botón…). Con este filtro (WordPress 6.9+) un dato que
+ * vive en otro sitio llega a estos bloques sin copiarlo: la dirección de una
+ * sede (core/post-meta, dentro de una Consulta) al mapa, o el número de
+ * WhatsApp de la empresa (la fuente de un plugin) al botón flotante.
+ * El padre no conoce ninguna fuente ni ningún campo: solo dice QUÉ atributos
+ * se pueden enlazar. Cuáles se enlazan y a qué, lo decide el hijo o el
+ * contenido.
+ *
+ * Cómo se mantiene: un atributo de TEXTO o URL nuevo en un bloque del padre
+ * que tenga sentido rellenar desde fuera entra en esta lista. Caso frontera:
+ * los números y booleanos (imageId, autoplay) no, porque las fuentes devuelven
+ * texto. La trampa: los atributos enlazados se resuelven ANTES de render.php,
+ * así que render.php no sabe si un valor vino del bloque o de la fuente; no
+ * se escribe código que dependa de eso.
+ *
+ * @return array<string, string[]>
+ */
+function armazon_bindable_attributes(): array {
+	return array(
+		'armazon/map'      => array( 'address', 'embedUrl', 'mapsUrl', 'imageUrl', 'imageAlt' ),
+		'armazon/whatsapp' => array( 'phone', 'message', 'label' ),
+	);
+}
+
+foreach ( armazon_bindable_attributes() as $armazon_block_name => $armazon_block_attributes ) {
+	add_filter(
+		"block_bindings_supported_attributes_{$armazon_block_name}",
+		static fn( $supported ) => array_values( array_unique( array_merge( (array) $supported, $armazon_block_attributes ) ) )
+	);
+}
+unset( $armazon_block_name, $armazon_block_attributes );
+
+/**
  * Adds translated labels to the auto-generated controls of autoRegister blocks.
  *
  * @param array $metadata Block metadata read from block.json.
