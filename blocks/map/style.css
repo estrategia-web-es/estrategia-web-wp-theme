@@ -28,6 +28,35 @@
 	object-fit: cover;
 }
 
+/*
+ * Sin imagen (lo normal desde 0.3.0): un recuadro con los datos del sitio en
+ * texto, con los colores del tema. No imita un mapa: una captura de Google
+ * Maps como «foto» se veía mal y mentía (no se puede mover). Un hijo lo viste
+ * sobre estas clases o con su propio fondo decorativo.
+ */
+.armazon-map__card {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	align-content: center;
+	gap: var(--wp--preset--spacing--8, 0.5rem);
+	padding: var(--wp--preset--spacing--24, 1.5rem);
+	background: var(--wp--preset--color--surface, #f4f4f4);
+	color: var(--wp--preset--color--contrast, inherit);
+}
+
+.armazon-map__card > * {
+	margin: 0;
+}
+
+.armazon-map__name {
+	font-weight: 600;
+}
+
+.armazon-map__card-address {
+	font-style: normal;
+}
+
 .armazon-map [hidden] {
 	display: none;
 }

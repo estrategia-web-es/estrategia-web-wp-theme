@@ -19,6 +19,19 @@
  * - Sin imagen elegida sale un recuadro neutro con la dirección.
  * - Editor: edit.js (script clásico) por el selector de imagen de la
  *   mediateca, que autoRegister no ofrece; la vista previa es ServerSideRender.
+ * - SIN IMAGEN por defecto (0.3.0): antes del clic se ve un recuadro con los
+ *   DATOS del sitio en texto (nombre, dirección, teléfono con tel:, horario),
+ *   con los colores del tema, y debajo «Ver mapa» y «Abrir en Google Maps».
+ *   Por qué: una captura de Google Maps como foto se veía mal (David,
+ *   02-10-2026) y aparentaba un mapa que no se puede mover. La imagen sigue
+ *   siendo posible (elegida, o la destacada con useFeaturedImage) pero es la
+ *   excepción. Con «maps» aceptado en el consentimiento se pinta el iframe
+ *   directamente, como antes.
+ *   Caso frontera: el recuadro dice lo que el bloque sabe; los datos de una
+ *   sede llegan por bindings (p. ej. la fuente armazon-site/location).
+ *   La trampa: las fuentes de bindings devuelven el texto ya escapado y con
+ *   <br>; render.php lo devuelve a texto plano antes de escaparlo (si no, sale
+ *   «&amp;amp;» o «<br>» a la vista).
  * - Dentro de una Consulta (0.2.0): sus atributos de texto aceptan Block
  *   Bindings (inc/blocks.php), así que la dirección y la URL de embed pueden
  *   salir de los campos de cada entrada (core/post-meta); y sin imagen
@@ -73,7 +86,14 @@ if ( ! function_exists( 'armazon_map_embed_url' ) ) {
 	}
 }
 
-$armazon_address   = trim( (string) $attributes['address'] );
+// Los datos llegan de atributos o de Block Bindings: una fuente de texto los
+// trae con <br> en vez de saltos (las de armazon-site lo hacen); se
+// devuelven a saltos para escaparlos aquí una sola vez.
+$armazon_text      = static fn( string $key ): string => trim( html_entity_decode( wp_strip_all_tags( preg_replace( '/<br\s*\/?>/i', "\n", (string) $attributes[ $key ] ) ), ENT_QUOTES, 'UTF-8' ) );
+$armazon_place     = $armazon_text( 'placeName' );
+$armazon_phone     = $armazon_text( 'phone' );
+$armazon_hours     = $armazon_text( 'hours' );
+$armazon_address   = $armazon_text( 'address' );
 $armazon_embed     = armazon_map_embed_url( (string) $attributes['embedUrl'] );
 $armazon_maps_url  = trim( (string) $attributes['mapsUrl'] );
 if ( '' === $armazon_maps_url && '' !== $armazon_address ) {
@@ -105,9 +125,9 @@ if ( $attributes['imageId'] ) {
 		)
 	);
 }
-// Dentro de una Consulta (0.2.0), sin imagen elegida en el bloque: la imagen
-// destacada de la entrada (en una sede, su mapa estático).
-if ( '' === $armazon_image && '' === $attributes['imageUrl'] && ! empty( $block->context['postId'] ) && has_post_thumbnail( (int) $block->context['postId'] ) ) {
+// Dentro de una Consulta, SOLO si se pide (useFeaturedImage, 0.3.0; en 0.2.0
+// era siempre): la imagen destacada de la entrada.
+if ( '' === $armazon_image && '' === $attributes['imageUrl'] && $attributes['useFeaturedImage'] && ! empty( $block->context['postId'] ) && has_post_thumbnail( (int) $block->context['postId'] ) ) {
 	$armazon_image = wp_get_attachment_image(
 		get_post_thumbnail_id( (int) $block->context['postId'] ),
 		'large',
@@ -144,7 +164,20 @@ $armazon_title = '' !== $armazon_address
 		<?php if ( '' !== $armazon_image ) : ?>
 			<?php echo $armazon_image; // phpcs:ignore WordPress.Security.EscapeOutput -- built with escaping above. ?>
 		<?php else : ?>
-			<div class="armazon-map__placeholder" aria-hidden="true" data-wp-bind--hidden="context.loaded"></div>
+			<div class="armazon-map__card" data-wp-bind--hidden="context.loaded">
+				<?php if ( '' !== $armazon_place ) : ?>
+				<p class="armazon-map__name"><?php echo esc_html( $armazon_place ); ?></p>
+				<?php endif; ?>
+				<?php if ( '' !== $armazon_address ) : ?>
+				<address class="armazon-map__card-address"><?php echo nl2br( esc_html( $armazon_address ), false ); ?></address>
+				<?php endif; ?>
+				<?php if ( '' !== $armazon_phone ) : ?>
+				<p class="armazon-map__phone"><a href="<?php echo esc_url( 'tel:' . preg_replace( '/[^\d+]/', '', $armazon_phone ), array( 'tel' ) ); ?>"><?php echo esc_html( $armazon_phone ); ?></a></p>
+				<?php endif; ?>
+				<?php if ( '' !== $armazon_hours ) : ?>
+				<p class="armazon-map__hours"><?php echo nl2br( esc_html( $armazon_hours ), false ); ?></p>
+				<?php endif; ?>
+			</div>
 		<?php endif; ?>
 		<?php if ( '' !== $armazon_embed ) : ?>
 		<iframe
@@ -159,7 +192,7 @@ $armazon_title = '' !== $armazon_address
 		<?php endif; ?>
 	</div>
 	<figcaption class="armazon-map__caption">
-		<?php if ( '' !== $armazon_address ) : ?>
+		<?php if ( '' !== $armazon_address && '' !== $armazon_image ) : ?>
 		<address class="armazon-map__address"><?php echo esc_html( $armazon_address ); ?></address>
 		<?php endif; ?>
 		<?php if ( '' !== $armazon_embed ) : ?>

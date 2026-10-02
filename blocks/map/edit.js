@@ -32,7 +32,18 @@
 					h(
 						PanelBody,
 						{ title: __( 'Map settings', 'armazon' ) },
-						text( __( 'Address', 'armazon' ), 'address' ),
+						text( __( 'Place name', 'armazon' ), 'placeName' ),
+						h( TextareaControl, {
+							label: __( 'Address', 'armazon' ),
+							value: attributes.address,
+							onChange: ( value ) => setAttributes( { address: value } ),
+						} ),
+						text( __( 'Phone', 'armazon' ), 'phone' ),
+						h( TextareaControl, {
+							label: __( 'Opening hours', 'armazon' ),
+							value: attributes.hours,
+							onChange: ( value ) => setAttributes( { hours: value } ),
+						} ),
 						h( TextareaControl, {
 							label: __( 'Google Maps embed URL', 'armazon' ),
 							help: __( 'Google Maps › Share › Embed a map. You can paste the whole iframe code.', 'armazon' ),
@@ -47,7 +58,14 @@
 					),
 					h(
 						PanelBody,
-						{ title: __( 'Static image', 'armazon' ) },
+						{ title: __( 'Static image', 'armazon' ), initialOpen: false },
+						h( 'p', null, __( 'Optional. Without an image the map shows a box with the place details.', 'armazon' ) ),
+						h( wp.components.ToggleControl, {
+							label: __( 'Use the featured image of the post', 'armazon' ),
+							help: __( 'Inside a Query Loop.', 'armazon' ),
+							checked: attributes.useFeaturedImage,
+							onChange: ( value ) => setAttributes( { useFeaturedImage: value } ),
+						} ),
 						h(
 							MediaUploadCheck,
 							null,

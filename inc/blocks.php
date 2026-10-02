@@ -62,7 +62,7 @@ add_action( 'init', 'armazon_register_blocks' );
  */
 function armazon_bindable_attributes(): array {
 	return array(
-		'armazon/map'      => array( 'address', 'embedUrl', 'mapsUrl', 'imageUrl', 'imageAlt' ),
+		'armazon/map'      => array( 'placeName', 'address', 'phone', 'hours', 'embedUrl', 'mapsUrl', 'imageUrl', 'imageAlt' ),
 		'armazon/whatsapp' => array( 'phone', 'message', 'label' ),
 	);
 }

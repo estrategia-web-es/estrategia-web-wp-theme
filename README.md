@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.2.0**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.3.0**
   (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
@@ -118,7 +118,7 @@ frontera y la trampa) está **en la cabecera de su `render.php`** (o de
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
 | `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
-| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; dentro de una Consulta, datos por bindings e imagen destacada (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
+| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 
@@ -178,6 +178,19 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.3.0 — 02-10-2026 (menor, con un cambio visible)
+
+- **`armazon/map` sin foto por defecto.** Antes del clic enseña un recuadro
+  con los datos del sitio en texto (atributos nuevos `placeName`, `phone`,
+  `hours`, además de `address`; todos aceptan bindings), «Ver mapa» y «Abrir en
+  Google Maps». Con «maps» aceptado, el iframe directamente, como siempre. Una
+  imagen elegida en el bloque se sigue usando.
+- **Cambio visible respecto a 0.2.0:** la imagen destacada de la entrada
+  (dentro de una Consulta) ya NO se usa sola: hay que marcar
+  `useFeaturedImage`. Un hijo que contaba con ella la pierde y ve el recuadro.
+- Prueba nueva: `tests/map-card.test.mjs` (recuadro sin imagen, datos, enlace
+  tel:, ninguna petición a Google antes del clic).
 
 ### 0.2.0 — 02-10-2026 (menor: no obliga a tocar ningún hijo)
 
