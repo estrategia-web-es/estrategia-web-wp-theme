@@ -33,6 +33,16 @@ add_action(
 	}
 );
 
+// Un carrusel en REJILLA de dos filas, como la franja de clientes de
+// Lavandería (tests/carousel-infinite.test.mjs): el infinito rota por
+// columnas y ninguna ficha cambia de fila. Lo pone el hijo, como allí.
+add_action(
+	'wp_head',
+	static function () {
+		echo '<style>.rejilla-prueba .armazon-carousel__track{display:grid;grid-template-columns:repeat(3,70%);}</style>';
+	}
+);
+
 add_action(
 	'wp_footer',
 	static function () {

@@ -2,8 +2,8 @@
 /**
  * armazon/carousel en bucle (0.5.0, atributo loop, por defecto true):
  * 1. al cargar, las DOS flechas están activas (antes «anterior» salía gris);
- * 2. «anterior» en la primera lleva al final de la pista;
- * 3. «siguiente» en la última vuelve al principio;
+ * 2. «anterior» en la primera enseña la última;
+ * 3. «siguiente» en la última vuelve a la primera;
  * 4. igual con ← → del teclado, y lo mismo con un core/query dentro, donde
  *    las diapositivas son las entradas.
  *
@@ -13,6 +13,26 @@
  * Las esperas son por HECHOS (scrollLeft), nunca por tiempo.
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
+
+/*
+ * Se mira lo que SE VE, no scrollLeft (cambiado en 0.6.0): desde el infinito
+ * la pista rota sus diapositivas y «la última» ya no es el final físico de la
+ * pista. Que el bucle además no rebobine lo vigila carousel-infinite.test.mjs.
+ * Las dos funciones se ejecutan DENTRO de la página (waitForFunction las
+ * serializa): no pueden llamar a nada de este fichero.
+ */
+/** The last slide is entirely in view. */
+const lastInView = ( el ) => {
+	const all = [ ...el.children ].flatMap( ( c ) => ( c.classList.contains( 'wp-block-query' ) ? [ ...c.querySelectorAll( ':scope > .wp-block-post-template > li' ) ] : [ c ] ) );
+	const r = all[ all.length - 1 ].getBoundingClientRect();
+	const t = el.getBoundingClientRect();
+	return r.left >= t.left - 1 && r.right <= t.right + 1;
+};
+/** The first slide sits at the left edge. */
+const firstAtStart = ( el ) => {
+	const first = el.children[ 0 ].classList.contains( 'wp-block-query' ) ? el.querySelector( 'li' ) : el.children[ 0 ];
+	return Math.abs( first.getBoundingClientRect().left - el.getBoundingClientRect().left ) < 1;
+};
 
 run( () =>
 	withBrowser( async ( { newPage } ) => {
@@ -35,19 +55,19 @@ run( () =>
 
 			// 2. «Anterior» desde la primera va al final.
 			await prev.click();
-			await page.waitForFunction( ( el ) => el.scrollLeft + el.clientWidth >= el.scrollWidth - 1, handle );
+			await page.waitForFunction( lastInView, handle );
 
 			// 3. «Siguiente» desde la última vuelve al principio, y la flecha sigue activa.
 			assert.equal( await next.isDisabled(), false, `${ name }: «siguiente» se desactiva en la última` );
 			await next.click();
-			await page.waitForFunction( ( el ) => el.scrollLeft < 1, handle );
+			await page.waitForFunction( firstAtStart, handle );
 
 			// 4. Teclado: ← en la primera va al final; → en la última vuelve.
 			await track.focus();
 			await page.keyboard.press( 'ArrowLeft' );
-			await page.waitForFunction( ( el ) => el.scrollLeft + el.clientWidth >= el.scrollWidth - 1, handle );
+			await page.waitForFunction( lastInView, handle );
 			await page.keyboard.press( 'ArrowRight' );
-			await page.waitForFunction( ( el ) => el.scrollLeft < 1, handle );
+			await page.waitForFunction( firstAtStart, handle );
 		}
 
 		// Con consulta: cada entrada sigue siendo una diapositiva (seis puntos).

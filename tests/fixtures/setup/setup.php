@@ -7,7 +7,8 @@
  * página /prueba-modulos/ con los cuatro bloques; y /prueba-carrusel-consulta/
  * con seis entradas en un carrusel con core/query; y /prueba-acordeon/ con
  * un core/accordion de respuesta larga (0.4.0); /prueba-carrusel-bucle/ y
- * /prueba-mapa-estatico/ (0.5.0). Es idempotente: si la
+ * /prueba-mapa-estatico/ (0.5.0); /prueba-mapa-sin-datos/ y un carrusel de una
+ * sola diapositiva en /prueba-carrusel-bucle/ (0.6.0). Es idempotente: si la
  * página o la entrada ya existe, la reescribe.
  *
  * @package armazon
@@ -78,6 +79,15 @@ $loop_content = '<!-- wp:armazon/carousel {"label":"Carrusel en bucle","showDots
 	. '<!-- /wp:armazon/carousel -->'
 	. '<!-- wp:armazon/carousel {"label":"Carrusel en bucle con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $query_block( 9 )
+	. '<!-- /wp:armazon/carousel -->'
+	// Infinito (0.6.0): en rejilla de dos filas (la CSS la pone el hijo de
+	// prueba, clase rejilla-prueba), seis entradas = tres columnas.
+	. '<!-- wp:armazon/carousel {"label":"Carrusel en dos filas","className":"rejilla-prueba"} -->'
+	. $query_block( 10 )
+	. '<!-- /wp:armazon/carousel -->'
+	// Infinito (0.6.0): con una sola diapositiva no hay nada que hacer.
+	. '<!-- wp:armazon/carousel {"label":"Carrusel de una","showDots":true} -->'
+	. '<!-- wp:paragraph --><p>Única diapositiva</p><!-- /wp:paragraph -->'
 	. '<!-- /wp:armazon/carousel -->';
 
 $existing_loop = get_page_by_path( 'prueba-carrusel-bucle' );
@@ -184,6 +194,25 @@ wp_insert_post(
 		'post_title'   => 'Prueba de mapa estático',
 		'post_name'    => 'prueba-mapa-estatico',
 		'post_content' => wp_slash( $static_content ),
+	)
+);
+
+// Mapa sin su recuadro de datos (0.6.0, showDetails:false): la ficha de la
+// sede ya dice la dirección al lado. El primero con mapa estático, el segundo
+// sin imagen; los dos con la dirección enlazada (para «Abrir en Google Maps»).
+$details_content = '<!-- wp:paragraph --><p class="ficha-sede">Plaça de Cort 1, 07001 Palma</p><!-- /wp:paragraph -->'
+	. '<!-- wp:armazon/map {"showDetails":false,"placeName":"Sede sin recuadro","address":"Plaça de Cort 1, 07001 Palma","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/armazon-fixtures/mapa-estatico.webp"} /-->'
+	. '<!-- wp:armazon/map {"showDetails":false,"placeName":"Sede sin recuadro ni imagen","address":"Calle Sin Imagen 2, Palma","embedUrl":"' . $embed . '"} /-->';
+
+$existing_details = get_page_by_path( 'prueba-mapa-sin-datos' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_details ? $existing_details->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de mapa sin datos',
+		'post_name'    => 'prueba-mapa-sin-datos',
+		'post_content' => wp_slash( $details_content ),
 	)
 );
 

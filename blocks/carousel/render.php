@@ -19,18 +19,57 @@
  *   aplanado es solo de la página publicada.
  *
  * En bucle (0.5.0, atributo loop, por defecto SÍ): «siguiente» en la última
- * vuelve a la primera y «anterior» en la primera va a la última (también con
- * ← → del teclado; Inicio y Fin no dan la vuelta). Las dos flechas están
+ * va a la primera y «anterior» en la primera va a la última (también con
+ * ← → del teclado). Las dos flechas están
  * siempre activas: sin bucle, «anterior» sale gris al cargar y en una web
  * parecía un carrusel roto. Con una Consulta dentro funciona igual (cuenta
  * entradas). Por qué SÍ por defecto: es lo que espera quien usa un carrusel
  * en una web de negocio, y el gris al cargar se veía como un fallo; un
  * carrusel que deba terminar (pasos de un proceso) pone loop: false.
- * - Caso frontera: con varias visibles, «la última» es la última POSICIÓN
- *   (el final de la pista), no la última diapositiva sola a la izquierda.
- * - La trampa: el bucle NO duplica diapositivas (no es un carrusel infinito
- *   con clones): da la vuelta desplazándose hacia atrás por toda la pista.
- *   Clonar rompería los puntos, el foco y lo que lee un lector de pantalla.
+ *
+ * INFINITO (0.6.0): el bucle ya no rebobina. De la última se pasa a la
+ * primera SIGUIENDO en la misma dirección (y al revés), con flechas, teclado,
+ * puntos, autoplay y con el dedo (scroll-snap). Lo pidió David: el rebobinado
+ * de la 0.5.0 recorría todas las diapositivas hacia atrás.
+ * - Técnica: SIN CLONES. view.js pone a cada diapositiva un `order` de flex
+ *   que ROTA la fila sin tocar el DOM, de modo que alrededor de la que se ve
+ *   siempre hay diapositivas a los dos lados. Cuando la pista se para
+ *   (scrollend; en Safari sin scrollend, tras 120 ms quieta) se vuelve a rotar
+ *   alrededor de la del borde y se corrige scrollLeft en el mismo fotograma,
+ *   sin animación: la diapositiva no se mueve en pantalla y el salto no se ve.
+ *   Antes de cada paso con flechas o puntos se rota lo necesario para que el
+ *   destino quede del lado al que se va.
+ * - Por qué no clones: duplicarían enlaces enfocables, ids y lo que lee un
+ *   lector de pantalla (habría que marcarlos inert/aria-hidden y quitarles
+ *   los ids), cargarían otra vez las imágenes, y sobre todo cambiarían el
+ *   :nth-child de las diapositivas, del que tiran los hijos (Lavandería da a
+ *   cada foto del hero-carousel su proporción por nth-child(3n+…)). `order`
+ *   no cambia el DOM: ni el nth-child, ni el orden de lectura, ni el del
+ *   tabulador, que siguen siendo el lógico (1, 2, 3…).
+ * - Rejilla: si el hijo hace la pista una rejilla de varias filas llenada
+ *   por filas (Lavandería: la franja de clientes, dos filas de 12), lo que
+ *   rota son las COLUMNAS, cada fila igual; rotar ficha a ficha pasaba fichas
+ *   de una fila a otra. Las filas se miden con el orden natural al cargar y
+ *   al cambiar de ancho. Una disposición irregular (filas de distinto largo,
+ *   flex con wrap) no se rota: da la vuelta rebobinando, como la 0.5.0.
+ *   Con varias filas los puntos no cuadran (cuentan fichas, no columnas):
+ *   esos carruseles van sin puntos.
+ * - Caso frontera: con UNA diapositiva, o todas a la vista, no hay nada que
+ *   desplazar: la fila queda quieta (is-static) y no se toca su orden. Con
+ *   solo UNA de más (p. ej. 3 fotos y 2 a la vista) el dedo solo encuentra
+ *   vecina a un lado en cada momento; las flechas dan la vuelta igual.
+ * - Los puntos: el activo es el de la diapositiva del borde izquierdo
+ *   (también con varias visibles); un punto lleva a la suya por el camino
+ *   más corto. Inicio y Fin van a la primera y a la última.
+ * - Con «reducir movimiento», los pasos son instantáneos; la vuelta se da
+ *   igual.
+ * - La trampa (para un hijo): una regla con `order` sobre las diapositivas
+ *   pierde contra el estilo en línea de view.js, y un estilo que dependa de
+ *   la posición VISUAL (:first-child para «la primera que se ve») no vale:
+ *   la primera del DOM ya no es la de la izquierda. Las de :nth-child siguen
+ *   pegadas a su diapositiva, que es lo que se quiere.
+ * - Prueba: tests/carousel-infinite.test.mjs, que mira fotograma a
+ *   fotograma que la pista no retroceda.
  *
  * Decisiones:
  * - Sin JavaScript es una fila desplazable con el dedo, la rueda o las flechas

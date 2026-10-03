@@ -3,7 +3,7 @@
 	"__comment": "armazon/carousel — fila desplazable con scroll-snap. Documentación y mantenimiento en la cabecera de render.php.",
 	"apiVersion": 3,
 	"name": "armazon/carousel",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"title": "Carousel",
 	"category": "design",
 	"icon": "slides",

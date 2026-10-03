@@ -32,6 +32,12 @@
 					h(
 						PanelBody,
 						{ title: __( 'Map settings', 'armazon' ) },
+						h( wp.components.ToggleControl, {
+							label: __( 'Show the place details', 'armazon' ),
+							help: __( 'Turn it off when the address is already next to the map.', 'armazon' ),
+							checked: attributes.showDetails,
+							onChange: ( value ) => setAttributes( { showDetails: value } ),
+						} ),
 						text( __( 'Place name', 'armazon' ), 'placeName' ),
 						h( TextareaControl, {
 							label: __( 'Address', 'armazon' ),

@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.5.0**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.6.0**
   (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
@@ -119,8 +119,8 @@ frontera y la trampa) está **en la cabecera de su `render.php`** (o de
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
-| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
-| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
+| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0 | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
+| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); sin recuadro de datos si la ficha ya los dice al lado (`showDetails:false`, 0.6.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 | `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
@@ -181,6 +181,40 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.6.0 — 03-10-2026 (menor, con un cambio visible en el carrusel)
+
+- **Carrusel infinito** (con `loop`, que ya era el valor por defecto). De la
+  última se pasa a la primera SIGUIENDO en la misma dirección, y al revés,
+  sin el rebobinado de la 0.5.0: flechas, teclado, puntos (el activo es el
+  de la diapositiva del borde izquierdo), autoplay y el dedo en móvil
+  (scroll-snap). **Sin clones:** `view.js` rota las diapositivas con
+  `order` de CSS y corrige `scrollLeft` sin animación cuando la pista se
+  para; el DOM no cambia (ni nth-child, ni lectura, ni tabulador). En una
+  rejilla de varias filas llenada por filas (la franja de clientes de dos
+  filas de Lavandería) rota por columnas; una disposición irregular
+  rebobina como la 0.5.0. Con una diapositiva o todas a la vista, nada.
+  **Cambio visible:** los carruseles con bucle dejan de rebobinar. **Para
+  el hijo:** una regla suya con `order` sobre las diapositivas pierde contra
+  la del padre, y `:first-child` ya no es «la de la izquierda» (las de
+  `:nth-child` siguen pegadas a su diapositiva). Detalle en la cabecera de
+  `blocks/carousel/render.php`.
+- **Mapa: atributo `showDetails`** (por defecto `true`). Con `false` el
+  bloque no pinta su recuadro de datos: para cuando la ficha de la sede ya
+  dice la dirección al lado (en Lavandería salía dos veces). Con imagen
+  estática queda solo la imagen y debajo «Ver mapa» y «Abrir en Google
+  Maps»; sin imagen, solo los botones (el marco aparece al cargar el mapa).
+  No obliga a tocar ningún hijo; quien lo quiera lo pone en su patrón:
+  `<!-- wp:armazon/map {"showDetails":false,"metadata":{"bindings":{…}}} /-->`.
+- **El «borde azul» detrás de «Ver mapa» en Lavandería no es del padre:**
+  es la sombra de botón del hijo (`styles.elements.button.shadow` →
+  `:root :where(.wp-element-button, .wp-block-button__link)`), que el botón
+  hereda por llevar `wp-element-button`. Se quita en el hijo.
+- Pruebas: `carousel-infinite.test.mjs` (fotograma a fotograma, sin
+  retroceder; dedo real en móvil; rejilla de dos filas) y
+  `map-details.test.mjs`, vistas fallar con la 0.5.0 (y la de la rejilla,
+  con la primera versión del infinito). `carousel-loop.test.mjs` mira ahora
+  lo que se ve, no `scrollLeft`.
 
 ### 0.5.0 — 03-10-2026 (menor, con un cambio visible en el carrusel)
 

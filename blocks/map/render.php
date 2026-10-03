@@ -53,6 +53,22 @@
  *   La trampa: el marcador va en el CENTRO de la imagen y el recuadro tapa la
  *   izquierda; por eso el recuadro no pasa del 42 % del ancho. Un hijo que lo
  *   ensanche tapa el marcador.
+ * - SIN DATOS (0.6.0, atributo showDetails, por defecto SÍ): con
+ *   showDetails:false el bloque no pinta su recuadro de datos (ni la
+ *   dirección bajo una foto). Para cuando la ficha de la sede ya los dice al
+ *   lado: en Lavandería la dirección salía dos veces, en la ficha y dentro
+ *   del mapa. Queda: con mapa estático o foto, SOLO la imagen, y debajo
+ *   «Ver mapa» y «Abrir en Google Maps»; sin imagen, solo los botones (el
+ *   marco no se pinta hasta que hay mapa: una caja vacía parecería rota).
+ *   La dirección se sigue pasando: hace falta para el enlace a Google Maps,
+ *   el título del iframe y el texto alternativo del mapa estático.
+ *       <!-- wp:armazon/map {"showDetails":false,"metadata":{"bindings":{
+ *         "address":…,"embedUrl":…,"staticMapUrl":…}}} /-->
+ *   Por qué un atributo y no adivinarlo: el bloque no ve lo que hay al lado
+ *   (un hermano en el mismo grupo puede ser la ficha o no). Lo sabe el patrón
+ *   del hijo, que es quien lo pone.
+ *   Caso frontera: un mapa suelto (página de contacto sin ficha) se queda
+ *   con el valor por defecto: sin datos no diría dónde está.
  * - Dentro de una Consulta (0.2.0): sus atributos de texto aceptan Block
  *   Bindings (inc/blocks.php), así que la dirección y la URL de embed pueden
  *   salir de los campos de cada entrada (core/post-meta); y sin imagen
@@ -227,23 +243,36 @@ if ( '' === $armazon_image && '' !== $attributes['imageUrl'] ) {
 // estático no es foto: va DEBAJO del recuadro de datos (0.5.0).
 $armazon_has_photo = '' !== $armazon_image && '' === $armazon_static;
 
+// Sin datos (0.6.0, showDetails:false): ni recuadro ni dirección bajo la foto,
+// porque la ficha de al lado ya los dice. Sin imagen, el marco no se pinta
+// hasta que hay mapa: una caja vacía antes del clic parecería rota.
+$armazon_details     = ! isset( $attributes['showDetails'] ) || false !== $attributes['showDetails'];
+$armazon_frame_later = ! $armazon_details && '' === $armazon_image;
+$armazon_no_frame    = false;
+if ( $armazon_frame_later && '' === $armazon_embed ) {
+	// Nada que enseñar ni antes ni después del clic: solo el enlace.
+	$armazon_frame_later = false;
+	$armazon_no_frame    = true;
+}
+
 $armazon_title = '' !== $armazon_address
 	/* translators: %s: postal address. */
 	? sprintf( __( 'Map: %s', 'armazon' ), $armazon_address )
 	: __( 'Map', 'armazon' );
 ?>
 <figure
-	<?php echo get_block_wrapper_attributes( array( 'class' => '' !== $armazon_static ? 'armazon-map has-static-map' : 'armazon-map' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	<?php echo get_block_wrapper_attributes( array( 'class' => 'armazon-map' . ( '' !== $armazon_static ? ' has-static-map' : '' ) . ( $armazon_details ? '' : ' is-without-details' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	data-wp-interactive="armazon/map"
 	<?php echo wp_interactivity_data_wp_context( array( 'loaded' => false, 'embedUrl' => $armazon_embed ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	data-wp-init="callbacks.init"
 	data-wp-class--is-loaded="context.loaded"
 >
-	<div class="armazon-map__frame">
+	<?php if ( ! $armazon_no_frame ) : ?>
+	<div class="armazon-map__frame"<?php echo $armazon_frame_later ? ' hidden data-wp-bind--hidden="!context.loaded"' : ''; ?>>
 		<?php if ( '' !== $armazon_image ) : ?>
 			<?php echo $armazon_image; // phpcs:ignore WordPress.Security.EscapeOutput -- built with escaping above. ?>
 		<?php endif; ?>
-		<?php if ( ! $armazon_has_photo ) : ?>
+		<?php if ( ! $armazon_has_photo && $armazon_details ) : ?>
 			<div class="armazon-map__card" data-wp-bind--hidden="context.loaded">
 				<?php if ( '' !== $armazon_place ) : ?>
 				<p class="armazon-map__name"><?php echo esc_html( $armazon_place ); ?></p>
@@ -271,8 +300,9 @@ $armazon_title = '' !== $armazon_address
 		></iframe>
 		<?php endif; ?>
 	</div>
+	<?php endif; ?>
 	<figcaption class="armazon-map__caption">
-		<?php if ( '' !== $armazon_address && $armazon_has_photo ) : ?>
+		<?php if ( '' !== $armazon_address && $armazon_has_photo && $armazon_details ) : ?>
 		<address class="armazon-map__address"><?php echo esc_html( $armazon_address ); ?></address>
 		<?php endif; ?>
 		<?php if ( '' !== $armazon_embed ) : ?>
