@@ -1,0 +1,58 @@
+/*
+ * core/accordion — abrir y cerrar con la altura animada (0.4.0).
+ *
+ * Qué pinta el núcleo (WordPress 7.1): un botón con aria-expanded y un panel
+ * <div role="region"> que, cerrado, lleva hidden="until-found" (lo pone y lo
+ * quita su store de la Interactivity API, «core/accordion»). Cerrado, el
+ * navegador le da content-visibility:hidden: el panel sigue en la página
+ * (la búsqueda del navegador lo encuentra y lo abre) pero mide 0.
+ * Sin esto, abrir o cerrar es un salto de 0 al alto entero.
+ *
+ * La técnica, sin JavaScript propio (el store del núcleo sigue mandando, con
+ * su aria-expanded, su foco y su teclado):
+ * - block-size: 0 con [hidden] y auto abierto, interpolando entre 0 y «auto»
+ *   con interpolate-size: allow-keywords;
+ * - content-visibility con transition-behavior allow-discrete: al CERRAR el
+ *   contenido sigue visible mientras se pliega y se oculta al final; al
+ *   abrir se ve desde el primer fotograma;
+ * - también el relleno y el margen del panel: el núcleo los quita al panel
+ *   cerrado (padding 0 !important) y un hijo suele dárselos solo al abierto;
+ *   si no se animan, saltan aunque la altura se deslice;
+ * - el giro del icono (+ → ×, el núcleo lo rota 45°) con la misma duración.
+ *
+ * Tokens (theme.json del padre, settings.custom.motion; un hijo los cambia en
+ * el suyo): --wp--custom--motion--duration y --wp--custom--motion--easing.
+ *
+ * Caso frontera: un navegador sin interpolate-size (Firefox y Safari a
+ * octubre de 2026) abre y cierra como antes, de golpe: se degrada, no se
+ * rompe. Con «reducir movimiento», sin animación (ni la del núcleo).
+ * La trampa: sin overflow:clip el contenido se ve fuera del panel mientras
+ * éste mide menos que su contenido; y NO vale overflow:hidden con un foco
+ * visible que sobresale: clip con overflow-clip-margin deja ver el anillo.
+ * Lo prueba tests/accordion.test.mjs (alturas intermedias; nada con reduce).
+ */
+@media (prefers-reduced-motion: no-preference) {
+	.wp-block-accordion-panel {
+		interpolate-size: allow-keywords;
+		overflow: clip;
+		overflow-clip-margin: 4px;
+		transition:
+			block-size var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
+			padding-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
+			margin-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
+			content-visibility var(--wp--custom--motion--duration, 0.3s) allow-discrete;
+	}
+	.wp-block-accordion-panel[hidden] { block-size: 0; }
+
+	.wp-block-accordion-item > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
+		transition: transform var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-accordion-panel,
+	.wp-block-accordion-item,
+	.wp-block-accordion-item > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
+		transition: none;
+	}
+}

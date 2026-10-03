@@ -65,6 +65,12 @@
 				{ "slug": "xx-large", "name": "2X large", "size": "2.5rem", "fluid": { "min": "1.75rem", "max": "2.5rem" } },
 				{ "slug": "xxx-large", "name": "3X large", "size": "3.5rem", "fluid": { "min": "2.25rem", "max": "3.5rem" } }
 			]
+		},
+		"custom": {
+			"motion": {
+				"duration": "0.3s",
+				"easing": "cubic-bezier(0.2, 0, 0, 1)"
+			}
 		}
 	},
 	"styles": {

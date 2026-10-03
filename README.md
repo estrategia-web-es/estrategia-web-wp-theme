@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.3.2**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.4.0**
   (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
@@ -30,7 +30,8 @@ cosa**, al hijo.
     style.css            cabecera + lo que theme.json no expresa (foco, salto al contenido)
     theme.json           base v3: layout, viewport, paleta, espaciado, tipografía, partes
     functions.php        solo carga inc/*.php
-    inc/                 setup.php · blocks.php · consent.php · whatsapp.php
+    inc/                 setup.php · blocks.php · core-blocks.php · consent.php · whatsapp.php
+    assets/core-blocks/  comportamiento común de bloques del núcleo (accordion.css), uno por bloque
     templates/           index, front-page, page, single, archive, search, 404
     parts/               header, footer, navigation-overlay
     patterns/            404, no-results (textos traducibles de las plantillas)
@@ -121,6 +122,7 @@ frontera y la trampa) está **en la cabecera de su `render.php`** (o de
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
+| `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
 
 **Por qué `edit.js` clásico y no un módulo:** WordPress 7.1 no admite módulos
 ES como `editorScript` (no hay `editorScriptModule`). Sin compilación, lo que
@@ -178,6 +180,25 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.4.0 — 03-10-2026 (menor: no obliga a tocar ningún hijo)
+
+- **`core/accordion` abre y cierra deslizando.** El panel anima su altura de
+  0 a la de su contenido (y al revés), con su relleno y su margen, y el «+»
+  gira al mismo ritmo. Sin JavaScript propio: el store del núcleo sigue
+  poniendo `hidden="until-found"`, `aria-expanded` y el foco; la hoja
+  (`assets/core-blocks/accordion.css`, cargada solo donde hay acordeón por
+  `inc/core-blocks.php`) interpola `block-size` con `interpolate-size` y
+  retrasa el `content-visibility` al cerrar. Con «reducir movimiento», nada.
+  Sin `interpolate-size` (Firefox, Safari) se abre de golpe, como antes.
+- **Tokens nuevos** en `settings.custom.motion`: `duration` (0.3s) y
+  `easing`; un hijo los cambia en su `theme.json`
+  (`--wp--custom--motion--duration` / `--easing`).
+- La trampa para el hijo: una regla suya con `transition` sobre el panel o
+  el icono pisa la del padre (sus hojas cargan después).
+- Prueba: `tests/accordion.test.mjs` sobre `/prueba-acordeon/` (alturas
+  intermedias al abrir y al cerrar; ninguna con «reducir movimiento»), vista
+  fallar sin la hoja.
 
 ### 0.3.2 — 03-10-2026 (arreglo, no obliga a tocar ningún hijo)
 

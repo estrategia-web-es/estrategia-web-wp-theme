@@ -5,7 +5,8 @@
  *
  * Deja: enlaces permanentes bonitos, la opción de WhatsApp del sitio, y la
  * página /prueba-modulos/ con los cuatro bloques; y /prueba-carrusel-consulta/
- * con seis entradas en un carrusel con core/query. Es idempotente: si la
+ * con seis entradas en un carrusel con core/query; y /prueba-acordeon/ con
+ * un core/accordion de respuesta larga (0.4.0). Es idempotente: si la
  * página o la entrada ya existe, la reescribe.
  *
  * @package armazon
@@ -132,6 +133,31 @@ wp_insert_post(
 		'post_title'   => 'Prueba de mapa en una consulta',
 		'post_name'    => 'prueba-mapa-consulta',
 		'post_content' => wp_slash( $map_content ),
+	)
+);
+
+// Acordeón del núcleo (0.4.0): dos preguntas, la primera con una respuesta
+// larga, para ver que la altura del panel se anima al abrir y al cerrar.
+$answer = str_repeat( 'Respuesta larga de prueba para ver la altura del panel moverse poco a poco. ', 12 );
+$item   = static fn( string $question, string $text ): string => '<!-- wp:accordion-item --><div class="wp-block-accordion-item">'
+	. '<!-- wp:accordion-heading --><h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle"><span class="wp-block-accordion-heading__toggle-title">' . $question . '</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3><!-- /wp:accordion-heading -->'
+	. '<!-- wp:accordion-panel --><div role="region" class="wp-block-accordion-panel"><!-- wp:paragraph --><p>' . $text . '</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>' . $text . '</p><!-- /wp:paragraph --></div><!-- /wp:accordion-panel -->'
+	. '</div><!-- /wp:accordion-item -->';
+
+$accordion_content = '<!-- wp:accordion --><div role="group" class="wp-block-accordion">'
+	. $item( '¿Primera pregunta?', $answer )
+	. $item( '¿Segunda pregunta?', 'Respuesta corta.' )
+	. '</div><!-- /wp:accordion -->';
+
+$existing_accordion = get_page_by_path( 'prueba-acordeon' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_accordion ? $existing_accordion->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de acordeón',
+		'post_name'    => 'prueba-acordeon',
+		'post_content' => wp_slash( $accordion_content ),
 	)
 );
 
