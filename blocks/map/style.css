@@ -6,13 +6,18 @@
 	--armazon-map-ratio: 16 / 9;
 	margin-inline: 0;
 	/*
-	 * NO SE ENCOGE dentro de un contenedor flex. Un Grupo vertical de
-	 * WordPress (is-vertical) es un flex en columna, y un hijo flex con
-	 * overflow:hidden (el que le pone el hijo para redondear el borde) tiene
-	 * tamaño minimo 0: el mapa se quedaba en 2 px y cortaba todo lo de dentro.
-	 * Lo pillo la comparacion de altos de Lavanderia el 03-10-2026 (Autoservicio
-	 * 14 % mas corta). Ver tests/map-in-flex.test.mjs.
+	 * OCUPA TODO EL ANCHO, siempre. Un Grupo vertical de WordPress es un flex
+	 * en columna con align-items:flex-start (alineado a la izquierda): sus
+	 * hijos no se estiran y se miden «a lo que ocupe su contenido». El marco
+	 * del mapa no tiene contenido en flujo (su alto sale de aspect-ratio y de
+	 * su ancho), así que en esa medición ancho 0 → alto 0: el mapa se quedaba
+	 * en 2 px (solo el borde) con todo lo de dentro cortado.
+	 * Lo pillo la comparacion de altos de Lavanderia el 03-10-2026
+	 * (Autoservicio un 14 % mas corta). La 0.3.1 lo intento con flex:none y no
+	 * servia: el problema no era encogerse sino el ancho de la medicion.
+	 * Ver tests/map-in-flex.test.mjs.
 	 */
+	inline-size: 100%;
 	flex: none;
 }
 

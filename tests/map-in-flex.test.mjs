@@ -9,9 +9,14 @@
  * `flex: none` en .armazon-map (blocks/map/style.css).
  *
  * La prueba reproduce exactamente ese caso sobre /prueba-modulos/: envuelve el
- * mapa en un contenedor flex en columna con alto limitado (como el que
- * producía el colapso) y le pone overflow:hidden, y comprueba que la figura
- * sigue midiendo lo que su marco.
+ * mapa en lo mismo que pinta un Grupo vertical de WordPress —flex en columna,
+ * align-items:flex-start, ALTO AUTOMÁTICO— y le pone overflow:hidden, y
+ * comprueba que la figura sigue midiendo lo que su marco.
+ *
+ * La TRAMPA, que costó una versión: la primera prueba (0.3.1) le ponía al
+ * contenedor un alto fijo de 200 px. Así el fallo era otro (encogerse) y la
+ * prueba pasaba con un arreglo que en la web real no arreglaba nada. Una prueba
+ * tiene que reproducir el caso real, no uno parecido.
  */
 import { withBrowser, run, assert, PAGE } from './browser.mjs';
 
@@ -22,16 +27,22 @@ run( () =>
 		const medida = await page.evaluate( () => {
 			const map = document.querySelector( '.armazon-map' );
 			const wrap = document.createElement( 'div' );
-			// Un Grupo vertical de WordPress: flex en columna. El alto limitado
-			// fuerza a repartir, que es cuando un hijo encogible se aplasta.
-			wrap.style.cssText = 'display:flex;flex-direction:column;height:200px';
+			// Lo que pinta un Grupo vertical de WordPress alineado a la izquierda.
+			wrap.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start';
 			map.before( wrap );
 			wrap.append( map );
 			map.style.overflow = 'hidden';
+			// Lo que hace el estilo «map-card» del hijo: el pie (dirección y
+			// botones) va ENCIMA del mapa, fuera del flujo. Sin esto la figura
+			// tiene contenido en flujo con ancho propio y el fallo no aparece.
+			const caption = map.querySelector( '.armazon-map__caption' );
+			if ( caption ) caption.style.position = 'absolute';
 			const frame = map.querySelector( '.armazon-map__frame' );
 			return { figura: map.getBoundingClientRect().height, marco: frame.getBoundingClientRect().height };
 		} );
-		assert.ok( medida.marco > 100, `el marco del mapa no tiene alto (${ medida.marco } px): la prueba no mide nada` );
+		// Con el fallo, el marco se mide con ancho 0 y su alto (aspect-ratio) sale 0:
+		// un mapa de menos de 100 px de alto es el fallo, no una prueba sin datos.
+		assert.ok( medida.marco > 100 && medida.figura > 100, `el mapa se aplasta dentro de un Grupo vertical: figura ${ medida.figura } px, marco ${ medida.marco } px` );
 		assert.ok(
 			medida.figura >= medida.marco,
 			`el mapa se encoge dentro de un flex: la figura mide ${ medida.figura } px y su marco ${ medida.marco } px`

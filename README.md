@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.3.1**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.3.2**
   (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
@@ -179,7 +179,21 @@ Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
 
-### 0.3.1 — 03-10-2026 (arreglo, no obliga a tocar ningún hijo)
+### 0.3.2 — 03-10-2026 (arreglo, no obliga a tocar ningún hijo)
+
+- **El arreglo de verdad del mapa aplastado: `inline-size: 100%`.** La 0.3.1
+  NO lo arreglaba. Un Grupo vertical de WordPress alinea a la izquierda
+  (`align-items:flex-start`) y mide a sus hijos por su contenido; el marco del
+  mapa no tiene contenido en flujo (su alto sale de `aspect-ratio`), y si el
+  hijo pone el pie del mapa encima (posición absoluta), la medición da ancho
+  0 → alto 0. Con el mapa a todo el ancho, Autoservicio de Lavandería pasa de
+  −14,5 % a +0,5 % del kit.
+- **La trampa, que costó una versión:** la prueba de la 0.3.1 metía el mapa en
+  un contenedor de alto fijo (otro fallo, encogerse) y pasaba con un arreglo
+  que en la web real no servía. Ahora reproduce lo que pinta WordPress y lo que
+  hace el hijo, y se ha visto fallar sin el arreglo.
+
+### 0.3.1 — 03-10-2026 (arreglo INCOMPLETO: usar la 0.3.2)
 
 - **`armazon/map` ya no se encoge dentro de un Grupo vertical.** Un Grupo
   vertical es un flex en columna, y un mapa con `overflow:hidden` (el que le
