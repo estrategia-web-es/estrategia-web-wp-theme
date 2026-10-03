@@ -26,7 +26,16 @@
  * Caso frontera: un navegador sin interpolate-size (Firefox y Safari a
  * octubre de 2026) abre y cierra como antes, de golpe: se degrada, no se
  * rompe. Con «reducir movimiento», sin animación (ni la del núcleo).
- * La trampa: sin overflow:clip el contenido se ve fuera del panel mientras
+ * La trampa que costó la 0.5.0 («efecto muy raro con el texto al cerrarse»):
+ * el núcleo pone padding 0 !important al panel cerrado y los hijos le dan
+ * margen y relleno LATERAL solo al abierto (:not([hidden])). Al cerrar, eso
+ * saltaba en el primer fotograma: el texto se ensanchaba, se reajustaba en
+ * menos líneas y se desplazaba mientras la altura bajaba. Al abrir no se veía
+ * porque el panel ya nace con su ancho final. Por eso lo lateral se retiene
+ * hasta el final del cierre (regla [hidden] de abajo); una transición pisa
+ * incluso el !important del núcleo. Si se añade otra propiedad al panel
+ * abierto en un hijo y «baila» al cerrar, va a esa lista con retraso.
+ * La otra trampa: sin overflow:clip el contenido se ve fuera del panel mientras
  * éste mide menos que su contenido; y NO vale overflow:hidden con un foco
  * visible que sobresale: clip con overflow-clip-margin deja ver el anillo.
  * Lo prueba tests/accordion.test.mjs (alturas intermedias; nada con reduce).
@@ -42,7 +51,25 @@
 			margin-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
 			content-visibility var(--wp--custom--motion--duration, 0.3s) allow-discrete;
 	}
-	.wp-block-accordion-panel[hidden] { block-size: 0; }
+	/*
+	 * Al CERRAR (la transición que vale es la del estado de destino, [hidden]):
+	 * lo LATERAL —margen, relleno y borde— se queda como estaba hasta que el
+	 * panel termina de plegarse (duración 0 con retraso = la duración), y solo
+	 * entonces salta a lo de cerrado, ya con 0 de alto. Al abrir, sin retraso:
+	 * el panel nace ya con su ancho final. Así el texto no cambia de ancho a
+	 * media animación y el cierre es el espejo de la apertura (0.5.0).
+	 */
+	.wp-block-accordion-panel[hidden] {
+		block-size: 0;
+		transition:
+			block-size var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
+			padding-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
+			margin-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
+			content-visibility var(--wp--custom--motion--duration, 0.3s) allow-discrete,
+			margin-inline 0s linear var(--wp--custom--motion--duration, 0.3s),
+			padding-inline 0s linear var(--wp--custom--motion--duration, 0.3s),
+			border-width 0s linear var(--wp--custom--motion--duration, 0.3s);
+	}
 
 	.wp-block-accordion-item > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
 		transition: transform var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease);
