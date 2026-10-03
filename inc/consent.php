@@ -6,7 +6,8 @@
  * peso visual, como pide la AEPD), categorías declarables, la elección en una
  * cookie propia y técnica (armazon_consent), y la elección expuesta:
  * - a PHP:  armazon_consent_has( 'maps' ), armazon_consent_categories();
- * - a JS:   window.armazonConsent.has( 'maps' ) / .get() / .open(), el evento
+ * - a JS:   window.armazonConsent.has( 'maps' ) / .get() / .open() /
+ *           .grant( 'maps' ) (0.5.0: «Ver mapa» concede la categoría), el evento
  *           «armazon:consent» en document (detail.accepted) y el store de
  *           Interactivity «armazon/consent»;
  * - y activa solo los <script type="text/plain" data-armazon-consent="X">

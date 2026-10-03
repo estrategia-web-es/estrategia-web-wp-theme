@@ -70,6 +70,12 @@
 							checked: attributes.showDots,
 							onChange: ( value ) => setAttributes( { showDots: value } ),
 						} ),
+						h( ToggleControl, {
+							label: __( 'Loop', 'armazon' ),
+							help: __( 'After the last slide, go back to the first one (and from the first to the last).', 'armazon' ),
+							checked: attributes.loop,
+							onChange: ( value ) => setAttributes( { loop: value } ),
+						} ),
 						range( __( 'Visible on mobile', 'armazon' ), 'perViewMobile' ),
 						range( __( 'Visible on tablet', 'armazon' ), 'perViewTablet' ),
 						range( __( 'Visible on desktop', 'armazon' ), 'perViewDesktop' ),

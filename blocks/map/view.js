@@ -1,7 +1,8 @@
 /**
  * armazon/map — carga el iframe de Google Maps solo cuando toca.
  *
- * Toca cuando: el visitante pulsa «Ver mapa», o el consentimiento
+ * Toca cuando: el visitante pulsa «Ver mapa» (que además concede «maps» en
+ * el consentimiento si la web la declara, 0.5.0), o el consentimiento
  * (armazon/consent) tiene aceptada la categoría «maps» — ya al arrancar, o
  * cuando se acepta con la página abierta.
  * Documentación del módulo en la cabecera de render.php.
@@ -29,6 +30,9 @@ store( 'armazon/map', {
 			const context = getContext();
 			const { ref } = getElement();
 			context.loaded = true;
+			// Pulsar es aceptar los mapas (0.5.0): si la web declara «maps», queda
+			// concedida y los demás mapas cargan solos (también los de otras páginas).
+			window.armazonConsent?.grant?.( 'maps' );
 			// The button disappears: send focus to the map so it is not lost.
 			const iframe = ref.closest( '.armazon-map' ).querySelector( '.armazon-map__iframe' );
 			window.requestAnimationFrame( () => iframe?.focus() );

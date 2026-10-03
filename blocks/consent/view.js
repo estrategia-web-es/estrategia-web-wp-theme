@@ -11,6 +11,10 @@
  *     window.armazonConsent.has( 'maps' )  → boolean
  *     window.armazonConsent.get()          → string[] | null (null = sin elegir)
  *     window.armazonConsent.open()         → reabre el aviso
+ *     window.armazonConsent.grant( 'maps' ) → añade UNA categoría a la
+ *       elección (0.5.0; la usa «Ver mapa»). Si la web no la declara, no
+ *       hace nada. No cierra el aviso si estaba abierto: el visitante sigue
+ *       eligiendo el resto; si luego pulsa «Rechazar todas», la retira.
  *     document.addEventListener( 'armazon:consent', ( e ) => e.detail.accepted )
  *   El evento se lanza al arrancar (si ya había elección) y en cada cambio.
  * - La trampa: los módulos ES se ejecutan en diferido y en orden de llegada;
@@ -77,6 +81,13 @@ const apply = ( accepted ) => {
 	document.dispatchEvent( new CustomEvent( 'armazon:consent', { detail: { accepted: [ ...accepted ] } } ) );
 };
 
+/** Saves the current choice in the technical cookie (format: see the header). */
+const writeCookie = () => {
+	const value = `${ state.revision }.${ choice.join( '~' ) }.${ Math.floor( Date.now() / 1000 ) }`;
+	const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+	document.cookie = `${ state.cookieName }=${ encodeURIComponent( value ) }; Max-Age=${ state.maxAge }; Path=/; SameSite=Lax${ secure }`;
+};
+
 const { state, actions } = store( 'armazon/consent', {
 	state: {
 		draft: [],
@@ -89,9 +100,7 @@ const { state, actions } = store( 'armazon/consent', {
 		save( accepted ) {
 			const previous = choice;
 			choice = state.categories.filter( ( category ) => accepted.includes( category ) );
-			const value = `${ state.revision }.${ choice.join( '~' ) }.${ Math.floor( Date.now() / 1000 ) }`;
-			const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-			document.cookie = `${ state.cookieName }=${ encodeURIComponent( value ) }; Max-Age=${ state.maxAge }; Path=/; SameSite=Lax${ secure }`;
+			writeCookie();
 			state.isOpen = false;
 			state.showSettings = false;
 
@@ -162,6 +171,15 @@ const { state, actions } = store( 'armazon/consent', {
 				has: ( category ) => category === 'necessary' || ( choice || [] ).includes( category ),
 				get: () => ( choice ? [ ...choice ] : null ),
 				open: () => actions.open(),
+				grant: ( category ) => {
+					if ( ! state.categories.includes( category ) || ( choice || [] ).includes( category ) ) {
+						return;
+					}
+					choice = state.categories.filter( ( item ) => item === category || ( choice || [] ).includes( item ) );
+					state.draft = [ ...new Set( [ ...state.draft, category ] ) ];
+					writeCookie();
+					apply( choice );
+				},
 			};
 			if ( choice === null ) {
 				state.draft = [];

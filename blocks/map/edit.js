@@ -58,6 +58,38 @@
 					),
 					h(
 						PanelBody,
+						{ title: __( 'Static map', 'armazon' ), initialOpen: false },
+						h( 'p', null, __( 'An OpenStreetMap image made with tools/static-map.mjs, shown under the place details until the visitor loads Google Maps. It must be served by this site.', 'armazon' ) ),
+						text(
+							__( 'Static map image', 'armazon' ),
+							'staticMapUrl',
+							__( 'A theme path (assets/maps/place.webp) or a URL of this site.', 'armazon' )
+						),
+						h(
+							MediaUploadCheck,
+							null,
+							h( MediaUpload, {
+								allowedTypes: [ 'image' ],
+								value: attributes.staticMapId,
+								onSelect: ( media ) => setAttributes( { staticMapId: media.id } ),
+								render: ( { open } ) =>
+									h(
+										Button,
+										{ variant: 'secondary', onClick: open },
+										attributes.staticMapId ? __( 'Replace image', 'armazon' ) : __( 'Choose from the media library', 'armazon' )
+									),
+							} )
+						),
+						attributes.staticMapId
+							? h(
+									Button,
+									{ variant: 'link', isDestructive: true, onClick: () => setAttributes( { staticMapId: 0 } ) },
+									__( 'Remove image', 'armazon' )
+							  )
+							: null
+					),
+					h(
+						PanelBody,
 						{ title: __( 'Static image', 'armazon' ), initialOpen: false },
 						h( 'p', null, __( 'Optional. Without an image the map shows a box with the place details.', 'armazon' ) ),
 						h( wp.components.ToggleControl, {

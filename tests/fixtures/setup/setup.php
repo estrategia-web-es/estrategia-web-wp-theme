@@ -6,7 +6,8 @@
  * Deja: enlaces permanentes bonitos, la opción de WhatsApp del sitio, y la
  * página /prueba-modulos/ con los cuatro bloques; y /prueba-carrusel-consulta/
  * con seis entradas en un carrusel con core/query; y /prueba-acordeon/ con
- * un core/accordion de respuesta larga (0.4.0). Es idempotente: si la
+ * un core/accordion de respuesta larga (0.4.0); /prueba-carrusel-bucle/ y
+ * /prueba-mapa-estatico/ (0.5.0). Es idempotente: si la
  * página o la entrada ya existe, la reescribe.
  *
  * @package armazon
@@ -25,7 +26,7 @@ for ( $i = 1; $i <= 5; $i++ ) {
 }
 
 $content = '<!-- wp:heading --><h2 class="wp-block-heading">Carrusel</h2><!-- /wp:heading -->'
-	. '<!-- wp:armazon/carousel {"label":"Carrusel de prueba","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+	. '<!-- wp:armazon/carousel {"label":"Carrusel de prueba","showDots":true,"loop":false,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $slides
 	. '<!-- /wp:armazon/carousel -->'
 	. '<!-- wp:heading --><h2 class="wp-block-heading">Mapa</h2><!-- /wp:heading -->'
@@ -61,7 +62,37 @@ for ( $i = 1; $i <= 6; $i++ ) {
 	);
 }
 
-$query_content = '<!-- wp:armazon/carousel {"label":"Carrusel con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+// La consulta de las seis entradas, para los dos carruseles que la usan.
+$query_block = static fn( int $id ): string => '<!-- wp:query {"queryId":' . $id . ',"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"carrusel","inherit":false}} -->'
+	. '<div class="wp-block-query"><!-- wp:post-template -->'
+	. '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
+	. '<div class="wp-block-group has-surface-background-color has-background"><!-- wp:post-title /--></div>'
+	. '<!-- /wp:group -->'
+	. '<!-- /wp:post-template --></div>'
+	. '<!-- /wp:query -->';
+
+// Carrusel en bucle (0.5.0): uno de bloques y uno con consulta, SIN el
+// atributo loop, para probar también que el bucle es el valor por defecto.
+$loop_content = '<!-- wp:armazon/carousel {"label":"Carrusel en bucle","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+	. $slides
+	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- wp:armazon/carousel {"label":"Carrusel en bucle con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+	. $query_block( 9 )
+	. '<!-- /wp:armazon/carousel -->';
+
+$existing_loop = get_page_by_path( 'prueba-carrusel-bucle' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_loop ? $existing_loop->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de carrusel en bucle',
+		'post_name'    => 'prueba-carrusel-bucle',
+		'post_content' => wp_slash( $loop_content ),
+	)
+);
+
+$query_content = '<!-- wp:armazon/carousel {"label":"Carrusel con consulta","showDots":true,"loop":false,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. '<!-- wp:query {"queryId":7,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"carrusel","inherit":false}} -->'
 	. '<div class="wp-block-query"><!-- wp:post-template -->'
 	. '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
@@ -133,6 +164,26 @@ wp_insert_post(
 		'post_title'   => 'Prueba de mapa en una consulta',
 		'post_name'    => 'prueba-mapa-consulta',
 		'post_content' => wp_slash( $map_content ),
+	)
+);
+
+// Mapa estático (0.5.0): dos mapas. El primero con la imagen de OSM que
+// generó tools/static-map.mjs (está en esta carpeta, que Playground sirve en
+// /wp-content/armazon-fixtures/); el segundo con una URL de OTRO dominio, que
+// el bloque tiene que descartar (cero peticiones a terceros).
+$embed          = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3075.5!2d2.6502!3d39.5696';
+$static_content = '<!-- wp:armazon/map {"placeName":"Sede con mapa estático","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/armazon-fixtures/mapa-estatico.webp"} /-->'
+	. '<!-- wp:armazon/map {"placeName":"Sede con mapa de fuera","address":"Calle de Fuera 1, Palma","embedUrl":"' . $embed . '","staticMapUrl":"https://tile.openstreetmap.org/16/33248/24911.png"} /-->';
+
+$existing_static = get_page_by_path( 'prueba-mapa-estatico' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_static ? $existing_static->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de mapa estático',
+		'post_name'    => 'prueba-mapa-estatico',
+		'post_content' => wp_slash( $static_content ),
 	)
 );
 

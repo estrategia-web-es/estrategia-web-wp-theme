@@ -2,7 +2,8 @@
  * armazon/carousel — comportamiento (Interactivity API, módulo ES nativo).
  *
  * Lo que hace: mover la pista una diapositiva con las flechas, el teclado o
- * los puntos; marcar inicio/fin para desactivar flechas; autoplay opcional.
+ * los puntos; marcar inicio/fin para desactivar flechas (sin bucle) o dar la
+ * vuelta (con bucle, 0.5.0: atributo loop); autoplay opcional.
  * La documentación del módulo está en la cabecera de render.php.
  *
  * Cómo se mantiene:
@@ -62,9 +63,21 @@ const updateEdges = ( context, track ) => {
 	context.current = context.atEnd ? context.count - 1 : currentIndex( track );
 };
 
-const step = ( track, direction ) => {
-	const index = currentIndex( track ) + direction;
-	scrollToIndex( track, index );
+/**
+ * Moves one slide. With loop (0.5.0), «next» at the end goes to the first
+ * slide and «previous» at the start goes to the last one. The edges are read
+ * from the track, not from the context, so it also works mid-scroll.
+ */
+const step = ( track, direction, loop = false ) => {
+	if ( loop && direction > 0 && track.scrollLeft + track.clientWidth >= track.scrollWidth - 1 ) {
+		scrollToIndex( track, 0 );
+		return;
+	}
+	if ( loop && direction < 0 && track.scrollLeft <= 1 ) {
+		scrollToIndex( track, slidesOf( track ).length - 1 );
+		return;
+	}
+	scrollToIndex( track, currentIndex( track ) + direction );
 };
 
 const { state } = store( 'armazon/carousel', {
@@ -84,10 +97,10 @@ const { state } = store( 'armazon/carousel', {
 	},
 	actions: {
 		prev() {
-			step( trackOf( getElement().ref ), -1 );
+			step( trackOf( getElement().ref ), -1, getContext().loop );
 		},
 		next() {
-			step( trackOf( getElement().ref ), 1 );
+			step( trackOf( getElement().ref ), 1, getContext().loop );
 		},
 		goTo() {
 			const context = getContext();
@@ -98,7 +111,7 @@ const { state } = store( 'armazon/carousel', {
 			const moves = { ArrowLeft: -1, ArrowRight: 1 };
 			if ( event.key in moves ) {
 				event.preventDefault();
-				step( track, moves[ event.key ] );
+				step( track, moves[ event.key ], getContext().loop );
 			} else if ( 'Home' === event.key ) {
 				event.preventDefault();
 				scrollToIndex( track, 0 );

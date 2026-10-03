@@ -71,6 +71,47 @@
 	font-style: normal;
 }
 
+/*
+ * Con mapa estático (0.5.0): el mapa llena el marco y el recuadro de datos
+ * flota a la izquierda, sin pasar del 42 % para no tapar el marcador, que va
+ * en el centro. En un bloque estrecho no cabe encima: el marco pierde la
+ * proporción, el mapa la lleva él y el recuadro va debajo.
+ */
+.armazon-map.has-static-map {
+	container-type: inline-size;
+}
+
+.armazon-map__static {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+}
+
+.armazon-map.has-static-map .armazon-map__card {
+	inset: var(--wp--preset--spacing--16, 1rem) auto auto var(--wp--preset--spacing--16, 1rem);
+	max-inline-size: min(22rem, 42%);
+	border-radius: 4px;
+	box-shadow: 0 1px 4px rgb(0 0 0 / 0.2);
+}
+
+@container (max-width: 479px) {
+	.armazon-map.has-static-map .armazon-map__frame {
+		aspect-ratio: auto;
+	}
+	.armazon-map.has-static-map .armazon-map__static,
+	.armazon-map.has-static-map .armazon-map__iframe {
+		aspect-ratio: var(--armazon-map-ratio);
+		block-size: auto;
+	}
+	.armazon-map.has-static-map .armazon-map__card {
+		position: static;
+		max-inline-size: none;
+		border-radius: 0;
+		box-shadow: none;
+	}
+}
+
 .armazon-map [hidden] {
 	display: none;
 }

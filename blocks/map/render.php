@@ -32,6 +32,27 @@
  *   La trampa: las fuentes de bindings devuelven el texto ya escapado y con
  *   <br>; render.php lo devuelve a texto plano antes de escaparlo (si no, sale
  *   «&amp;amp;» o «<br>» a la vista).
+ * - MAPA ESTÁTICO (0.5.0, atributos staticMapUrl o staticMapId): una imagen
+ *   de OpenStreetMap generada UNA vez con tools/static-map.mjs (marcador del
+ *   color de la marca y «© OpenStreetMap» dentro) va DEBAJO del recuadro de
+ *   datos, que se mantiene: en ancho, el recuadro flota a la izquierda sobre
+ *   el mapa; en estrecho (< 480 px de bloque), va debajo. No es una captura de
+ *   Google (su licencia no lo permite y pedirla al visitar manda la IP a
+ *   Google sin consentimiento). Se sirve desde el PROPIO sitio:
+ *   staticMapUrl es una ruta del tema («assets/maps/sede.webp», se busca en
+ *   el hijo y luego en el padre), una ruta del sitio («/wp-content/…») o una
+ *   URL del mismo dominio; cualquier otra se descarta (armazon_map_static_url).
+ *   staticMapId es la misma imagen subida a la mediateca. Acepta bindings
+ *   (cada sede de una Consulta, su mapa). Si hay mapa estático, la «foto»
+ *   (imageId/imageUrl/useFeaturedImage) no se usa.
+ *   Caso frontera: el mapa estático no se mueve ni hace zoom; quien quiera
+ *   moverlo pulsa «Ver mapa», que carga Google y CONCEDE la categoría «maps»
+ *   del consentimiento (window.armazonConsent.grant), así los demás mapas de
+ *   la web cargan ya sin preguntar. Si la web no declara «maps», el clic solo
+ *   carga ese mapa, como antes.
+ *   La trampa: el marcador va en el CENTRO de la imagen y el recuadro tapa la
+ *   izquierda; por eso el recuadro no pasa del 42 % del ancho. Un hijo que lo
+ *   ensanche tapa el marcador.
  * - Dentro de una Consulta (0.2.0): sus atributos de texto aceptan Block
  *   Bindings (inc/blocks.php), así que la dirección y la URL de embed pueden
  *   salir de los campos de cada entrada (core/post-meta); y sin imagen
@@ -86,6 +107,41 @@ if ( ! function_exists( 'armazon_map_embed_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'armazon_map_static_url' ) ) {
+	/**
+	 * URL of the static map image (0.5.0), only if it is served by THIS site.
+	 * A relative path («assets/maps/sede.webp») is a file of the active theme
+	 * (the child, then the parent). An absolute URL must be on the site's own
+	 * host: a static map from a third party would be a request without consent.
+	 *
+	 * @param string $value Attribute value.
+	 */
+	function armazon_map_static_url( string $value ): string {
+		$value = trim( $value );
+		if ( '' === $value ) {
+			return '';
+		}
+		$parts = wp_parse_url( $value );
+		if ( empty( $parts['host'] ) ) {
+			if ( str_starts_with( $value, '/' ) ) {
+				return esc_url_raw( home_url( $value ) );
+			}
+			$path = preg_replace( '#^\./#', '', $value );
+			if ( str_contains( $path, '..' ) ) {
+				return '';
+			}
+			foreach ( array( get_stylesheet_directory() => get_stylesheet_directory_uri(), get_template_directory() => get_template_directory_uri() ) as $dir => $uri ) {
+				if ( file_exists( $dir . '/' . $path ) ) {
+					return esc_url_raw( $uri . '/' . $path );
+				}
+			}
+			return '';
+		}
+		$site = wp_parse_url( home_url() );
+		return isset( $site['host'] ) && strtolower( $parts['host'] ) === strtolower( $site['host'] ) ? esc_url_raw( $value ) : '';
+	}
+}
+
 // Los datos llegan de atributos o de Block Bindings: una fuente de texto los
 // trae con <br> en vez de saltos (las de armazon-site lo hacen); se
 // devuelven a saltos para escaparlos aquí una sola vez.
@@ -111,8 +167,27 @@ if ( '' === $armazon_embed && '' === $armazon_maps_url ) {
 	return;
 }
 
+$armazon_static = '';
+if ( $attributes['staticMapId'] ) {
+	$armazon_static = (string) wp_get_attachment_image_url( (int) $attributes['staticMapId'], 'full' );
+}
+if ( '' === $armazon_static ) {
+	$armazon_static = armazon_map_static_url( $armazon_text( 'staticMapUrl' ) );
+}
+
 $armazon_image = '';
-if ( $attributes['imageId'] ) {
+if ( '' !== $armazon_static ) {
+	$armazon_image = sprintf(
+		'<img class="armazon-map__static" src="%s" alt="%s" loading="lazy" decoding="async" data-wp-bind--hidden="context.loaded">',
+		esc_url( $armazon_static ),
+		esc_attr(
+			'' !== $armazon_address
+				/* translators: %s: postal address. */
+				? sprintf( __( 'Street map around %s', 'armazon' ), str_replace( "\n", ', ', $armazon_address ) )
+				: __( 'Street map of the area', 'armazon' )
+		)
+	);
+} elseif ( $attributes['imageId'] ) {
 	$armazon_image = wp_get_attachment_image(
 		(int) $attributes['imageId'],
 		'large',
@@ -148,13 +223,17 @@ if ( '' === $armazon_image && '' !== $attributes['imageUrl'] ) {
 	);
 }
 
+// Foto = una imagen que SUSTITUYE al recuadro (la de 0.2.0). El mapa
+// estático no es foto: va DEBAJO del recuadro de datos (0.5.0).
+$armazon_has_photo = '' !== $armazon_image && '' === $armazon_static;
+
 $armazon_title = '' !== $armazon_address
 	/* translators: %s: postal address. */
 	? sprintf( __( 'Map: %s', 'armazon' ), $armazon_address )
 	: __( 'Map', 'armazon' );
 ?>
 <figure
-	<?php echo get_block_wrapper_attributes( array( 'class' => 'armazon-map' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	<?php echo get_block_wrapper_attributes( array( 'class' => '' !== $armazon_static ? 'armazon-map has-static-map' : 'armazon-map' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	data-wp-interactive="armazon/map"
 	<?php echo wp_interactivity_data_wp_context( array( 'loaded' => false, 'embedUrl' => $armazon_embed ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	data-wp-init="callbacks.init"
@@ -163,7 +242,8 @@ $armazon_title = '' !== $armazon_address
 	<div class="armazon-map__frame">
 		<?php if ( '' !== $armazon_image ) : ?>
 			<?php echo $armazon_image; // phpcs:ignore WordPress.Security.EscapeOutput -- built with escaping above. ?>
-		<?php else : ?>
+		<?php endif; ?>
+		<?php if ( ! $armazon_has_photo ) : ?>
 			<div class="armazon-map__card" data-wp-bind--hidden="context.loaded">
 				<?php if ( '' !== $armazon_place ) : ?>
 				<p class="armazon-map__name"><?php echo esc_html( $armazon_place ); ?></p>
@@ -192,7 +272,7 @@ $armazon_title = '' !== $armazon_address
 		<?php endif; ?>
 	</div>
 	<figcaption class="armazon-map__caption">
-		<?php if ( '' !== $armazon_address && '' !== $armazon_image ) : ?>
+		<?php if ( '' !== $armazon_address && $armazon_has_photo ) : ?>
 		<address class="armazon-map__address"><?php echo esc_html( $armazon_address ); ?></address>
 		<?php endif; ?>
 		<?php if ( '' !== $armazon_embed ) : ?>

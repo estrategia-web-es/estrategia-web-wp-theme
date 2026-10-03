@@ -1,2 +1,4 @@
 node_modules/
 *.zip
+# Caché de teselas de tools/static-map.mjs (política de OSM: reutilizar, no volver a pedir).
+tools/.cache/

@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.4.0**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.5.0**
   (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
@@ -39,6 +39,7 @@ cosa**, al hijo.
     languages/           armazon.pot · es_ES.po · es_ES.l10n.php
     tests/               pruebas de navegador + WordPress de pruebas (Playground)
     tools/i18n.mjs       extrae, fusiona y genera las traducciones
+    tools/static-map.mjs imagen estática de un mapa (OpenStreetMap) para armazon/map
 
 ## La paleta y los presets que redefine un hijo
 
@@ -118,8 +119,8 @@ frontera y la trampa) está **en la cabecera de su `render.php`** (o de
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
-| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
-| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
+| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
+| `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 | `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
@@ -180,6 +181,33 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.5.0 — 03-10-2026 (menor, con un cambio visible en el carrusel)
+
+- **Acordeón: el texto ya no «baila» al cerrar.** Causa: el núcleo deja el
+  panel cerrado con `padding: 0 !important` y los hijos dan margen y relleno
+  LATERAL solo al abierto (Lavandería: `margin: … 24px; padding-right:
+  2.5rem`). Al cerrar, eso saltaba en el primer fotograma: el texto se
+  ensanchaba, se reajustaba en menos líneas y se movía mientras la altura
+  bajaba (en Lavandería, de 268/704 a 244/792 px). Ahora lo lateral se
+  retiene hasta que el panel termina de plegarse (transición de 0 s con
+  retraso, solo hacia `[hidden]`); el cierre es el espejo de la apertura.
+- **Carrusel en bucle: atributo `loop`, por defecto `true`.** «Siguiente» en
+  la última vuelve a la primera y «anterior» en la primera va a la última
+  (también ← →); las dos flechas siempre activas. **Cambio visible:** los
+  carruseles ya guardados pasan a dar la vuelta y su flecha izquierda deja de
+  salir gris al cargar; uno que deba terminar (pasos de un proceso) se guarda
+  con `"loop":false`. Funciona igual con un `core/query` dentro.
+- **Mapa estático: atributos `staticMapUrl` y `staticMapId`.** Una imagen de
+  OpenStreetMap con marcador del color de la marca y «© OpenStreetMap»
+  dentro, hecha UNA vez con `node tools/static-map.mjs` y guardada en el
+  hijo; va debajo del recuadro de datos (que se mantiene). Solo se acepta si
+  la sirve el propio sitio. «Ver mapa» ahora además **concede «maps»** en el
+  consentimiento (`window.armazonConsent.grant`, nuevo), así el resto de
+  mapas cargan sin preguntar.
+- Pruebas: `accordion.test.mjs` (caso 4, texto quieto al cerrar),
+  `carousel-loop.test.mjs` y `map-static.test.mjs`, las tres vistas fallar
+  con la 0.4.0.
 
 ### 0.4.0 — 03-10-2026 (menor: no obliga a tocar ningún hijo)
 

@@ -18,6 +18,20 @@
  * - En el editor la consulta se ve con su disposición normal (en columna): el
  *   aplanado es solo de la página publicada.
  *
+ * En bucle (0.5.0, atributo loop, por defecto SÍ): «siguiente» en la última
+ * vuelve a la primera y «anterior» en la primera va a la última (también con
+ * ← → del teclado; Inicio y Fin no dan la vuelta). Las dos flechas están
+ * siempre activas: sin bucle, «anterior» sale gris al cargar y en una web
+ * parecía un carrusel roto. Con una Consulta dentro funciona igual (cuenta
+ * entradas). Por qué SÍ por defecto: es lo que espera quien usa un carrusel
+ * en una web de negocio, y el gris al cargar se veía como un fallo; un
+ * carrusel que deba terminar (pasos de un proceso) pone loop: false.
+ * - Caso frontera: con varias visibles, «la última» es la última POSICIÓN
+ *   (el final de la pista), no la última diapositiva sola a la izquierda.
+ * - La trampa: el bucle NO duplica diapositivas (no es un carrusel infinito
+ *   con clones): da la vuelta desplazándose hacia atrás por toda la pista.
+ *   Clonar rompería los puntos, el foco y lo que lee un lector de pantalla.
+ *
  * Decisiones:
  * - Sin JavaScript es una fila desplazable con el dedo, la rueda o las flechas
  *   del teclado: el comportamiento es una mejora, no un requisito. Los
@@ -79,7 +93,7 @@ if ( str_contains( $content, 'wp-block-post-template' ) ) {
 	}
 }
 $armazon_track_id = wp_unique_id( 'armazon-carousel-' );
-$armazon_track_id = wp_unique_id( 'armazon-carousel-' );
+$armazon_loop     = ! empty( $attributes['loop'] );
 $armazon_label    = '' !== trim( (string) $attributes['label'] ) ? $attributes['label'] : __( 'Carousel', 'armazon' );
 
 $armazon_per_view = array(
@@ -94,6 +108,7 @@ $armazon_context = array(
 	'atEnd'      => false,
 	'current'    => 0,
 	'count'      => $armazon_count,
+	'loop'       => $armazon_loop,
 	'autoplay'   => (bool) $attributes['autoplay'],
 	'interval'   => max( 2000, (int) $attributes['autoplayInterval'] ),
 	'playing'    => false,
@@ -162,7 +177,7 @@ $armazon_wrapper = get_block_wrapper_attributes(
 			aria-controls="<?php echo esc_attr( $armazon_track_id ); ?>"
 			aria-label="<?php echo esc_attr__( 'Previous slide', 'armazon' ); ?>"
 			data-wp-on--click="actions.prev"
-			data-wp-bind--disabled="context.atStart"
+			<?php echo $armazon_loop ? '' : 'data-wp-bind--disabled="context.atStart"'; ?>
 		>
 			<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
 		</button>
@@ -172,7 +187,7 @@ $armazon_wrapper = get_block_wrapper_attributes(
 			aria-controls="<?php echo esc_attr( $armazon_track_id ); ?>"
 			aria-label="<?php echo esc_attr__( 'Next slide', 'armazon' ); ?>"
 			data-wp-on--click="actions.next"
-			data-wp-bind--disabled="context.atEnd"
+			<?php echo $armazon_loop ? '' : 'data-wp-bind--disabled="context.atEnd"'; ?>
 		>
 			<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
 		</button>
