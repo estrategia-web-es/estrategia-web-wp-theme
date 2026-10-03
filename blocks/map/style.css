@@ -5,6 +5,15 @@
 .armazon-map {
 	--armazon-map-ratio: 16 / 9;
 	margin-inline: 0;
+	/*
+	 * NO SE ENCOGE dentro de un contenedor flex. Un Grupo vertical de
+	 * WordPress (is-vertical) es un flex en columna, y un hijo flex con
+	 * overflow:hidden (el que le pone el hijo para redondear el borde) tiene
+	 * tamaño minimo 0: el mapa se quedaba en 2 px y cortaba todo lo de dentro.
+	 * Lo pillo la comparacion de altos de Lavanderia el 03-10-2026 (Autoservicio
+	 * 14 % mas corta). Ver tests/map-in-flex.test.mjs.
+	 */
+	flex: none;
 }
 
 .armazon-map__frame {

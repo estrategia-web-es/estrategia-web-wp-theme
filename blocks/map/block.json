@@ -3,7 +3,7 @@
 	"__comment": "armazon/map — mapa en dos clics. Documentación y mantenimiento en la cabecera de render.php.",
 	"apiVersion": 3,
 	"name": "armazon/map",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"title": "Map (two clicks)",
 	"category": "embed",
 	"icon": "location-alt",

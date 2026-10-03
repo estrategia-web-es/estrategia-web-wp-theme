@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.3.0**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.3.1**
   (notas de cambios en «Versiones», al final).
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
@@ -178,6 +178,15 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.3.1 — 03-10-2026 (arreglo, no obliga a tocar ningún hijo)
+
+- **`armazon/map` ya no se encoge dentro de un Grupo vertical.** Un Grupo
+  vertical es un flex en columna, y un mapa con `overflow:hidden` (el que le
+  pone un hijo para redondear el borde) podía aplastarse hasta 2 px y cortar
+  todo lo de dentro. Ahora lleva `flex: none`. Lo pilló la comparación de
+  altos de Lavandería Mallorca (Autoservicio salía un 14 % más corta).
+  Prueba: `tests/map-in-flex.test.mjs`, vista fallar sin el arreglo.
 
 ### 0.3.0 — 02-10-2026 (menor, con un cambio visible)
 
