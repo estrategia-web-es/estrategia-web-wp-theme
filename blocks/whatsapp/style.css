@@ -1,6 +1,14 @@
 /*
  * armazon/whatsapp — botón flotante. El verde es el de WhatsApp (no de un
  * cliente) y se cambia en el hijo con --armazon-whatsapp-background.
+ *
+ * Margen seguro (0.7.1): a la distancia de la esquina se le suma el margen
+ * seguro del dispositivo (env(safe-area-inset-*): la barra de gestos o la
+ * muesca de un móvil). Solo vale algo con viewport-fit=cover; sin eso es 0 y
+ * el botón queda donde siempre. Un hijo cambia la distancia con
+ * --armazon-whatsapp-offset y el margen seguro se sigue sumando solo.
+ * La trampa: no escribir inset-* en el hijo, o se pierde el margen seguro;
+ * se cambia la variable.
  */
 .armazon-whatsapp {
 	--armazon-whatsapp-background: #128c7e;
@@ -8,7 +16,7 @@
 	--armazon-whatsapp-size: 3.5rem;
 	--armazon-whatsapp-offset: var(--wp--preset--spacing--16, 1rem);
 	position: fixed;
-	inset-block-end: var(--armazon-whatsapp-offset);
+	inset-block-end: calc(var(--armazon-whatsapp-offset) + env(safe-area-inset-bottom, 0px));
 	z-index: 9999;
 	display: inline-grid;
 	place-items: center;
@@ -22,11 +30,11 @@
 }
 
 .armazon-whatsapp.is-position-bottom-right {
-	inset-inline-end: var(--armazon-whatsapp-offset);
+	inset-inline-end: calc(var(--armazon-whatsapp-offset) + env(safe-area-inset-right, 0px));
 }
 
 .armazon-whatsapp.is-position-bottom-left {
-	inset-inline-start: var(--armazon-whatsapp-offset);
+	inset-inline-start: calc(var(--armazon-whatsapp-offset) + env(safe-area-inset-left, 0px));
 }
 
 .armazon-whatsapp:focus-visible {

@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.0**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.1**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -193,6 +193,20 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.1 — 05-10-2026 (arreglo, no obliga a tocar ningún hijo)
+
+- **`armazon/whatsapp` respeta el margen seguro del móvil**: la distancia a
+  la esquina es `--armazon-whatsapp-offset` MÁS `env(safe-area-inset-*)`
+  (abajo y el lado de su esquina), para que con `viewport-fit=cover` no
+  quede bajo la barra de gestos o la muesca. Sin eso, env() vale 0 y el
+  botón queda donde estaba. La esquina ya se elegía con el atributo
+  `position` (`bottom-right` por defecto, o `bottom-left`); no cambia.
+- Un hijo que mueva el botón lo hace con la variable, no con `inset-*`: si
+  no, pierde el margen seguro (cabecera de `blocks/whatsapp/style.css`).
+- **Pruebas:** `tests/whatsapp.test.mjs` mira en la hoja que las tres
+  distancias llevan su `safe-area-inset-*` (en un Chromium de escritorio
+  env() vale 0 y el estilo calculado no lo distingue).
 
 ### 0.7.0 — 05-10-2026 (el aviso de cookies se va al plugin: OBLIGA a instalar Armazón Sitio 0.5.0)
 

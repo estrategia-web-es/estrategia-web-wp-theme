@@ -3,7 +3,7 @@
 	"__comment": "armazon/whatsapp — botón flotante de WhatsApp. Sin editor propio: supports.autoRegister (WP 7.0). Documentación y mantenimiento en la cabecera de render.php.",
 	"apiVersion": 3,
 	"name": "armazon/whatsapp",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"title": "WhatsApp button",
 	"category": "widgets",
 	"icon": "format-chat",
