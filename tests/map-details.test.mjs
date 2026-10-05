@@ -21,7 +21,6 @@ run( () =>
 			const page = await newPage( { viewport: { width, height: 900 } } );
 			await page.route( /google\.com/, ( route ) => route.fulfill( { status: 200, contentType: 'text/html', body: '<p>mapa</p>' } ) );
 			await page.goto( `${ BASE_URL }/prueba-mapa-sin-datos/`, { waitUntil: 'networkidle' } );
-			await page.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 
 			// 1. La dirección, una sola vez a la vista.
 			const text = await page.locator( 'body' ).innerText();

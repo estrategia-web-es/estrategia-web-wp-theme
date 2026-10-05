@@ -10,9 +10,14 @@
  * Decisiones:
  * - El clic del visitante es el consentimiento para ESA carga, por eso el mapa
  *   no necesita aviso de cookies. Debajo del botón se dice qué pasa al pulsar.
- * - Si el sitio declara la categoría «maps» en el consentimiento
- *   (inc/consent.php) y el visitante la aceptó, el mapa carga directo, también
+ * - Si el sitio declara la categoría «maps» en el consentimiento (el aviso de
+ *   cookies del plugin armazon-site desde la 0.7.0 del padre; antes,
+ *   inc/consent.php) y el visitante la aceptó, el mapa carga directo, también
  *   si la acepta después con la página abierta (evento armazon:consent).
+ *   SIN EL PLUGIN el mapa funciona igual: imagen estática o recuadro, y
+ *   «Ver mapa» carga ese mapa al pulsar. Solo habla con el aviso por su
+ *   contrato JS (window.armazonConsent?.…, el evento), nunca por PHP, para no
+ *   depender de que esté (tests/map.test.mjs corre sin él).
  * - La URL de embed se valida: https, host www.google.com o maps.google.com y
  *   ruta /maps/embed. Se acepta pegar el <iframe> entero que da Google
  *   (Compartir › Insertar un mapa): se saca el src.

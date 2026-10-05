@@ -107,7 +107,6 @@ run( () =>
 		const page = await newPage( { viewport: { width: 1200, height: 900 } } );
 		await page.addInitScript( probes );
 		await page.goto( URL, { waitUntil: 'networkidle' } );
-		await page.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 
 		for ( const [ name, n ] of [ [ 'Carrusel en bucle', 5 ], [ 'Carrusel en bucle con consulta', 6 ] ] ) {
 			const carousel = page.getByRole( 'region', { name, exact: true } );
@@ -214,7 +213,6 @@ run( () =>
 		const phone = await newPage( { viewport: { width: 402, height: 860 }, isMobile: true, hasTouch: true } );
 		await phone.addInitScript( probes );
 		await phone.goto( URL, { waitUntil: 'networkidle' } );
-		await phone.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 		for ( const [ name, n ] of [ [ 'Carrusel en bucle', 5 ], [ 'Carrusel en bucle con consulta', 6 ] ] ) {
 			const track = phone.getByRole( 'region', { name, exact: true } ).locator( '.armazon-carousel__track' );
 			await track.scrollIntoViewIfNeeded();
@@ -258,7 +256,6 @@ run( () =>
 		const calm = await newPage( { viewport: { width: 1200, height: 900 }, reducedMotion: 'reduce' } );
 		await calm.addInitScript( probes );
 		await calm.goto( URL, { waitUntil: 'networkidle' } );
-		await calm.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 		const carousel = calm.getByRole( 'region', { name: 'Carrusel en bucle', exact: true } );
 		await carousel.scrollIntoViewIfNeeded();
 		const handle = await carousel.locator( '.armazon-carousel__track' ).elementHandle();

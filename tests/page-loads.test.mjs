@@ -25,7 +25,8 @@ run( () =>
 		const page = await newPage();
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
 		// Textos de los bloques traducidos (languages/es_ES.l10n.php).
-		for ( const text of [ 'Ver mapa', 'Aceptar todas', 'Rechazar todas' ] ) {
+		// (El aviso de cookies ya no es del padre: está en armazon-site desde 0.7.0.)
+		for ( const text of [ 'Ver mapa' ] ) {
 			assert.ok( await page.getByRole( 'button', { name: text, exact: true } ).isVisible(), `falta el botón «${ text }»` );
 		}
 		assert.ok(

@@ -5,8 +5,10 @@
  *    con el recuadro de datos encima (a la izquierda), y la página no pide
  *    NADA a otro dominio;
  * 2. un staticMapUrl de otro dominio se descarta: ese mapa no lleva imagen;
- * 3. «Ver mapa» carga Google Y concede «maps»: el otro mapa de la página
- *    carga solo y la cookie de consentimiento la lleva;
+ * 3. «Ver mapa» carga Google para ESE mapa. Sin el plugin del aviso de
+ *    cookies (0.7.0) no concede nada: el otro mapa sigue sin cargar y no hay
+ *    cookie. Con el plugin, «Ver mapa» concede «maps» y los demás cargan: eso
+ *    lo prueba la web (Lavandería, tests/consent-maps.test.mjs);
  * 4. en un bloque estrecho, el recuadro va DEBAJO del mapa, no encima.
  *
  * Página sembrada en tests/fixtures/setup/setup.php (/prueba-mapa-estatico/);
@@ -33,7 +35,6 @@ run( () =>
 		} );
 		await page.route( /google\.com/, ( route ) => route.fulfill( { status: 200, contentType: 'text/html', body: '<p>mapa</p>' } ) );
 		await page.goto( URL, { waitUntil: 'networkidle' } );
-		await page.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 
 		const first = page.locator( '.armazon-map' ).nth( 0 );
 		const second = page.locator( '.armazon-map' ).nth( 1 );
@@ -57,19 +58,21 @@ run( () =>
 		assert.equal( await second.locator( 'img' ).count(), 0, 'un staticMapUrl de otro dominio no se descarta' );
 		assert.deepEqual( foreign, [], `peticiones a terceros sin consentimiento: ${ foreign.join( ' ' ) }` );
 
-		// 3. «Ver mapa» carga este y concede «maps»: el otro carga solo.
+		// 3. Sin el plugin del aviso (0.7.0): «Ver mapa» carga ESTE mapa y solo
+		// este; no hay consentimiento que conceder ni cookie que guardar.
 		await first.getByRole( 'button', { name: 'Ver mapa' } ).click();
-		await page.waitForFunction( () => window.armazonConsent.has( 'maps' ) );
-		await page.waitForFunction( () => [ ...document.querySelectorAll( '.armazon-map__iframe' ) ].every( ( f ) => ! f.hidden && /google\.com/.test( f.src ) ) );
+		await page.waitForFunction( () => {
+			const frame = document.querySelectorAll( '.armazon-map__iframe' )[ 0 ];
+			return frame && ! frame.hidden && /google\.com/.test( frame.src );
+		} );
 		assert.ok( await image.isHidden(), 'cargado el mapa, la imagen estática sigue a la vista' );
-		const cookie = ( await page.context().cookies() ).find( ( c ) => c.name === 'armazon_consent' );
-		assert.match( decodeURIComponent( cookie.value ), /maps/, `la cookie no lleva «maps»: ${ cookie.value }` );
+		assert.ok( ! ( await second.locator( '.armazon-map__iframe' ).getAttribute( 'src' ) ), 'sin aviso, el clic en un mapa no debería cargar los demás' );
+		assert.equal( ( await page.context().cookies() ).find( ( c ) => c.name === 'armazon_consent' ), undefined, 'sin plugin no hay cookie de consentimiento' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 
 		// 4. Estrecho: el recuadro debajo del mapa.
 		const narrow = await newPage( { viewport: { width: 375, height: 800 } } );
 		await narrow.goto( URL, { waitUntil: 'networkidle' } );
-		await narrow.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 		const narrowImage = narrow.locator( '.armazon-map' ).nth( 0 ).locator( 'img.armazon-map__static' );
 		await narrowImage.scrollIntoViewIfNeeded();
 		await narrow.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await narrowImage.elementHandle() );

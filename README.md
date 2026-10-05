@@ -5,8 +5,12 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.6.0**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.0**
   (notas de cambios en «Versiones», al final).
+- **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
+  **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
+  cookies opcionales necesita ese plugin; sin él no hay aviso, y el mapa
+  sigue funcionando en dos clics.
 - Se instala en `wp-content/themes/armazon/` (el slug de carpeta es `armazon`:
   los hijos lo nombran en `Template: armazon`).
 - Sin paso de compilación: ni `@wordpress/scripts` ni `node_modules`.
@@ -17,8 +21,16 @@ el primer día. La decisión y sus tres condiciones están en
 |---|---|
 | plantillas y partes genéricas (`templates/`, `parts/`) | los colores, fuentes y medidas de la marca (redefiniendo los slugs de abajo) |
 | `theme.json` base: escala de espaciado, tipografía fluida, paleta neutra, cortes de `viewport` | patrones (las secciones de la web), estilos de sección, plantillas propias |
-| los módulos comunes como bloques: carrusel, mapa, consentimiento, WhatsApp | textos de la web, logotipo, páginas |
-| sus traducciones (`languages/`) | qué categorías de cookies declara la web |
+| los módulos comunes como bloques: carrusel, mapa, WhatsApp | textos de la web, logotipo, páginas |
+| sus traducciones (`languages/`) | qué categorías de cookies declara la web (filtro del plugin) |
+
+**Lo que funciona y se guarda, aunque se vea en todas las webs, NO va aquí**:
+va al plugin Armazón Sitio, porque una web que cambie de tema no puede
+perderlo. Es el caso del aviso de cookies (se fue en la 0.7.0): el padre no
+le pone ningún estilo propio, porque el plugin trae una hoja neutra que lee
+los tokens de `theme.json` (`base`, `contrast`, `border`, espaciado, tamaños);
+los colores del padre y del hijo le llegan solos. Un hijo que quiera otro
+aspecto lo afina con CSS sobre `.armazon-consent` en su propia hoja.
 
 **Nada de ninguna marca ni de ningún proyecto.** Si algo solo lo usa una web, va
 a su hijo. Caso frontera: un módulo que casi todas usan con variaciones va al
@@ -30,7 +42,7 @@ cosa**, al hijo.
     style.css            cabecera + lo que theme.json no expresa (foco, salto al contenido)
     theme.json           base v3: layout, viewport, paleta, espaciado, tipografía, partes
     functions.php        solo carga inc/*.php
-    inc/                 setup.php · blocks.php · core-blocks.php · consent.php · whatsapp.php
+    inc/                 setup.php · blocks.php · core-blocks.php · whatsapp.php
     assets/core-blocks/  comportamiento común de bloques del núcleo (accordion.css), uno por bloque
     templates/           index, front-page, page, single, archive, search, 404
     parts/               header, footer, navigation-overlay
@@ -77,12 +89,14 @@ entera (no se fusiona por slug): el hijo repite los nueve slugs con sus colores.
    `Template: armazon` y su propio `Text Domain`.
 2. `theme.json` del hijo: la paleta con los nueve slugs, fuentes de la marca,
    estilos de sección en `styles/`.
-3. `functions.php` del hijo, si la web tiene cookies opcionales:
+3. `functions.php` del hijo, si la web tiene cookies opcionales (el aviso es
+   del plugin Armazón Sitio 0.5.0+, que tiene que estar activo):
 
-       add_filter( 'armazon_consent_categories', fn() => array( 'statistics' ) );
+       add_filter( 'armazon_consent_categories', fn( $c ) => array_merge( (array) $c, array( 'maps' ) ) );
 
-   Si no declara ninguna, **no sale aviso de cookies**, que es lo normal (ver
-   el módulo de consentimiento).
+   Si no declara ninguna, **no sale aviso de cookies**, que es lo normal. El
+   enlace «Configurar cookies» es el bloque `armazon-site/consent` (lo lleva
+   `parts/footer.html`; sin el plugin no pinta nada).
 4. Número de WhatsApp de la web: `wp option update armazon_whatsapp_phone 34600111222`.
 5. Lo que el hijo NO hace: copiar carpetas de `blocks/` del padre (ver la trampa
    en `inc/blocks.php`) ni llamar a funciones `armazon_*` fuera de un hook (el
@@ -114,14 +128,13 @@ se cachea: en local, `WP_DEVELOPMENT_MODE='theme'`.
 ## Los módulos y cómo se mantiene cada uno
 
 La documentación completa de cada uno (decisiones, quién, cuándo, caso
-frontera y la trampa) está **en la cabecera de su `render.php`** (o de
-`inc/consent.php`), que es donde aterriza quien lo toque. Aquí, el resumen.
+frontera y la trampa) está **en la cabecera de su `render.php`**, que es donde
+aterriza quien lo toque. Aquí, el resumen.
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
 | `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0 | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); sin recuadro de datos si la ficha ya los dice al lado (`showDetails:false`, 0.6.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
-| `armazon/consent` | botón «Configurar cookies» para el pie; el aviso lo pinta `inc/consent.php` en `wp_footer` | `autoRegister` (sin JS de editor) | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 | `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
 
@@ -137,13 +150,12 @@ genera los controles; sus etiquetas traducidas salen de `labels.php`.
 es la convención de los bloques de WordPress, y no `@scope` (fila 1 del
 Armazón, pensada para custom elements). Colores y medidas, siempre tokens.
 
-**Consentimiento, en una línea:** con Matomo sin cookies (fila 16) y mapas en
-dos clics, la mayoría de webs no declaran ninguna categoría y no muestran aviso.
-API para el hijo: `armazon_consent_has()` en PHP (cuidado con la caché de
-página), `window.armazonConsent` y el evento `armazon:consent` en JS, y
-`<script type="text/plain" data-armazon-consent="statistics">` para scripts que
-solo deben ejecutarse con consentimiento. Compatible con la WP Consent API si
-está activa, sin depender de ella.
+**Consentimiento, en una línea:** es del plugin Armazón Sitio desde la 0.7.0
+(su `includes/class-consent.php` lo documenta entero), con el mismo contrato
+que tenía aquí. El padre solo lo USA, y solo por JS: `armazon/map` mira
+`window.armazonConsent?.has( 'maps' )`, escucha `armazon:consent` y, al pulsar
+«Ver mapa», llama a `window.armazonConsent?.grant( 'maps' )`. Sin el plugin,
+esas llamadas no hacen nada y el mapa va en dos clics (`tests/map.test.mjs`).
 
 ## Textos y traducciones (fila 11)
 
@@ -181,6 +193,40 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.0 — 05-10-2026 (el aviso de cookies se va al plugin: OBLIGA a instalar Armazón Sitio 0.5.0)
+
+Lo que hay que hacer en cada web: **actualizar a la vez el padre a 0.7.0 y
+Armazón Sitio a 0.5.0**. Nada más: el filtro `armazon_consent_categories`
+del hijo, la cookie (quien ya eligió no vuelve a ver el aviso) y la API JS
+son los mismos. Con el padre nuevo y el plugin viejo **no hay aviso** (falla
+del lado seguro: nada opcional se carga, pero la web pierde el aviso). Con
+el plugin nuevo y el padre viejo sale el aviso del padre y el plugin se
+aparta (no hay dos).
+
+- **Fuera**: `inc/consent.php` y `blocks/consent/` (aviso, categorías,
+  cookie, `window.armazonConsent`, evento `armazon:consent`, shortcode
+  `[armazon_consent_settings]`, WP Consent API). Todo eso vive ahora en
+  `armazon-wp-sitio/includes/class-consent.php` y `blocks/consent/`, con el
+  mismo contrato. Por qué: el consentimiento es funcionalidad, no
+  presentación; si una web cambia de tema no puede quedarse sin aviso, y
+  Matomo, que es del plugin, depende de él.
+- **El bloque del pie se llama ahora `armazon-site/consent`**
+  (`parts/footer.html` ya lo usa). El nombre viejo `armazon/consent` lo
+  registra el plugin como alias oculto, así que el contenido ya guardado
+  sigue pintando el enlace; lo nuevo se escribe con el nombre nuevo.
+- **Estilos:** el padre no conserva ninguno. El plugin trae una hoja base
+  neutra que lee los tokens de `theme.json`; el aspecto con el padre es el
+  mismo que antes.
+- **`armazon/map` sin el plugin**: imagen estática o recuadro y «Ver mapa»
+  carga ese mapa al pulsar. Su JS habla con el aviso solo por
+  `window.armazonConsent?.` y el evento, así que no le hace falta.
+- **Pruebas:** fuera `tests/consent.test.mjs` (pasa al plugin, con Matomo
+  híbrido contra el aviso real); `tests/map.test.mjs` prueba el mapa SIN el
+  plugin (ni aviso ni `window.armazonConsent`, sin errores, «Ver mapa»
+  carga); `map-static` comprueba que sin aviso el clic carga solo ese mapa y
+  no deja cookie; las demás ya no contestan el aviso. El hijo de prueba deja
+  de declarar categorías.
 
 ### 0.6.0 — 03-10-2026 (menor, con un cambio visible en el carrusel)
 

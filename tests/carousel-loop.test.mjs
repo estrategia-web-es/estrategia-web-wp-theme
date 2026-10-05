@@ -38,7 +38,6 @@ run( () =>
 	withBrowser( async ( { newPage } ) => {
 		const page = await newPage( { viewport: { width: 1200, height: 900 } } );
 		await page.goto( `${ BASE_URL }/prueba-carrusel-bucle/`, { waitUntil: 'networkidle' } );
-		await page.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 
 		for ( const name of [ 'Carrusel en bucle', 'Carrusel en bucle con consulta' ] ) {
 			const carousel = page.getByRole( 'region', { name, exact: true } );

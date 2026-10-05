@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: el registro de bloques en el editor (edit.js clásico, autoRegister) solo existe ejecutando el editor de WordPress.
 /**
- * Los cuatro bloques existen en el editor, con títulos en castellano; se
+ * Los tres bloques (el del aviso de cookies se fue a armazon-site en 0.7.0) existen en el editor, con títulos en castellano; se
  * insertan sin errores; el carrusel acepta bloques internos; y los controles
  * automáticos de autoRegister llevan las etiquetas traducidas de labels.php.
  * Ojo: el --login de Playground NO sirve a un navegador nuevo; se entra por
@@ -21,7 +21,7 @@ run( () =>
 		await page.waitForFunction( () => window.wp?.blocks?.getBlockType?.( 'armazon/whatsapp' ), null, { timeout: 60000 } );
 
 		const types = await page.evaluate( () =>
-			[ 'armazon/carousel', 'armazon/map', 'armazon/consent', 'armazon/whatsapp' ].map( ( name ) => {
+			[ 'armazon/carousel', 'armazon/map', 'armazon/whatsapp' ].map( ( name ) => {
 				const type = window.wp.blocks.getBlockType( name );
 				return type && { name, title: type.title, label: type.attributes.phone?.label };
 			} )
@@ -29,26 +29,24 @@ run( () =>
 		assert.ok( types.every( Boolean ), `faltan bloques en el editor: ${ JSON.stringify( types ) }` );
 		assert.deepEqual(
 			types.map( ( t ) => t.title ),
-			[ 'Carrusel', 'Mapa (en dos clics)', 'Enlace de configuración de cookies', 'Botón de WhatsApp' ]
+			[ 'Carrusel', 'Mapa (en dos clics)', 'Botón de WhatsApp' ]
 		);
-		assert.equal( types[ 3 ].label, 'Teléfono en formato internacional (vacío: la opción del sitio)', 'etiqueta de autoRegister sin traducir' );
+		assert.equal( types[ 2 ].label, 'Teléfono en formato internacional (vacío: la opción del sitio)', 'etiqueta de autoRegister sin traducir' );
 
-		// Insertar los cuatro; el carrusel con su plantilla de bloques internos.
+		// Insertar los tres; el carrusel con su plantilla de bloques internos.
 		const inserted = await page.evaluate( () => {
 			const { createBlock } = window.wp.blocks;
 			const carousel = createBlock( 'armazon/carousel', {}, [ createBlock( 'core/paragraph', { content: 'Uno' } ), createBlock( 'core/paragraph', { content: 'Dos' } ) ] );
 			window.wp.data.dispatch( 'core/block-editor' ).insertBlocks( [
 				carousel,
 				createBlock( 'armazon/map', { address: 'Calle Falsa 1' } ),
-				createBlock( 'armazon/consent' ),
 				createBlock( 'armazon/whatsapp', { phone: '34600111222' } ),
 			] );
 			return window.wp.data.select( 'core/block-editor' ).getBlocks().map( ( b ) => [ b.name, b.isValid, b.innerBlocks.length ] );
 		} );
-		assert.deepEqual( inserted.slice( -4 ), [
+		assert.deepEqual( inserted.slice( -3 ), [
 			[ 'armazon/carousel', true, 2 ],
 			[ 'armazon/map', true, 0 ],
-			[ 'armazon/consent', true, 0 ],
 			[ 'armazon/whatsapp', true, 0 ],
 		] );
 

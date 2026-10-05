@@ -4,7 +4,7 @@
  * (tests/fixtures/blueprint.json) con runPHP después de cargar WordPress.
  *
  * Deja: enlaces permanentes bonitos, la opción de WhatsApp del sitio, y la
- * página /prueba-modulos/ con los cuatro bloques; y /prueba-carrusel-consulta/
+ * página /prueba-modulos/ con los bloques del padre; y /prueba-carrusel-consulta/
  * con seis entradas en un carrusel con core/query; y /prueba-acordeon/ con
  * un core/accordion de respuesta larga (0.4.0); /prueba-carrusel-bucle/ y
  * /prueba-mapa-estatico/ (0.5.0); /prueba-mapa-sin-datos/ y un carrusel de una
@@ -32,7 +32,6 @@ $content = '<!-- wp:heading --><h2 class="wp-block-heading">Carrusel</h2><!-- /w
 	. '<!-- /wp:armazon/carousel -->'
 	. '<!-- wp:heading --><h2 class="wp-block-heading">Mapa</h2><!-- /wp:heading -->'
 	. '<!-- wp:armazon/map {"placeName":"Ayuntamiento de prueba","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","hours":"De lunes a viernes\nDe 9:00 a 14:00","embedUrl":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3075.5!2d2.6502!3d39.5696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMznCsDM0JzEwLjYiTiAywrAzOScwMC43IkU!5e0!3m2!1ses!2ses!4v1700000000000"} /-->'
-	. '<!-- wp:armazon/consent /-->'
 	. '<!-- wp:armazon/whatsapp {"phone":"+34 600 11 12 22","message":"Hola, ¿tenéis hora mañana?","position":"bottom-left"} /-->';
 
 $existing = get_page_by_path( 'prueba-modulos' );

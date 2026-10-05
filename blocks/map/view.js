@@ -3,8 +3,10 @@
  *
  * Toca cuando: el visitante pulsa «Ver mapa» (que además concede «maps» en
  * el consentimiento si la web la declara, 0.5.0), o el consentimiento
- * (armazon/consent) tiene aceptada la categoría «maps» — ya al arrancar, o
- * cuando se acepta con la página abierta.
+ * (el aviso del plugin armazon-site desde 0.7.0) tiene aceptada la categoría
+ * «maps» — ya al arrancar, o cuando se acepta con la página abierta.
+ * Sin el plugin no hay window.armazonConsent: por eso SIEMPRE «?.»; quitar
+ * uno rompe «Ver mapa» en una web sin aviso (tests/map.test.mjs).
  * Documentación del módulo en la cabecera de render.php.
  *
  * La trampa: este módulo puede ejecutarse antes o después que el del

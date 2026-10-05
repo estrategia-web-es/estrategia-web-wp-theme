@@ -3,7 +3,8 @@
  * Armazón — tema padre de bloques.
  *
  * Este fichero solo carga inc/*.php. La lógica vive allí, un fichero por
- * asunto (setup, bloques, consentimiento, WhatsApp, traducciones de editor).
+ * asunto (setup, bloques, WhatsApp, traducciones de editor). El aviso de
+ * cookies ya no es de aquí: es del plugin armazon-site desde la 0.7.0.
  *
  * Cómo se mantiene:
  * - Un asunto nuevo es un fichero nuevo en inc/, no un bloque más aquí.

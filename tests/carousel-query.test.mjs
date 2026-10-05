@@ -11,7 +11,6 @@ run( () =>
 	withBrowser( async ( { newPage } ) => {
 		const page = await newPage( { viewport: { width: 1200, height: 900 } } );
 		await page.goto( `${ BASE_URL }/prueba-carrusel-consulta/`, { waitUntil: 'networkidle' } );
-		await page.getByRole( 'button', { name: 'Rechazar todas' } ).click();
 
 		const carousel = page.locator( '.armazon-carousel' );
 		const track = carousel.locator( '.armazon-carousel__track' );
