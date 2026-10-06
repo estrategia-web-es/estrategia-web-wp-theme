@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.7**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.8**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -42,7 +42,9 @@ cosa**, al hijo.
     style.css            cabecera + lo que theme.json no expresa (foco, salto al contenido, anclas); lo encola el padre
     theme.json           base v3: layout, viewport, paleta, espaciado, tipografía, partes
     functions.php        solo carga inc/*.php
-    inc/                 setup.php · blocks.php · core-blocks.php · whatsapp.php
+    inc/                 setup.php · blocks.php · core-blocks.php · whatsapp.php · carousel-images.php ·
+                         view-transitions.php · rendimiento (0.7.8): critical-css.php · font-preload.php ·
+                         column-image-sizes.php
     assets/core-blocks/  comportamiento común de bloques del núcleo (accordion.css), uno por bloque
     templates/           index, front-page, page, single, archive, search, 404
     parts/               header, footer, navigation-overlay
@@ -218,6 +220,34 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.8 — 06-10-2026 (rendimiento, no obliga a tocar ningún hijo)
+
+Del PageSpeed de Lavandería en móvil (rendimiento 80, LCP 5,2 s): CSS que
+bloqueaba, fuentes que se pedían tarde y fotos de columna que bajaban el
+doble. Cada fichero lleva en su cabecera qué hace, cómo se mantiene y su
+trampa.
+
+- `inc/critical-css.php`: el límite de CSS en línea del núcleo pasa de
+  20.000 a 120.000 bytes (`armazon_styles_inline_size_limit`), así que las
+  hojas de bloque de navegación e imagen van dentro del HTML; las hojas del
+  tema y de los plugins encoladas por URL también, si caben (se les da su
+  `path`; `armazon_inline_style` para excluir una). Y un hijo puede
+  **diferir** una hoja grande (`armazon_deferred_styles`): va con
+  `rel="preload"` + `onload`, detrás de su CSS crítico
+  (`assets/css/dist/critical.css`, `armazon_critical_css_file`), que el padre
+  pinta en un `<style id="armazon-critical-css">` en su sitio. Sin crítico no
+  difiere nada. **Visible:** sin hijo que lo use, el único cambio es que las
+  hojas pequeñas van en línea.
+- `inc/font-preload.php`: `<link rel="preload" as="font" crossorigin>` de
+  las caras normales en woff2 de las familias del texto y de los títulos de
+  `theme.json` (hasta 4), por `wp_preload_resources`. `armazon_preload_fonts`.
+- `inc/column-image-sizes.php`: el `sizes` de una foto dentro de un
+  `core/column`, si es el de WordPress (100vw), pasa a la parte de la fila
+  (`(max-width: 781px) 100vw, min(50vw, 692px)`), ampliada si la foto va
+  recortada (`object-fit: cover`). `armazon_column_image_sizes`.
+- Pruebas: las mira el hijo (Lavandería, `tests/render-blocking.test.mjs`,
+  nivel 3). Ninguna nueva aquí.
 
 ### 0.7.7 — 06-10-2026 (nuevo, no obliga a tocar ningún hijo)
 
