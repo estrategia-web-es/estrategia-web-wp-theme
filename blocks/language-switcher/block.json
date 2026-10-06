@@ -11,7 +11,8 @@
 	"keywords": [ "language", "wpml", "translation", "idioma" ],
 	"textdomain": "armazon",
 	"attributes": {
-		"display": { "type": "string", "enum": [ "code", "name" ], "default": "code" }
+		"display": { "type": "string", "enum": [ "code", "name" ], "default": "code" },
+		"layout": { "type": "string", "enum": [ "dropdown", "inline" ], "default": "dropdown" }
 	},
 	"supports": {
 		"autoRegister": true,

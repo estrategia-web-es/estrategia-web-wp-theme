@@ -68,6 +68,32 @@ if ( ! $armazon_current || ! $armazon_others ) {
 }
 
 $armazon_name    = static fn( array $l ): string => (string) ( $l['native_name'] ?? $l['translated_name'] ?? strtoupper( (string) $l['code'] ) );
+
+// «inline» (0.7.7): todos los idiomas en línea, «EN – ES», sin desplegable; el
+// actual marcado con aria-current y el resto enlazados. Para el menú del móvil:
+// David, 06-10-2026, «el selector de idioma en mobile es feo, puedes poner
+// EN - ES (sin desplegable)». El orden es el de WPML. Sin JS.
+if ( 'inline' === ( $attributes['layout'] ?? 'dropdown' ) ) {
+	$armazon_text = static fn( array $l ): string => 'name' === ( $attributes['display'] ?? 'code' ) ? $armazon_name( $l ) : strtoupper( (string) $l['code'] );
+	$armazon_wrap = get_block_wrapper_attributes(
+		array(
+			'class'      => 'armazon-language armazon-language--inline',
+			'aria-label' => __( 'Language', 'armazon' ),
+		)
+	);
+	echo '<nav ' . $armazon_wrap . '><ul class="armazon-language__inline">'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core.
+	foreach ( $armazon_languages as $armazon_language ) {
+		$armazon_code = (string) $armazon_language['code'];
+		$armazon_full = $armazon_name( $armazon_language );
+		if ( ! empty( $armazon_language['active'] ) ) {
+			printf( '<li><span aria-current="true" lang="%1$s" title="%2$s">%3$s</span></li>', esc_attr( $armazon_code ), esc_attr( $armazon_full ), esc_html( $armazon_text( $armazon_language ) ) );
+		} else {
+			printf( '<li><a href="%1$s" hreflang="%2$s" lang="%2$s" aria-label="%3$s">%4$s</a></li>', esc_url( (string) $armazon_language['url'] ), esc_attr( $armazon_code ), esc_attr( $armazon_full ), esc_html( $armazon_text( $armazon_language ) ) );
+		}
+	}
+	echo '</ul></nav>';
+	return;
+}
 $armazon_label   = 'name' === ( $attributes['display'] ?? 'code' ) ? $armazon_name( $armazon_current ) : strtoupper( (string) $armazon_current['code'] );
 $armazon_list_id = wp_unique_id( 'armazon-language-' );
 $armazon_wrapper = get_block_wrapper_attributes(

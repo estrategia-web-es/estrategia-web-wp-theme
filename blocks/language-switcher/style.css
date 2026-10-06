@@ -48,3 +48,13 @@
 @media (prefers-reduced-motion: reduce) {
 	.armazon-language__toggle::after { transition: none; }
 }
+
+/* «inline» (0.7.7): «EN – ES» en línea. El guion es decorativo (::before), no
+   lo lee el lector de pantalla. El actual, sin enlace y en negrita; el otro,
+   enlace con diana de 44 px de alto. */
+.armazon-language__inline { display: flex; align-items: center; justify-content: center; gap: 0; margin: 0; padding: 0; list-style: none; }
+.armazon-language__inline li { display: flex; align-items: center; }
+.armazon-language__inline li + li::before { content: "–"; padding-inline: 0.5em; opacity: 0.7; }
+.armazon-language__inline :is(a, span) { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 0.25em; color: inherit; }
+.armazon-language__inline [aria-current] { font-weight: 700; }
+.armazon-language__inline a { text-decoration: underline; text-underline-offset: 0.2em; }
