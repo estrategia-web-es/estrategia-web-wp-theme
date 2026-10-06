@@ -34,3 +34,17 @@ add_action(
 		echo '<style>.rejilla-prueba .armazon-carousel__track{display:grid;grid-template-columns:repeat(3,70%);}</style>';
 	}
 );
+
+// Una cabecera FIJA de 80 px, como la de Lavandería, solo en /prueba-anclas/
+// (tests/anchors.test.mjs): el destino de un ancla no puede quedar debajo.
+// El alto lo declara el token que un hijo pone en su theme.json
+// (settings.custom.layout.cabecera); aquí, a mano. Solo en esa página: en
+// las demás taparía lo que otras pruebas pulsan.
+add_action(
+	'wp_head',
+	static function () {
+		if ( is_page( 'prueba-anclas' ) ) {
+			echo '<style>:root{--wp--custom--layout--cabecera:80px}.wp-site-blocks>header{position:fixed;inset:0 0 auto;height:80px;z-index:10;background:#fff;box-sizing:border-box}</style>';
+		}
+	}
+);

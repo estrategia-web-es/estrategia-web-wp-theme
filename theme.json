@@ -69,7 +69,13 @@
 		"custom": {
 			"motion": {
 				"duration": "0.3s",
-				"easing": "cubic-bezier(0.2, 0, 0, 1)"
+				"easing": "cubic-bezier(0.2, 0, 0, 1)",
+				"accordion": {
+					"duration": "0.25s",
+					"easing": "ease-in-out",
+					"rise": "1rem",
+					"turn": "135deg"
+				}
 			}
 		}
 	},

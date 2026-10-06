@@ -46,6 +46,22 @@ function armazon_front_page_only_when_static( array $templates ): array {
 add_filter( 'frontpage_template_hierarchy', 'armazon_front_page_only_when_static' );
 
 /**
+ * Loads the parent's own style.css (focus, skip link, anchors) on the front.
+ *
+ * Hasta la 0.7.2 nadie lo cargaba salvo que el hijo lo encolase (Lavandería
+ * lo hace con el handle «armazon-style»): en un hijo que no lo hacía, el foco
+ * visible y el salto al contenido no existían. Desde la 0.7.3 lo encola el
+ * padre con ESE MISMO handle, así que el hijo que ya lo encolaba no lo
+ * duplica (el segundo wp_enqueue_style de un handle es un no-op) y el que no,
+ * lo recibe. La trampa: si un hijo lo encola con OTRO handle, sale dos veces;
+ * es inocuo (las mismas reglas), pero sobra: que lo quite.
+ */
+function armazon_styles(): void {
+	wp_enqueue_style( 'armazon-style', get_template_directory_uri() . '/style.css', array(), armazon_version() );
+}
+add_action( 'wp_enqueue_scripts', 'armazon_styles' );
+
+/**
  * Theme version, read once from style.css of the parent (not the child).
  */
 function armazon_version(): string {

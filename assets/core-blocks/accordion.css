@@ -1,5 +1,6 @@
 /*
- * core/accordion — abrir y cerrar con la altura animada (0.4.0).
+ * core/accordion — abrir y cerrar deslizando y fundiendo, sin saltos de
+ * texto (0.4.0; 0.5.0; rehecho en 0.7.3).
  *
  * Qué pinta el núcleo (WordPress 7.1): un botón con aria-expanded y un panel
  * <div role="region"> que, cerrado, lleva hidden="until-found" (lo pone y lo
@@ -8,76 +9,120 @@
  * (la búsqueda del navegador lo encuentra y lo abre) pero mide 0.
  * Sin esto, abrir o cerrar es un salto de 0 al alto entero.
  *
- * La técnica, sin JavaScript propio (el store del núcleo sigue mandando, con
- * su aria-expanded, su foco y su teclado):
+ * El modelo (0.7.3), medido fotograma a fotograma en el FAQ que le gustó a
+ * David (miquelcapellaiassociats.es, 06-10-2026): todo en 0,25 s ease-in-out;
+ * el alto crece, la respuesta pasa de opacidad 0 a 1 subiendo desde abajo
+ * (allí, translate 50 % → 0) y el «+» gira 135° hasta quedar en «×». Al
+ * cerrar, lo mismo al revés. Aquí se reproduce con la técnica propia, sin
+ * JavaScript (el store del núcleo sigue mandando: aria-expanded, foco y
+ * teclado):
  * - block-size: 0 con [hidden] y auto abierto, interpolando entre 0 y «auto»
  *   con interpolate-size: allow-keywords;
  * - content-visibility con transition-behavior allow-discrete: al CERRAR el
- *   contenido sigue visible mientras se pliega y se oculta al final; al
- *   abrir se ve desde el primer fotograma;
- * - también el relleno y el margen del panel: el núcleo los quita al panel
- *   cerrado (padding 0 !important) y un hijo suele dárselos solo al abierto;
- *   si no se animan, saltan aunque la altura se deslice;
- * - el giro del icono (+ → ×, el núcleo lo rota 45°) con la misma duración.
+ *   contenido sigue visible mientras se pliega y se oculta al final;
+ * - los HIJOS del panel funden (opacity) y suben (translate, «rise»); al
+ *   abrir, el punto de partida lo da @starting-style, porque el panel venía
+ *   de content-visibility:hidden y no hay estilo previo del que transicionar;
+ * - el relleno y el margen de ARRIBA y ABAJO del panel también se animan: el
+ *   núcleo los quita al panel cerrado y un hijo suele dárselos solo al
+ *   abierto; si no se animan, la pregunta entera cambia de alto de golpe;
+ * - el giro del icono, con la misma duración y curva.
  *
- * Tokens (theme.json del padre, settings.custom.motion; un hijo los cambia en
- * el suyo): --wp--custom--motion--duration y --wp--custom--motion--easing.
+ * Tokens (theme.json del padre, settings.custom.motion.accordion; un hijo
+ * los cambia en el suyo): --wp--custom--motion--accordion--duration,
+ * --easing, --rise (cuánto sube la respuesta al aparecer) y --turn (el giro
+ * del icono abierto; el núcleo gira 45°). Un hijo con un icono que no sea
+ * simétrico (una flecha) pone su --turn.
  *
  * Caso frontera: un navegador sin interpolate-size (Firefox y Safari a
- * octubre de 2026) abre y cierra como antes, de golpe: se degrada, no se
- * rompe. Con «reducir movimiento», sin animación (ni la del núcleo).
- * La trampa que costó la 0.5.0 («efecto muy raro con el texto al cerrarse»):
- * el núcleo pone padding 0 !important al panel cerrado y los hijos le dan
+ * octubre de 2026) abre y cierra el alto de golpe, pero la respuesta sigue
+ * fundiendo: se degrada, no se rompe. Con «reducir movimiento», sin
+ * animación ninguna (ni la del núcleo).
+ *
+ * La trampa de la 0.7.3 («da un salto el texto», David en Lavandería): el
+ * hijo da al panel abierto margin-top -0.5rem, y el margen se anima de 0 a
+ * -8 px. Con la respuesta a opacidad 1 desde el primer fotograma, se veía el
+ * texto aparecer y subir 8 px ya entero: se «recolocaba». No se arregla
+ * dejando de animar el margen (entonces la pregunta entera encoge 8 px en el
+ * primer fotograma y lo de abajo da un tirón): se arregla haciendo que ese
+ * desplazamiento ocurra MIENTRAS la respuesta funde y sube, en el mismo
+ * sentido y con la misma curva, que es lo que hace la referencia.
+ * La trampa de la 0.5.0 («efecto muy raro con el texto al cerrarse»): el
+ * núcleo pone padding 0 !important al panel cerrado y los hijos le dan
  * margen y relleno LATERAL solo al abierto (:not([hidden])). Al cerrar, eso
- * saltaba en el primer fotograma: el texto se ensanchaba, se reajustaba en
- * menos líneas y se desplazaba mientras la altura bajaba. Al abrir no se veía
- * porque el panel ya nace con su ancho final. Por eso lo lateral se retiene
+ * saltaba en el primer fotograma: el texto se ensanchaba y se reajustaba en
+ * menos líneas mientras la altura bajaba. Por eso lo lateral se retiene
  * hasta el final del cierre (regla [hidden] de abajo); una transición pisa
  * incluso el !important del núcleo. Si se añade otra propiedad al panel
  * abierto en un hijo y «baila» al cerrar, va a esa lista con retraso.
  * La otra trampa: sin overflow:clip el contenido se ve fuera del panel mientras
  * éste mide menos que su contenido; y NO vale overflow:hidden con un foco
  * visible que sobresale: clip con overflow-clip-margin deja ver el anillo.
- * Lo prueba tests/accordion.test.mjs (alturas intermedias; nada con reduce).
+ * Lo prueba tests/accordion.test.mjs (alto que solo crece o solo mengua,
+ * texto sin cambiar de x ni de líneas, opacidad que solo sube o solo baja,
+ * teclado y foco, giro; nada con «reducir movimiento»).
  */
 @media (prefers-reduced-motion: no-preference) {
 	.wp-block-accordion-panel {
+		--armazon-accordion-time: var(--wp--custom--motion--accordion--duration, 0.25s) var(--wp--custom--motion--accordion--easing, ease-in-out);
 		interpolate-size: allow-keywords;
 		overflow: clip;
 		overflow-clip-margin: 4px;
 		transition:
-			block-size var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
-			padding-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
-			margin-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
-			content-visibility var(--wp--custom--motion--duration, 0.3s) allow-discrete;
+			block-size var(--armazon-accordion-time),
+			padding-block var(--armazon-accordion-time),
+			margin-block var(--armazon-accordion-time),
+			content-visibility var(--wp--custom--motion--accordion--duration, 0.25s) allow-discrete;
 	}
 	/*
 	 * Al CERRAR (la transición que vale es la del estado de destino, [hidden]):
 	 * lo LATERAL —margen, relleno y borde— se queda como estaba hasta que el
 	 * panel termina de plegarse (duración 0 con retraso = la duración), y solo
 	 * entonces salta a lo de cerrado, ya con 0 de alto. Al abrir, sin retraso:
-	 * el panel nace ya con su ancho final. Así el texto no cambia de ancho a
-	 * media animación y el cierre es el espejo de la apertura (0.5.0).
+	 * el panel nace ya con su ancho final (0.5.0).
 	 */
 	.wp-block-accordion-panel[hidden] {
 		block-size: 0;
 		transition:
-			block-size var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
-			padding-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
-			margin-block var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease),
-			content-visibility var(--wp--custom--motion--duration, 0.3s) allow-discrete,
-			margin-inline 0s linear var(--wp--custom--motion--duration, 0.3s),
-			padding-inline 0s linear var(--wp--custom--motion--duration, 0.3s),
-			border-width 0s linear var(--wp--custom--motion--duration, 0.3s);
+			block-size var(--armazon-accordion-time),
+			padding-block var(--armazon-accordion-time),
+			margin-block var(--armazon-accordion-time),
+			content-visibility var(--wp--custom--motion--accordion--duration, 0.25s) allow-discrete,
+			margin-inline 0s linear var(--wp--custom--motion--accordion--duration, 0.25s),
+			padding-inline 0s linear var(--wp--custom--motion--accordion--duration, 0.25s),
+			border-width 0s linear var(--wp--custom--motion--accordion--duration, 0.25s);
+	}
+
+	/* La respuesta funde y sube al abrir; funde y baja al cerrar. */
+	.wp-block-accordion-panel > * {
+		transition:
+			opacity var(--armazon-accordion-time),
+			translate var(--armazon-accordion-time);
+	}
+	.wp-block-accordion-panel[hidden] > * {
+		opacity: 0;
+		translate: 0 var(--wp--custom--motion--accordion--rise, 1rem);
+	}
+	@starting-style {
+		.wp-block-accordion-panel:not([hidden]) > * {
+			opacity: 0;
+			translate: 0 var(--wp--custom--motion--accordion--rise, 1rem);
+		}
 	}
 
 	.wp-block-accordion-item > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
-		transition: transform var(--wp--custom--motion--duration, 0.3s) var(--wp--custom--motion--easing, ease);
+		transition: transform var(--wp--custom--motion--accordion--duration, 0.25s) var(--wp--custom--motion--accordion--easing, ease-in-out);
 	}
+}
+
+/* El giro abierto: el del modelo (135°) en vez del del núcleo (45°); con «+» acaban igual, en «×». */
+.wp-block-accordion-item.is-open > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
+	transform: rotate(var(--wp--custom--motion--accordion--turn, 135deg));
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.wp-block-accordion-panel,
+	.wp-block-accordion-panel > *,
 	.wp-block-accordion-item,
 	.wp-block-accordion-item > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
 		transition: none;

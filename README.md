@@ -39,7 +39,7 @@ cosa**, al hijo.
 
 ## Estructura
 
-    style.css            cabecera + lo que theme.json no expresa (foco, salto al contenido)
+    style.css            cabecera + lo que theme.json no expresa (foco, salto al contenido, anclas); lo encola el padre
     theme.json           base v3: layout, viewport, paleta, espaciado, tipografía, partes
     functions.php        solo carga inc/*.php
     inc/                 setup.php · blocks.php · core-blocks.php · whatsapp.php
@@ -136,7 +136,7 @@ aterriza quien lo toque. Aquí, el resumen.
 | `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0; cada paso desliza, también con una sola de más (0.7.2) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); sin recuadro de datos si la ficha ya los dice al lado (`showDetails:false`, 0.6.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
-| `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
+| `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la respuesta funde y sube, el «+» gira 135° (0.7.3); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
 
 **Por qué `edit.js` clásico y no un módulo:** WordPress 7.1 no admite módulos
 ES como `editorScript` (no hay `editorScriptModule`). Sin compilación, lo que
@@ -193,6 +193,47 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.3 — 06-10-2026 (arreglo, no obliga a tocar ningún hijo)
+
+- **El FAQ (`core/accordion`) ya no «da un salto el texto».** David, en
+  Lavandería, con la web de Miquel Capellà i Associats como modelo. Lo que
+  hace el modelo, medido fotograma a fotograma: todo en 0,25 s ease-in-out;
+  el alto crece, la respuesta pasa de opacidad 0 a 1 subiendo desde abajo y
+  el «+» gira 135°. Lo que hacía el nuestro: la respuesta salía a opacidad 1
+  desde el primer fotograma y, ya entera, subía 8 px (el `margin-top:
+  -0.5rem` que el hijo da al panel abierto, animándose de 0 a -8): se veía
+  recolocarse. Ahora los hijos del panel funden y suben (`@starting-style`
+  al abrir) con la misma curva que el alto y el margen, así que ese
+  desplazamiento ocurre mientras la respuesta aparece y en un solo sentido;
+  al cerrar, lo mismo al revés. El alto de la pregunta solo crece o solo
+  mengua, y el texto no cambia de x ni de líneas (lo de la 0.5.0 sigue).
+- **Tokens nuevos** en `settings.custom.motion.accordion`: `duration`
+  (0.25s), `easing` (ease-in-out), `rise` (1rem, cuánto sube la respuesta)
+  y `turn` (135deg, el giro del icono abierto; con «+» acaba en «×» como
+  con los 45° del núcleo). Un hijo con una flecha por icono pone su `turn`.
+- **Anclas de la misma página: el salto desliza** (`scroll-behavior:
+  smooth` en el raíz, salvo con «reducir movimiento») **y el destino queda
+  bajo la cabecera fija**: `scroll-padding-top` = el token
+  `--wp--custom--layout--cabecera` del hijo (0 si no lo tiene) más la barra
+  de administración. Sin JavaScript: al entrar con `#ancla` en la URL,
+  Chromium también desliza y respeta el relleno. La regla va con `:root` y
+  pisa el `html { scroll-padding-top }` que ya tenía Lavandería (mismo
+  valor, más la barra); el hijo puede quitar la suya.
+- **El padre encola su `style.css`** (handle `armazon-style`). Hasta ahora
+  solo llegaba si el hijo lo encolaba: el hijo de prueba no lo hacía y se
+  quedaba sin foco visible ni salto al contenido. Lavandería lo encola con
+  ese mismo handle, así que no sale dos veces.
+- **Pruebas:** `accordion.test.mjs` rehecha (abrir y cerrar con los márgenes
+  de Lavandería: alto monótono, texto quieto en x y líneas, opacidad que
+  solo sube o baja, movimiento en un solo sentido; teclado y foco; giro de
+  135°), vista fallar con la 0.7.2 («sale ya con opacidad 1»; «el + está a
+  45°»). `anchors.test.mjs` nueva sobre `/prueba-anclas/` (cabecera fija de
+  80 px que el hijo de prueba pone solo allí): clic que pasa por posiciones
+  intermedias sin retroceder, destino a la vista al pulsar y al entrar con
+  el hash, salto seco con «reducir movimiento»; vista fallar con la 0.7.2
+  («0 2631»: un solo salto). Comprobado también contra el WordPress local
+  de Lavandería (`/autoservicio/` y `#pasos`, a 1280 y a 390).
 
 ### 0.7.2 — 06-10-2026 (arreglo, no obliga a tocar ningún hijo)
 

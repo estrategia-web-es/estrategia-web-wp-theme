@@ -9,7 +9,8 @@
  * un core/accordion de respuesta larga (0.4.0); /prueba-carrusel-bucle/ y
  * /prueba-mapa-estatico/ (0.5.0); /prueba-mapa-sin-datos/ y un carrusel de una
  * sola diapositiva en /prueba-carrusel-bucle/ (0.6.0), y allí mismo uno de
- * tres diapositivas con 2,4 a la vista (0.7.2). Es idempotente: si la
+ * tres diapositivas con 2,4 a la vista (0.7.2); /prueba-anclas/ con un enlace
+ * a un #destino muy abajo (0.7.3). Es idempotente: si la
  * página o la entrada ya existe, la reescribe.
  *
  * @package armazon
@@ -243,6 +244,27 @@ wp_insert_post(
 		'post_title'   => 'Prueba de acordeón',
 		'post_name'    => 'prueba-acordeon',
 		'post_content' => wp_slash( $accordion_content ),
+	)
+);
+
+// Anclas (0.7.3): un enlace arriba a #destino, muy abajo, para ver que el
+// salto se desliza y que el destino no queda bajo la cabecera fija (la fija
+// el hijo de prueba solo en esta página).
+$anchors_content = '<!-- wp:paragraph --><p><a href="#destino">Ir al destino</a></p><!-- /wp:paragraph -->'
+	. '<!-- wp:spacer {"height":"2400px"} --><div style="height:2400px" aria-hidden="true" class="wp-block-spacer"></div><!-- /wp:spacer -->'
+	. '<!-- wp:heading --><h2 class="wp-block-heading" id="destino">Destino</h2><!-- /wp:heading -->'
+	. '<!-- wp:paragraph --><p>Texto bajo el destino.</p><!-- /wp:paragraph -->'
+	. '<!-- wp:spacer {"height":"1600px"} --><div style="height:1600px" aria-hidden="true" class="wp-block-spacer"></div><!-- /wp:spacer -->';
+
+$existing_anchors = get_page_by_path( 'prueba-anclas' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_anchors ? $existing_anchors->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de anclas',
+		'post_name'    => 'prueba-anclas',
+		'post_content' => wp_slash( $anchors_content ),
 	)
 );
 
