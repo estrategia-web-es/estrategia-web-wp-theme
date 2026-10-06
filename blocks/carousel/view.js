@@ -35,6 +35,27 @@
  *   diapositiva a diapositiva en una rejilla de dos filas pasa fichas de una
  *   fila a otra. Por eso las filas se miden con el orden natural (rows()) y
  *   se rota por columnas.
+ *
+ * Cada paso DESLIZA (0.7.2; David: «el carrusel necesita una animación, va a
+ * saltos», medido el 06-10-2026 en la portada de Lavandería):
+ * - Con solo UNA de más (3 fotos y 2,4 a la vista) ninguna rotación deja
+ *   desplazar una diapositiva entera: la fila no da para tanto. Hasta la 0.7.1
+ *   se rotaba y se ponía scrollLeft a 0 de golpe: un salto en un fotograma.
+ *   Ahora glide(): rota, mide dónde ha quedado cada diapositiva y la anima
+ *   desde donde estaba (transform con la Web Animations API). La que da la
+ *   vuelta entra por el otro lado y, mientras, una COPIA suya (ghostOf) sale
+ *   por este: sin ella el hueco que deja se ve vacío. La copia es inerte,
+ *   aria-hidden, sin ids, con los estilos calculados en línea (fuera de la
+ *   pista no le llegan las reglas :nth-child del hijo) y se quita al acabar.
+ *   Pulsar mientras anima no corta: el paso se encola (state.queue).
+ * - Pulsando seguido en una pista que SÍ desplaza: se mantiene la rotación
+ *   si ya permite el viaje, para que el navegador reoriente su animación sin
+ *   pararla; y mientras va una animación propia la pista va sin scroll-snap
+ *   (hold/release): con snap obligatorio, la corrección instantánea de
+ *   scrollLeft caía en el punto de anclaje más cercano y la pista saltaba.
+ * - La trampa: un scroll-snap-type en línea que se quede puesto deja la
+ *   pista sin anclaje para el dedo. Se quita al llegar (settle), al tocar o
+ *   girar la rueda (take) y al acabar glide().
  */
 import { store, getContext, getElement, withSyncEvent } from '@wordpress/interactivity';
 
@@ -112,10 +133,14 @@ const stepRewind = ( track, direction ) => {
 const ring = new WeakMap();
 const ringOf = ( track ) => {
 	if ( ! ring.has( track ) ) {
-		ring.set( track, { start: 0, cols: 0, moving: false, target: 0, touching: false } );
+		ring.set( track, { start: 0, cols: 0, moving: false, target: 0, touching: false, gliding: false, queue: [] } );
 	}
 	return ring.get( track );
 };
+
+/** Our own animations run without scroll-snap (see the header, 0.7.2). */
+const hold = ( track ) => track.style.setProperty( 'scroll-snap-type', 'none' );
+const release = ( track ) => track.style.removeProperty( 'scroll-snap-type' );
 
 /**
  * Measures the rows with the NATURAL order (inline orders removed and put
@@ -212,6 +237,9 @@ const travel = ( track, a, d, animate ) => {
 	}
 	const ideal = Math.max( 0, Math.floor( ( n - visible ) / 2 ) );
 
+	// A trip the current rotation already allows keeps it: re-rotating in
+	// the middle of an animation stops it dead and starts it again (0.7.2).
+	const current = ( a - state.start + n * 2 ) % n;
 	let best = null;
 	for ( let lead = 0; lead < n; lead++ ) {
 		if ( lead + d < 0 || lead + d > n - 1 ) {
@@ -221,12 +249,19 @@ const travel = ( track, a, d, animate ) => {
 		if ( plan.from > limit || plan.to > limit ) {
 			continue;
 		}
+		if ( d !== 0 && lead === current ) {
+			best = { ...plan, lead };
+			break;
+		}
 		if ( ! best || Math.abs( lead - ideal ) < Math.abs( best.lead - ideal ) ) {
 			best = { ...plan, lead };
 		}
 	}
 	if ( ! best ) {
 		return false;
+	}
+	if ( animate && ! reducedMotion() ) {
+		hold( track );
 	}
 	// Rotation 0 is the DOM order itself: a row that never rotates keeps no
 	// inline `order` at all.
@@ -244,7 +279,135 @@ const travel = ( track, a, d, animate ) => {
 			state.moving = true;
 			state.target = target;
 			track.scrollTo( { left: to, behavior: behavior() } );
+		} else if ( ! state.moving ) {
+			release( track );
 		}
+	}
+	return true;
+};
+
+/**
+ * A visual copy of a slide for glide(): inert, without ids, its computed
+ * styles inline (outside the track the child's selectors do not reach it).
+ */
+const ghostOf = ( slide ) => {
+	const copy = slide.cloneNode( true );
+	const paint = ( from, to ) => {
+		const style = window.getComputedStyle( from );
+		for ( let i = 0; i < style.length; i++ ) {
+			const name = style[ i ];
+			if ( ! name.startsWith( 'animation' ) && ! name.startsWith( 'transition' ) ) {
+				to.style.setProperty( name, style.getPropertyValue( name ) );
+			}
+		}
+		to.removeAttribute( 'id' );
+		if ( 'IMG' === to.tagName ) {
+			to.removeAttribute( 'srcset' );
+			to.removeAttribute( 'sizes' );
+			to.setAttribute( 'loading', 'eager' );
+			to.src = from.currentSrc || from.src;
+		}
+		Array.from( from.children ).forEach( ( child, i ) => to.children[ i ] && paint( child, to.children[ i ] ) );
+	};
+	paint( slide, copy );
+	return copy;
+};
+
+const GLIDE = { duration: 450, easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)' };
+
+/**
+ * Moves from unit `a` to unit `target` (`d` units, negative: to the left)
+ * when no rotation lets the track scroll there (one slide too few). Rotates
+ * and resets the scroll, then animates every slide from where it WAS; the
+ * slides that go round the ring enter from the other side while a ghost of
+ * them leaves on this one. Without animation (reduced motion) only the first
+ * part: the new slide is there at once.
+ */
+const glide = ( track, a, target, d ) => {
+	const state = ringOf( track );
+	const slides = slidesOf( track );
+	const units = unitsOf( track );
+	const before = slides.map( ( slide ) => slide.getBoundingClientRect() );
+	state.moving = false;
+	arrange( track, target );
+	track.scrollTo( { left: 0, behavior: 'instant' } );
+	// The dots follow the slide at the edge, also when scrollLeft was already 0.
+	track.dispatchEvent( new window.Event( 'scroll' ) );
+	if ( reducedMotion() || ! d || 'function' !== typeof track.animate ) {
+		return;
+	}
+	const after = slides.map( ( slide ) => slide.getBoundingClientRect() );
+	// A slide that keeps its place in the ring: the target going forwards, the
+	// one we leave going backwards.
+	const ref = slides.indexOf( units[ d > 0 ? target : a ][ 0 ] );
+	const shift = before[ ref ].left - after[ ref ].left;
+	if ( Math.abs( shift ) < 1 ) {
+		return;
+	}
+	const box = track.getBoundingClientRect();
+	const left = box.left + track.clientLeft;
+	const top = box.top + track.clientTop;
+	const root = rootOf( track );
+	const rootBox = root.getBoundingClientRect();
+	const layer = document.createElement( 'div' );
+	layer.className = 'armazon-carousel__ghosts';
+	layer.setAttribute( 'aria-hidden', 'true' );
+	layer.inert = true;
+	Object.assign( layer.style, {
+		position: 'absolute',
+		left: `${ left - rootBox.left - root.clientLeft }px`,
+		top: `${ top - rootBox.top - root.clientTop }px`,
+		width: `${ track.clientWidth }px`,
+		height: `${ track.clientHeight }px`,
+		overflow: 'hidden',
+		pointerEvents: 'none',
+	} );
+	slides.forEach( ( slide, i ) => {
+		const was = before[ i ];
+		const wentRound = Math.abs( was.left - after[ i ].left - shift ) > 1;
+		const seen = was.right > left && was.left < left + track.clientWidth;
+		if ( wentRound && seen ) {
+			const ghost = ghostOf( slide );
+			Object.assign( ghost.style, {
+				position: 'absolute',
+				left: `${ was.left - left }px`,
+				top: `${ was.top - top }px`,
+				width: `${ was.width }px`,
+				height: `${ was.height }px`,
+				margin: '0',
+				boxSizing: 'border-box',
+				transform: 'none',
+			} );
+			layer.append( ghost );
+		}
+	} );
+	root.append( layer );
+	hold( track );
+	state.gliding = true;
+	const moves = slides.map( ( slide ) => slide.animate( [ { transform: `translateX(${ shift }px)` }, { transform: 'none' } ], GLIDE ) );
+	Array.from( layer.children ).forEach( ( ghost ) =>
+		moves.push( ghost.animate( [ { transform: 'none' }, { transform: `translateX(${ -shift }px)` } ], GLIDE ) )
+	);
+	Promise.all( moves.map( ( move ) => move.finished ) )
+		.catch( () => {} )
+		.then( () => {
+			layer.remove();
+			release( track );
+			state.gliding = false;
+			while ( ! state.gliding && state.queue.length ) {
+				state.queue.shift()();
+			}
+		} );
+};
+
+/** While glide() animates, a new step waits its turn (a few at most). */
+const later = ( track, fn ) => {
+	const state = ringOf( track );
+	if ( ! state.gliding ) {
+		return false;
+	}
+	if ( state.queue.length < 4 ) {
+		state.queue.push( fn );
 	}
 	return true;
 };
@@ -257,7 +420,7 @@ const nearestUnit = ( track ) => nearestIndex( track, offsetsOf( unitsOf( track 
 /** Re-centres the row around the unit at the edge, invisibly. */
 const settle = ( track ) => {
 	const state = ringOf( track );
-	if ( state.touching || ! rotates( track ) || maxScroll( track ) <= 1 ) {
+	if ( state.touching || state.gliding || ! rotates( track ) || maxScroll( track ) <= 1 ) {
 		return;
 	}
 	if ( state.moving ) {
@@ -267,6 +430,7 @@ const settle = ( track ) => {
 		}
 		state.moving = false;
 	}
+	release( track );
 	travel( track, nearestUnit( track ), 0, false );
 };
 
@@ -275,6 +439,9 @@ const goInfinite = ( track, target, dir = 0 ) => {
 	const state = ringOf( track );
 	if ( ! rotates( track ) ) {
 		scrollToIndex( track, target );
+		return;
+	}
+	if ( later( track, () => goInfinite( track, target, dir ) ) ) {
 		return;
 	}
 	const n = state.cols;
@@ -289,10 +456,9 @@ const goInfinite = ( track, target, dir = 0 ) => {
 		d = forward <= n / 2 ? forward : forward - n;
 	}
 	if ( ! travel( track, a, d, true ) ) {
-		// No rotation fits both ends (very wide slides): go there directly.
-		state.moving = false;
-		arrange( track, target );
-		track.scrollTo( { left: 0, behavior: 'instant' } );
+		// No rotation fits both ends (one slide too few): animate it apart.
+		release( track );
+		glide( track, a, target, d );
 	}
 };
 
@@ -300,6 +466,9 @@ const stepInfinite = ( track, direction ) => {
 	const state = ringOf( track );
 	if ( ! rotates( track ) ) {
 		stepRewind( track, direction );
+		return;
+	}
+	if ( later( track, () => stepInfinite( track, direction ) ) ) {
 		return;
 	}
 	const n = state.cols;
@@ -411,6 +580,7 @@ const { state } = store( 'armazon/carousel', {
 				// A finger on the track, or the wheel, takes over from our animation.
 				const take = () => {
 					ringState.moving = false;
+					release( track );
 				};
 				const touchStart = () => {
 					ringState.touching = true;
@@ -429,7 +599,7 @@ const { state } = store( 'armazon/carousel', {
 				// New width (rotating the phone, a breakpoint): rows and rotation
 				// are measured again.
 				const resize = new window.ResizeObserver( () => {
-					if ( ! ringState.moving ) {
+					if ( ! ringState.moving && ! ringState.gliding ) {
 						measure( track );
 						settle( track );
 					}

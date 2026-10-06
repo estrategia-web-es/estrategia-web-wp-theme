@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.1**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.2**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -133,7 +133,7 @@ aterriza quien lo toque. Aquí, el resumen.
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
-| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0 | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
+| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0; cada paso desliza, también con una sola de más (0.7.2) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); sin recuadro de datos si la ficha ya los dice al lado (`showDetails:false`, 0.6.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 | `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
@@ -193,6 +193,29 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.2 — 06-10-2026 (arreglo, no obliga a tocar ningún hijo)
+
+- **El carrusel infinito desliza en vez de saltar.** David, en la portada
+  de Lavandería: «el carrusel necesita una animación, va a saltos». Causa,
+  medida fotograma a fotograma: con solo UNA diapositiva de más (3 fotos y
+  2,4 a la vista) ninguna rotación de `order` deja desplazar una entera, y
+  `view.js` caía en «rotar y scrollLeft = 0 de golpe»: el cambio entero en un
+  fotograma, con «siguiente» y con «anterior». Ahora `glide()` rota y anima
+  cada diapositiva con transform desde donde estaba; la que da la vuelta
+  entra por un lado mientras una copia temporal e inerte sale por el otro
+  (se quita al acabar). Los pasos pulsados mientras anima se encolan.
+- **Pulsando seguido en una pista que sí desplaza** ya no hay tirón: la
+  corrección instantánea de scrollLeft caía en el anclaje de scroll-snap más
+  cercano. Ahora la pista va sin snap durante la animación propia y se
+  mantiene la rotación si ya permite el viaje.
+- Con «reducir movimiento» sigue sin animación: la diapositiva cambia una
+  vez, sin ida y vuelta.
+- **Pruebas:** `tests/carousel-glide.test.mjs` (nueva, vista fallar con la
+  0.7.1) exige en cada paso al menos 3 fotogramas intermedios, ninguno que
+  avance más de media diapositiva ni que retroceda, y llegar a la que toca;
+  a 1200 y a 402, dando la vuelta y con tres clics seguidos. Siembra: el
+  «Carrusel con una de más» en /prueba-carrusel-bucle/.
 
 ### 0.7.1 — 05-10-2026 (arreglo, no obliga a tocar ningún hijo)
 

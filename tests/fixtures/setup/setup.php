@@ -8,7 +8,8 @@
  * con seis entradas en un carrusel con core/query; y /prueba-acordeon/ con
  * un core/accordion de respuesta larga (0.4.0); /prueba-carrusel-bucle/ y
  * /prueba-mapa-estatico/ (0.5.0); /prueba-mapa-sin-datos/ y un carrusel de una
- * sola diapositiva en /prueba-carrusel-bucle/ (0.6.0). Es idempotente: si la
+ * sola diapositiva en /prueba-carrusel-bucle/ (0.6.0), y allí mismo uno de
+ * tres diapositivas con 2,4 a la vista (0.7.2). Es idempotente: si la
  * página o la entrada ya existe, la reescribe.
  *
  * @package armazon
@@ -83,6 +84,11 @@ $loop_content = '<!-- wp:armazon/carousel {"label":"Carrusel en bucle","showDots
 	// prueba, clase rejilla-prueba), seis entradas = tres columnas.
 	. '<!-- wp:armazon/carousel {"label":"Carrusel en dos filas","className":"rejilla-prueba"} -->'
 	. $query_block( 10 )
+	. '<!-- /wp:armazon/carousel -->'
+	// 0.7.2: tres diapositivas y 2,4 a la vista (la portada de Lavandería):
+	// ninguna rotación deja desplazar una entera y el paso se anima aparte.
+	. '<!-- wp:armazon/carousel {"label":"Carrusel con una de más","showDots":true,"perViewMobile":1,"perViewTablet":2.4,"perViewDesktop":2.4} -->'
+	. implode( '<!-- /wp:group -->', array_slice( explode( '<!-- /wp:group -->', $slides ), 0, 3 ) ) . '<!-- /wp:group -->'
 	. '<!-- /wp:armazon/carousel -->'
 	// Infinito (0.6.0): con una sola diapositiva no hay nada que hacer.
 	. '<!-- wp:armazon/carousel {"label":"Carrusel de una","showDots":true} -->'

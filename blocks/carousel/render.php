@@ -57,7 +57,13 @@
  * - Caso frontera: con UNA diapositiva, o todas a la vista, no hay nada que
  *   desplazar: la fila queda quieta (is-static) y no se toca su orden. Con
  *   solo UNA de más (p. ej. 3 fotos y 2 a la vista) el dedo solo encuentra
- *   vecina a un lado en cada momento; las flechas dan la vuelta igual.
+ *   vecina a un lado en cada momento; las flechas dan la vuelta igual, y
+ *   desde la 0.7.2 DESLIZANDO: como la fila no da para desplazar una entera,
+ *   view.js (glide) anima cada diapositiva con transform desde donde estaba,
+ *   y la que da la vuelta sale por un lado con una copia inerte y temporal
+ *   mientras entra por el otro. En reposo no queda ninguna copia.
+ * - Pulsar seguido no salta (0.7.2): durante la animación propia la pista va
+ *   sin scroll-snap, y los pasos que llegan mientras glide anima se encolan.
  * - Los puntos: el activo es el de la diapositiva del borde izquierdo
  *   (también con varias visibles); un punto lleva a la suya por el camino
  *   más corto. Inicio y Fin van a la primera y a la última.
@@ -68,7 +74,8 @@
  *   la posición VISUAL (:first-child para «la primera que se ve») no vale:
  *   la primera del DOM ya no es la de la izquierda. Las de :nth-child siguen
  *   pegadas a su diapositiva, que es lo que se quiere.
- * - Prueba: tests/carousel-infinite.test.mjs, que mira fotograma a
+ * - Pruebas: tests/carousel-glide.test.mjs (cada paso desliza, con varios
+ *   fotogramas intermedios y sin saltos) y tests/carousel-infinite.test.mjs, que mira fotograma a
  *   fotograma que la pista no retroceda.
  *
  * Decisiones:
