@@ -243,7 +243,16 @@ function armazon_carousel_images_filter( $image ) {
 			$carousel['hero'] = true;
 		}
 		if ( $carousel['hero'] ) {
-			$tag->set_attribute( 'fetchpriority', 'high' );
+			// Prioridad alta SOLO para la primera (0.7.9). Con las tres visibles
+			// en «high», en el móvil se pedían ~500 KB con prioridad y solo se ve
+			// una: bloqueando la 2 y la 3, el LCP local bajó de 6,6 a 4,6 s
+			// (Lavandería, 06-10-2026). Las demás visibles cargan ya (sin lazy),
+			// pero sin adelantarse a la primera.
+			if ( 0 === $slide ) {
+				$tag->set_attribute( 'fetchpriority', 'high' );
+			} else {
+				$tag->remove_attribute( 'fetchpriority' );
+			}
 			$tag->remove_attribute( 'loading' );
 		}
 	} else {

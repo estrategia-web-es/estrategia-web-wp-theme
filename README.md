@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.8**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.9**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -220,6 +220,13 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.9 — 06-10-2026 (parche, no obliga a tocar ningún hijo)
+
+- Carrusel: de las diapositivas visibles al cargar, solo la PRIMERA lleva
+  `fetchpriority="high"`; las demás cargan ya (sin lazy) pero sin prioridad.
+  Con las tres en «high», el móvil pedía ~500 KB con prioridad y solo se ve
+  una: bloqueando la 2 y la 3, el LCP local bajó de 6,6 a 4,6 s (Lavandería).
 
 ### 0.7.8 — 06-10-2026 (rendimiento, no obliga a tocar ningún hijo)
 
