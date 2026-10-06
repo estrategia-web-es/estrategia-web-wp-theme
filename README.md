@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.2**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.4**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -133,7 +133,7 @@ aterriza quien lo toque. Aquí, el resumen.
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
-| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0; cada paso desliza, también con una sola de más (0.7.2) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
+| `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0; cada paso desliza, también con una sola de más (0.7.2); fotos con prioridad en las que se ven al cargar, diferidas las demás y `sizes` del ancho de la diapositiva, o el del atributo `imageSizes` (0.7.4, `inc/carousel-images.php`) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); sin recuadro de datos si la ficha ya los dice al lado (`showDetails:false`, 0.6.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
 | `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la respuesta funde y sube, el «+» gira 135° (0.7.3); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
@@ -193,6 +193,32 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.4 — 06-10-2026 (arreglo, no obliga a tocar ningún hijo)
+
+- **Las fotos del carrusel cargan según lo que se ve.** De la auditoría de
+  Lavandería: en escritorio la imagen LCP del inicio era la diapositiva 2 y
+  solo la 1 llevaba `fetchpriority="high"`. Ahora, si WordPress decide que
+  el carrusel es lo primero de la página (da prioridad a una de sus fotos),
+  todas las diapositivas que se pueden ver al cargar —`ceil` del mayor
+  `perView`— llevan `fetchpriority="high"` y ninguna `loading="lazy"`; las
+  demás van diferidas y con `sizes="auto, …"`. Un carrusel más abajo no
+  recibe prioridad. Medido en Lavandería: a 402 se ve la 1; a 1512, la 1,
+  la 2 y la 3.
+- **`sizes` del ancho de la diapositiva**, no de la ventana: sale de
+  `perView` y del ancho del carrusel (`100vw` si es `align: full`; si no,
+  `wideSize` o `contentSize`). Antes todas llevaban el de WordPress,
+  `(max-width: 1920px) 100vw`, y en uno de tres a la vista se bajaba la de
+  1536 para un hueco de ~500.
+- **Atributo nuevo `imageSizes`** (texto, vacío por defecto): un hijo que
+  pinta las diapositivas a otro ancho que el de `perView` escribe ahí su
+  `sizes`. También los filtros `armazon_carousel_image_sizes` y
+  `armazon_carousel_eager_slides`. Cómo funciona y las dos trampas, en la
+  cabecera de `inc/carousel-images.php`.
+- **Pruebas:** `tests/carousel-images.test.mjs` (nivel 3, página nueva
+  `/prueba-carrusel-fotos/` con fotos de verdad generadas en la siembra),
+  vista fallar contra la 0.7.3: «Foto 2 (diapositiva 2, visible al cargar)
+  sin fetchpriority="high"».
 
 ### 0.7.3 — 06-10-2026 (arreglo, no obliga a tocar ningún hijo)
 

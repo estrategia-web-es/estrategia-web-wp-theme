@@ -78,6 +78,12 @@
  *   fotogramas intermedios y sin saltos) y tests/carousel-infinite.test.mjs, que mira fotograma a
  *   fotograma que la pista no retroceda.
  *
+ * FOTOS (0.7.4): las diapositivas que se ven al cargar llevan
+ * fetchpriority="high" (si el carrusel es lo primero de la página), las demás
+ * loading="lazy", y todas un sizes del ancho de la diapositiva, o el del
+ * atributo imageSizes. Todo en inc/carousel-images.php, con su caso frontera
+ * (Lavandería) y sus trampas. Prueba: tests/carousel-images.test.mjs.
+ *
  * Decisiones:
  * - Sin JavaScript es una fila desplazable con el dedo, la rueda o las flechas
  *   del teclado: el comportamiento es una mejora, no un requisito. Los
@@ -139,7 +145,13 @@ if ( str_contains( $content, 'wp-block-post-template' ) ) {
 	}
 }
 $armazon_track_id = wp_unique_id( 'armazon-carousel-' );
-$armazon_loop     = ! empty( $attributes['loop'] );
+
+// Fotos (0.7.4): prioridad a las que se ven al cargar, diferidas las demás y
+// un sizes del ancho de la diapositiva. Cómo y por qué: inc/carousel-images.php.
+armazon_carousel_images_register( $armazon_track_id, (array) $attributes );
+$content = armazon_carousel_images_mark( (string) $content, $armazon_track_id );
+
+$armazon_loop    = ! empty( $attributes['loop'] );
 $armazon_label    = '' !== trim( (string) $attributes['label'] ) ? $attributes['label'] : __( 'Carousel', 'armazon' );
 
 $armazon_per_view = array(

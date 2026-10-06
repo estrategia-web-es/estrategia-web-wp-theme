@@ -268,5 +268,62 @@ wp_insert_post(
 	)
 );
 
+// Carrusel de fotos (0.7.4): cuatro fotos de 1920x1280 (con sus tamaños
+// intermedios, para que haya srcset) en un carrusel a todo el ancho ARRIBA
+// de la página, 1/2/3 a la vista, y otro de tres MUY ABAJO. Para ver qué
+// diapositivas llevan prioridad, cuáles van diferidas y que el sizes deja
+// elegir una foto del tamaño de su hueco. Las fotos se pintan aquí con GD:
+// un degradado con un número, nada que descargar.
+require_once ABSPATH . 'wp-admin/includes/image.php';
+$photo_block = static function ( int $n ): string {
+	$name     = 'foto-carrusel-' . $n . '.jpg';
+	$existing = get_posts( array( 'post_type' => 'attachment', 'name' => 'foto-carrusel-' . $n, 'posts_per_page' => 1, 'post_status' => 'inherit' ) );
+	if ( $existing ) {
+		$id = $existing[0]->ID;
+	} else {
+		$image = imagecreatetruecolor( 1920, 1280 );
+		for ( $x = 0; $x < 1920; $x += 16 ) {
+			imagefilledrectangle( $image, $x, 0, $x + 15, 1279, imagecolorallocate( $image, ( $x / 8 ) % 256, ( 40 * $n ) % 256, 160 ) );
+		}
+		imagestring( $image, 5, 900, 620, 'Foto ' . $n, imagecolorallocate( $image, 255, 255, 255 ) );
+		ob_start();
+		imagejpeg( $image, null, 70 );
+		$upload = wp_upload_bits( $name, null, (string) ob_get_clean() );
+		$id     = wp_insert_attachment(
+			array(
+				'post_title'     => 'Foto carrusel ' . $n,
+				'post_name'      => 'foto-carrusel-' . $n,
+				'post_mime_type' => 'image/jpeg',
+				'post_status'    => 'inherit',
+			),
+			$upload['file']
+		);
+		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $upload['file'] ) );
+	}
+	$url = wp_get_attachment_url( $id );
+	return '<!-- wp:image {"id":' . $id . ',"sizeSlug":"full","linkDestination":"none"} -->'
+		. '<figure class="wp-block-image size-full"><img src="' . esc_url( $url ) . '" alt="Foto ' . $n . '" class="wp-image-' . $id . '"/></figure>'
+		. '<!-- /wp:image -->';
+};
+$photos_content = '<!-- wp:armazon/carousel {"label":"Fotos arriba","align":"full","perViewMobile":1,"perViewTablet":2,"perViewDesktop":3} -->'
+	. $photo_block( 1 ) . $photo_block( 2 ) . $photo_block( 3 ) . $photo_block( 4 )
+	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- wp:spacer {"height":"3000px"} --><div style="height:3000px" aria-hidden="true" class="wp-block-spacer"></div><!-- /wp:spacer -->'
+	. '<!-- wp:armazon/carousel {"label":"Fotos abajo","perViewMobile":1,"perViewTablet":1,"perViewDesktop":1} -->'
+	. $photo_block( 5 ) . $photo_block( 6 ) . $photo_block( 7 )
+	. '<!-- /wp:armazon/carousel -->';
+
+$existing_photos = get_page_by_path( 'prueba-carrusel-fotos' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_photos ? $existing_photos->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de carrusel de fotos',
+		'post_name'    => 'prueba-carrusel-fotos',
+		'post_content' => wp_slash( $photos_content ),
+	)
+);
+
 flush_rewrite_rules();
 echo 'armazon-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";
