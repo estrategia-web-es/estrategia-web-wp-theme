@@ -1,0 +1,82 @@
+/*
+ * Transiciones entre páginas (0.7.5) — View Transitions entre documentos,
+ * solo CSS. La página nueva entra con un fundido corto; la cabecera y el
+ * botón de WhatsApp se quedan QUIETOS (no se funden: se ven fijos de una
+ * página a la otra).
+ *
+ * Se mete en línea detrás de style.css (inc/view-transitions.php) y SOLO si
+ * settings.custom.motion.page.enabled no es false: una regla @view-transition
+ * no se puede apagar con una variable, así que el interruptor está en PHP.
+ *
+ * Tokens que afina un hijo (settings.custom.motion.page en su theme.json):
+ *   enabled   true | false   false: ni se imprime esta hoja
+ *   duration  "0.22s"        lo que dura el fundido de la página
+ *   easing    "ease"         su curva
+ *
+ * Decisiones:
+ * - Con prefers-reduced-motion: reduce no hay transición: la regla entera va
+ *   dentro de (prefers-reduced-motion: no-preference).
+ * - Cabecera: la del template part «header» que cuelga de .wp-site-blocks, y
+ *   solo la PRIMERA (:first-of-type). Un view-transition-name repetido en la
+ *   página aborta la transición entera, así que no se nombra nada que pueda
+ *   salir dos veces (el overlay de navegación vive DENTRO de la cabecera y va
+ *   con ella).
+ * - WhatsApp: solo el del PIE (footer.wp-block-template-part), que es el que
+ *   sale en todas las páginas y donde lo pone parts/footer.html. Uno más en
+ *   el contenido de una página (la de pruebas lo tiene) se funde con ella:
+ *   nombrar los dos repetiría el nombre. Medido el 06-10-2026: con
+ *   .armazon-whatsapp a secas, /prueba-modulos/ tenía dos y no había
+ *   transición.
+ * - Quietos: de su pareja de imágenes se quita la vieja y la nueva entra sin
+ *   animación. Si la cabecera cambia (el enlace activo del menú), se ve ya
+ *   cambiada, sin fundido.
+ * - El aviso de cookies NO es de aquí: se nombra a sí mismo en su plugin
+ *   (armazon-site), que es quien sabe si está a la vista.
+ *
+ * Cómo se mantiene:
+ * - Quién: quien toque el padre. Cuándo: si cambia la estructura de la
+ *   plantilla (otra etiqueta para la cabecera) o el marcado del WhatsApp.
+ * - Caso frontera: un hijo que pone el WhatsApp fuera del pie (en la
+ *   cabecera, en una plantilla) no lo tiene quieto: se funde con la página.
+ *   Si lo quiere quieto, lo nombra él en su CSS, una sola vez.
+ * - LA TRAMPA, medida en Lavandería el 06-10-2026: si lo que se ve de la
+ *   cabecera es un hijo con position: fixed (.lm-header) dentro del <header>
+ *   de la plantilla, el <header> mide 0 de alto y su captura sale VACÍA: a
+ *   mitad de transición la cabecera desaparece, que es justo el parpadeo que
+ *   se quería evitar. Para eso está la clase armazon-vt-header: el hijo se
+ *   la pone al elemento fijo (en el bloque, «Clase CSS adicional») y el
+ *   nombre pasa a él. Solo UNO por cabecera, o el nombre se repite.
+ *   tests/view-transitions.test.mjs cuenta los nombres de la página.
+ */
+@media (prefers-reduced-motion: no-preference) {
+	@view-transition {
+		navigation: auto;
+	}
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: var(--wp--custom--motion--page--duration, 0.22s);
+	animation-timing-function: var(--wp--custom--motion--page--easing, ease);
+}
+
+.wp-site-blocks > header.wp-block-template-part:first-of-type:not(:has(.armazon-vt-header)),
+.wp-site-blocks > header.wp-block-template-part:first-of-type .armazon-vt-header {
+	view-transition-name: armazon-header;
+}
+
+footer.wp-block-template-part .armazon-whatsapp {
+	view-transition-name: armazon-whatsapp;
+}
+
+::view-transition-group(armazon-header),
+::view-transition-group(armazon-whatsapp),
+::view-transition-new(armazon-header),
+::view-transition-new(armazon-whatsapp) {
+	animation: none;
+}
+
+::view-transition-old(armazon-header),
+::view-transition-old(armazon-whatsapp) {
+	display: none;
+}

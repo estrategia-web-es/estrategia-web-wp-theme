@@ -75,6 +75,11 @@
 					"easing": "ease-in-out",
 					"rise": "1rem",
 					"turn": "135deg"
+				},
+				"page": {
+					"enabled": true,
+					"duration": "0.22s",
+					"easing": "ease"
 				}
 			}
 		}

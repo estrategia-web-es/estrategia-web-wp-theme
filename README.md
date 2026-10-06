@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.4**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.5**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -102,6 +102,30 @@ entera (no se fusiona por slug): el hijo repite los nueve slugs con sus colores.
    en `inc/blocks.php`) ni llamar a funciones `armazon_*` fuera de un hook (el
    `functions.php` del hijo se carga ANTES que el del padre).
 
+## Transiciones entre páginas (0.7.5)
+
+Al pasar de una página a otra, la nueva entra con un fundido de 0,22 s
+(View Transitions entre documentos, solo CSS: `assets/view-transitions.css`,
+que `inc/view-transitions.php` mete en línea detrás de `style.css`). La
+cabecera y el botón de WhatsApp del pie se quedan quietos. Con «reducir
+movimiento», sin transición. Navegadores sin soporte (Firefox, hoy) cambian
+de página como siempre.
+
+Un hijo la afina o la apaga en su `theme.json`:
+
+    "settings": { "custom": { "motion": { "page": {
+        "enabled": true,       false: no se imprime nada
+        "duration": "0.22s",   el fundido de la página
+        "easing": "ease"
+    } } } }
+
+**Si la cabecera del hijo es un elemento `position: fixed` dentro del
+`<header>` de la plantilla** (Lavandería: `.lm-header`), ese elemento lleva la
+clase **`armazon-vt-header`**; sin ella la cabecera desaparece a mitad de
+transición (el `<header>` mide 0 de alto y su captura sale vacía; medido el
+06-10-2026). El aviso de cookies no participa: se nombra él mismo en
+Armazón Sitio 0.5.1. Las decisiones y las trampas, en la cabecera de la hoja.
+
 ## Cómo se versiona y se actualiza
 
 Versionado semántico en la cabecera de `style.css` (y en `block.json` de cada
@@ -193,6 +217,24 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.5 — 06-10-2026 (nuevo, no obliga a tocar ningún hijo)
+
+- **Transiciones entre páginas** con View Transitions entre documentos, solo
+  CSS (sección «Transiciones entre páginas»): fundido de la página, cabecera
+  (`armazon-header`) y WhatsApp del pie (`armazon-whatsapp`) quietos, nada
+  con «reducir movimiento». Tokens `settings.custom.motion.page`
+  (`enabled`, `duration`, `easing`).
+- **Clase `armazon-vt-header`** para un hijo con la cabecera fija dentro del
+  `<header>` de la plantilla. Lavandería la necesita en `.lm-header`; sin
+  ella funciona, pero la cabecera parpadea.
+- **Pruebas:** `tests/view-transitions.test.mjs` (nivel 3): la navegación
+  de `/prueba-modulos/` a la portada llega con `viewTransition` en
+  `pagereveal`, la regla está, los nombres no se repiten y con «reducir
+  movimiento» no hay transición. Vista fallar antes del CSS, y con un
+  mutante sin el `@media` de «reducir movimiento». La primera versión nombraba
+  `.armazon-whatsapp` a secas y la prueba la pilló: la página de pruebas tiene
+  dos y un nombre repetido aborta la transición.
 
 ### 0.7.4 — 06-10-2026 (arreglo, no obliga a tocar ningún hijo)
 
