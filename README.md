@@ -5,7 +5,7 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.5**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.6**
   (notas de cambios en «Versiones», al final).
 - **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
   **Armazón Sitio** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
@@ -160,6 +160,7 @@ aterriza quien lo toque. Aquí, el resumen.
 | `armazon/carousel` | fila desplazable con scroll-snap; flechas, puntos opcionales, cuántos visibles por ancho; autoplay solo si se pide; con un `core/query` dentro, cada entrada es una diapositiva (0.2.0); en bucle por defecto (`loop`, 0.5.0), infinito sin clones desde 0.6.0; cada paso desliza, también con una sola de más (0.7.2); fotos con prioridad en las que se ven al cargar, diferidas las demás y `sizes` del ancho de la diapositiva, o el del atributo `imageSizes` (0.7.4, `inc/carousel-images.php`) | `edit.js` clásico (InnerBlocks) | Interactivity API (`view.js`) |
 | `armazon/map` | imagen + dirección; el iframe de Google solo tras «Ver mapa» o con «maps» aceptado; enlace «Abrir en Google Maps»; sin foto, recuadro con los datos del sitio (0.3.0); mapa estático de OSM bajo el recuadro (`staticMapUrl`, 0.5.0); sin recuadro de datos si la ficha ya los dice al lado (`showDetails:false`, 0.6.0); dentro de una Consulta, datos por bindings (0.2.0) | `edit.js` clásico (selector de la mediateca) + ServerSideRender | Interactivity API |
 | `armazon/whatsapp` | enlace flotante a `wa.me` con mensaje; número del bloque o de la opción del sitio | `autoRegister` | ninguno (es un enlace) |
+| `armazon/language-switcher` | idioma actual («ES») en un botón con `aria-expanded` y la lista de los demás idiomas (enlaces a la misma página traducida, con `hreflang` y `lang`); los da WPML (`wpml_active_languages`); **sin WPML o con un solo idioma no pinta nada** (0.7.6) | `autoRegister` (atributo `display`: código o nombre) | Interactivity API: abre, cierra con Escape (foco al botón) y al pulsar fuera |
 | `core/accordion` (del núcleo) | abrir y cerrar deslizando, con tokens de movimiento (0.4.0); la respuesta funde y sube, el «+» gira 135° (0.7.3); la hoja dice la técnica y la trampa | el del núcleo | el store del núcleo + `assets/core-blocks/accordion.css` |
 
 **Por qué `edit.js` clásico y no un módulo:** WordPress 7.1 no admite módulos
@@ -217,6 +218,22 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 0.7.6 — 06-10-2026 (nuevo, no obliga a tocar ningún hijo)
+
+- **Bloque `armazon/language-switcher`**, el selector de idioma para webs con
+  WPML (el «ES ▾» de la cabecera de Lavandería, que lo tenía en su hijo como
+  `<details>` y ahora usa este). Botón con `aria-expanded`/`aria-controls` y
+  lista de enlaces con `hreflang` y `lang`, cada idioma con su nombre en su
+  idioma. Sin WPML, o con un solo idioma activo, no pinta nada: se puede dejar
+  en la cabecera de cualquier hijo. El hijo pone el aspecto sobre
+  `.armazon-language` (y la flecha, en `.armazon-language__toggle::after`).
+  Decisiones, caso frontera y trampas, en la cabecera de su `render.php`.
+- **Pruebas:** no hay prueba aquí. El padre de pruebas no tiene WPML (es de
+  pago; no se monta en un repo compartido), y sin WPML el bloque no pinta
+  nada. Lo prueba con WPML de verdad `tests/language-switcher.test.mjs` de
+  Lavandería (nivel 3: cada página con su pareja, el selector lleva a ella,
+  `aria-expanded` cambia, Escape cierra).
 
 ### 0.7.5 — 06-10-2026 (nuevo, no obliga a tocar ningún hijo)
 

@@ -1,0 +1,50 @@
+/*
+ * armazon/language-switcher — solo lo que hace falta para que funcione: el
+ * botón sin aspecto de botón del navegador, la flecha y la lista colgando
+ * debajo. El aspecto (tamaño de letra, bordes, colores) es del hijo, sobre
+ * .armazon-language. La flecha es un triángulo de CSS en
+ * .armazon-language__toggle::after; un hijo con su propio icono redefine ese
+ * ::after (clip-path: none y su máscara).
+ * La trampa: [hidden] lo pisa cualquier «display» de un hijo sobre la lista;
+ * por eso la regla de [hidden] va con !important.
+ */
+.armazon-language {
+	position: relative;
+	display: inline-block;
+}
+.armazon-language__toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6em;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+.armazon-language__toggle::after {
+	content: "";
+	inline-size: 0.75em;
+	block-size: 0.5em;
+	background: currentColor;
+	clip-path: polygon(0 0, 100% 0, 50% 100%);
+	transition: transform 0.15s ease;
+}
+.armazon-language__toggle[aria-expanded="true"]::after { transform: rotate(180deg); }
+.armazon-language__list {
+	position: absolute;
+	inset-block-start: calc(100% + 0.5rem);
+	inset-inline-end: 0;
+	z-index: 10;
+	margin: 0;
+	padding: 0.5rem 1rem;
+	list-style: none;
+	background: var(--wp--preset--color--base, #fff);
+	border: 1px solid var(--wp--preset--color--border, #d6d6d6);
+}
+.armazon-language__list[hidden] { display: none !important; }
+.armazon-language__list a { color: inherit; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+	.armazon-language__toggle::after { transition: none; }
+}
