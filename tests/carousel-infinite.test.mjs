@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es lo que SE VE fotograma a fotograma mientras la pista se desplaza (qué diapositiva asoma por el borde y hacia dónde va), con scroll-snap, teclado y gestos táctiles reales; nada de eso existe sin pintar la página.
 /**
- * armazon/carousel infinito (0.6.0, atributo loop, por defecto true):
+ * estrategia-web/carousel infinito (0.6.0, atributo loop, por defecto true):
  * 1. «siguiente» da la vuelta entera SIN retroceder nunca: en ningún
  *    fotograma la pista va hacia atrás, y tras la última asoma la primera a
  *    continuación (a su derecha);
@@ -110,13 +110,13 @@ run( () =>
 
 		for ( const [ name, n ] of [ [ 'Carrusel en bucle', 5 ], [ 'Carrusel en bucle con consulta', 6 ] ] ) {
 			const carousel = page.getByRole( 'region', { name, exact: true } );
-			const track = carousel.locator( '.armazon-carousel__track' );
+			const track = carousel.locator( '.estrategia-web-carousel__track' );
 			const prev = carousel.getByRole( 'button', { name: 'Diapositiva anterior' } );
 			const next = carousel.getByRole( 'button', { name: 'Diapositiva siguiente' } );
-			const dots = carousel.locator( '.armazon-carousel__dot' );
+			const dots = carousel.locator( '.estrategia-web-carousel__dot' );
 			const handle = await track.elementHandle();
 			await carousel.scrollIntoViewIfNeeded();
-			await page.waitForFunction( ( el ) => el.closest( '.armazon-carousel' ).classList.contains( 'is-ready' ), handle );
+			await page.waitForFunction( ( el ) => el.closest( '.estrategia-web-carousel' ).classList.contains( 'is-ready' ), handle );
 			await settledAt( page, handle, 0, n, `${ name }, al cargar` );
 
 			// 4. Sin clones.
@@ -178,9 +178,9 @@ run( () =>
 		// rotaba ficha a ficha: las de la fila de arriba bajaban a la de abajo.
 		const grid = page.getByRole( 'region', { name: 'Carrusel en dos filas', exact: true } );
 		await grid.scrollIntoViewIfNeeded();
-		const gridTrack = grid.locator( '.armazon-carousel__track' );
+		const gridTrack = grid.locator( '.estrategia-web-carousel__track' );
 		const gridHandle = await gridTrack.elementHandle();
-		await page.waitForFunction( ( el ) => el.closest( '.armazon-carousel' ).classList.contains( 'is-ready' ), gridHandle );
+		await page.waitForFunction( ( el ) => el.closest( '.estrategia-web-carousel' ).classList.contains( 'is-ready' ), gridHandle );
 		const rowsOf = () =>
 			page.evaluate( ( el ) => {
 				const items = ( window.__allSlides || window.__slides )( el );
@@ -206,7 +206,7 @@ run( () =>
 		const single = page.getByRole( 'region', { name: 'Carrusel de una', exact: true } );
 		await single.scrollIntoViewIfNeeded();
 		assert.ok( await single.evaluate( ( el ) => el.classList.contains( 'is-static' ) ), 'con una diapositiva el carrusel no queda quieto' );
-		assert.equal( await single.locator( '.armazon-carousel__track > [style*="order"]' ).count(), 0, 'con una diapositiva no hay nada que reordenar' );
+		assert.equal( await single.locator( '.estrategia-web-carousel__track > [style*="order"]' ).count(), 0, 'con una diapositiva no hay nada que reordenar' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 
 		// 5. Móvil con el dedo: en la primera, arrastrar hacia la derecha enseña la última.
@@ -214,10 +214,10 @@ run( () =>
 		await phone.addInitScript( probes );
 		await phone.goto( URL, { waitUntil: 'networkidle' } );
 		for ( const [ name, n ] of [ [ 'Carrusel en bucle', 5 ], [ 'Carrusel en bucle con consulta', 6 ] ] ) {
-			const track = phone.getByRole( 'region', { name, exact: true } ).locator( '.armazon-carousel__track' );
+			const track = phone.getByRole( 'region', { name, exact: true } ).locator( '.estrategia-web-carousel__track' );
 			await track.scrollIntoViewIfNeeded();
 			const handle = await track.elementHandle();
-			await phone.waitForFunction( ( el ) => el.closest( '.armazon-carousel' ).classList.contains( 'is-ready' ), handle );
+			await phone.waitForFunction( ( el ) => el.closest( '.estrategia-web-carousel' ).classList.contains( 'is-ready' ), handle );
 			await settledAt( phone, handle, 0, n, `${ name } en móvil, al cargar` );
 			const box = await track.boundingBox();
 			// Dedo de verdad: touchStart, movimientos a un fotograma cada uno y
@@ -258,9 +258,9 @@ run( () =>
 		await calm.goto( URL, { waitUntil: 'networkidle' } );
 		const carousel = calm.getByRole( 'region', { name: 'Carrusel en bucle', exact: true } );
 		await carousel.scrollIntoViewIfNeeded();
-		const handle = await carousel.locator( '.armazon-carousel__track' ).elementHandle();
-		await calm.waitForFunction( ( el ) => el.closest( '.armazon-carousel' ).classList.contains( 'is-ready' ), handle );
-		await carousel.locator( '.armazon-carousel__dot' ).nth( 4 ).click();
+		const handle = await carousel.locator( '.estrategia-web-carousel__track' ).elementHandle();
+		await calm.waitForFunction( ( el ) => el.closest( '.estrategia-web-carousel' ).classList.contains( 'is-ready' ), handle );
+		await carousel.locator( '.estrategia-web-carousel__dot' ).nth( 4 ).click();
 		await settledAt( calm, handle, 4, 5, 'con «reducir movimiento», punto 5' );
 		await carousel.getByRole( 'button', { name: 'Diapositiva siguiente' } ).click();
 		await settledAt( calm, handle, 0, 5, 'con «reducir movimiento», «siguiente» en la última' );

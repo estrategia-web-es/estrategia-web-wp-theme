@@ -18,7 +18,7 @@
  *   sin querer (un «transition: none» o un «transition: transform …» suelto
  *   en el icono); si una web no anima, mirar primero las hojas del hijo.
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,18 +26,18 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Enqueues assets/core-blocks/<name>.css for core/<name>.
  */
-function armazon_core_block_styles(): void {
+function estrategia_web_core_block_styles(): void {
 	foreach ( glob( get_template_directory() . '/assets/core-blocks/*.css' ) ?: array() as $file ) {
 		$name = basename( $file, '.css' );
 		wp_enqueue_block_style(
 			'core/' . $name,
 			array(
-				'handle' => 'armazon-core-' . $name,
+				'handle' => 'estrategia-web-core-' . $name,
 				'src'    => get_template_directory_uri() . '/assets/core-blocks/' . $name . '.css',
 				'path'   => $file,
-				'ver'    => armazon_version(),
+				'ver'    => estrategia_web_version(),
 			)
 		);
 	}
 }
-add_action( 'init', 'armazon_core_block_styles' );
+add_action( 'init', 'estrategia_web_core_block_styles' );

@@ -1,7 +1,7 @@
 // NIVEL: BANCO DE TRABAJO — no es una prueba. Herramienta: imagen estática de un mapa a partir de OpenStreetMap.
 /**
  * Genera UNA imagen de mapa (webp o png) con un marcador del color de la marca
- * y «© OpenStreetMap» dentro, para el bloque armazon/map (atributo
+ * y «© OpenStreetMap» dentro, para el bloque estrategia-web/map (atributo
  * staticMapUrl, 0.5.0). Se ejecuta UNA vez al preparar el contenido de una
  * web; la imagen se guarda en el hijo y la sirve el propio sitio: el
  * visitante no hace ninguna petición a terceros hasta que acepta los mapas.
@@ -18,7 +18,7 @@
  * bloque) · --escala 1|2 (2: el doble de píxeles para pantallas densas) ·
  * --color del marcador (#1a1a1a) · --salida .webp|.png (mapa.webp) ·
  * --contacto correo o URL que va en el User-Agent (lo pide la política de
- * OSM; también se puede poner en ARMAZON_OSM_CONTACT).
+ * OSM; también se puede poner en ESTRATEGIA_WEB_OSM_CONTACT).
  *
  * Por qué así y no una captura de Google: Google no permite guardar sus
  * mapas como imagen (licencia) y pedirlos al visitar la página manda su IP a
@@ -61,7 +61,7 @@ const TILE_URL = ( z, x, y ) => `https://tile.openstreetmap.org/${ z }/${ x }/${
 const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
 const cacheDir = path.join( root, 'tools', '.cache', 'osm-tiles' );
 
-const HELP = `Imagen estática de un mapa (OpenStreetMap) para armazon/map.
+const HELP = `Imagen estática de un mapa (OpenStreetMap) para estrategia-web/map.
 
   node tools/static-map.mjs (--lat N --lon N | --direccion "...") [opciones]
 
@@ -71,7 +71,7 @@ const HELP = `Imagen estática de un mapa (OpenStreetMap) para armazon/map.
   --escala 1|2     densidad de píxeles (2)
   --color #hex     color del marcador (#1a1a1a)
   --salida f       fichero .webp o .png (mapa.webp)
-  --contacto c     correo o URL para el User-Agent (o ARMAZON_OSM_CONTACT)
+  --contacto c     correo o URL para el User-Agent (o ESTRATEGIA_WEB_OSM_CONTACT)
   --seco           dice qué teselas pediría y no pide nada
   --ayuda          esto
 
@@ -127,7 +127,7 @@ export function tilesFor( center, width, height, zoom ) {
 }
 
 const userAgent = ( contact ) =>
-	`armazon-static-map/${ VERSION } (one-off static map for a website${ contact ? `; ${ contact }` : '' })`;
+	`estrategia-web-static-map/${ VERSION } (one-off static map for a website${ contact ? `; ${ contact }` : '' })`;
 
 async function geocode( address, contact ) {
 	const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${ encodeURIComponent( address ) }`;
@@ -235,7 +235,7 @@ async function main() {
 	const height = Number( args.alto ?? 450 );
 	const color = String( args.color ?? '#1a1a1a' );
 	const output = path.resolve( String( args.salida ?? 'mapa.webp' ) );
-	const contact = args.contacto || process.env.ARMAZON_OSM_CONTACT || '';
+	const contact = args.contacto || process.env.ESTRATEGIA_WEB_OSM_CONTACT || '';
 	const ext = path.extname( output ).toLowerCase();
 	const type = { '.webp': 'image/webp', '.png': 'image/png' }[ ext ];
 

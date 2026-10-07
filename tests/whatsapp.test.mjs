@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: se comprueba el nombre accesible y que el botón está fijo y visible en pantalla, que es estilo calculado.
 /**
- * armazon/whatsapp: el enlace wa.me es correcto con atributos (número con
+ * estrategia-web/whatsapp: el enlace wa.me es correcto con atributos (número con
  * espacios y «+», mensaje con acentos) y con la opción del sitio (el del pie),
  * se abre en pestaña nueva, tiene nombre accesible y queda fijo en su esquina.
  * Desde 0.7.1, la distancia a la esquina suma el margen seguro del móvil
@@ -36,8 +36,8 @@ run( () =>
 		}
 
 		// Posición: el de la página va a la izquierda, el del pie a la derecha.
-		const left = await page.locator( '.armazon-whatsapp.is-position-bottom-left' ).boundingBox();
-		const right = await page.locator( '.armazon-whatsapp.is-position-bottom-right' ).boundingBox();
+		const left = await page.locator( '.estrategia-web-whatsapp.is-position-bottom-left' ).boundingBox();
+		const right = await page.locator( '.estrategia-web-whatsapp.is-position-bottom-right' ).boundingBox();
 		assert.ok( left.x < 100 && right.x > 1000, `posiciones inesperadas: ${ left.x } / ${ right.x }` );
 
 		// Margen seguro (0.7.1): abajo y en el lado de su esquina, cada uno el suyo.
@@ -48,7 +48,7 @@ run( () =>
 					if ( rule.cssRules ) {
 						walk( rule.cssRules );
 					}
-					if ( ! rule.selectorText || ! rule.selectorText.includes( '.armazon-whatsapp' ) ) {
+					if ( ! rule.selectorText || ! rule.selectorText.includes( '.estrategia-web-whatsapp' ) ) {
 						continue;
 					}
 					for ( const prop of [ 'inset-block-end', 'inset-inline-start', 'inset-inline-end' ] ) {
@@ -67,9 +67,9 @@ run( () =>
 			return found;
 		} );
 		const insetOf = ( selector, prop ) => insets[ `${ selector } ${ prop }` ] || '';
-		assert.match( insetOf( '.armazon-whatsapp', 'inset-block-end' ), /safe-area-inset-bottom/, JSON.stringify( insets ) );
-		assert.match( insetOf( '.armazon-whatsapp.is-position-bottom-left', 'inset-inline-start' ), /safe-area-inset-left/, JSON.stringify( insets ) );
-		assert.match( insetOf( '.armazon-whatsapp.is-position-bottom-right', 'inset-inline-end' ), /safe-area-inset-right/, JSON.stringify( insets ) );
+		assert.match( insetOf( '.estrategia-web-whatsapp', 'inset-block-end' ), /safe-area-inset-bottom/, JSON.stringify( insets ) );
+		assert.match( insetOf( '.estrategia-web-whatsapp.is-position-bottom-left', 'inset-inline-start' ), /safe-area-inset-left/, JSON.stringify( insets ) );
+		assert.match( insetOf( '.estrategia-web-whatsapp.is-position-bottom-right', 'inset-inline-end' ), /safe-area-inset-right/, JSON.stringify( insets ) );
 
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 	} )

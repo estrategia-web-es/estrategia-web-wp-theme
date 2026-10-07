@@ -1,15 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"__comment": "armazon/carousel — fila desplazable con scroll-snap. Documentación y mantenimiento en la cabecera de render.php.",
+	"__comment": "estrategia-web/carousel — fila desplazable con scroll-snap. Documentación y mantenimiento en la cabecera de render.php.",
 	"apiVersion": 3,
-	"name": "armazon/carousel",
+	"name": "estrategia-web/carousel",
 	"version": "0.7.4",
 	"title": "Carousel",
 	"category": "design",
 	"icon": "slides",
 	"description": "Horizontal scrolling row of any blocks, with previous/next arrows and optional dots.",
 	"keywords": [ "carousel", "slider", "gallery" ],
-	"textdomain": "armazon",
+	"textdomain": "estrategia-web",
 	"attributes": {
 		"label": { "type": "string", "default": "" },
 		"showArrows": { "type": "boolean", "default": true },

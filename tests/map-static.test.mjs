@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba son las PETICIONES de red (a quién se le pide qué) y dónde queda pintado el recuadro sobre la imagen, y eso solo existe al ejecutar la página.
 /**
- * armazon/map con mapa estático (0.5.0, atributo staticMapUrl):
+ * estrategia-web/map con mapa estático (0.5.0, atributo staticMapUrl):
  * 1. sin aceptar mapas, se ve la imagen de OSM servida por el PROPIO sitio,
  *    con el recuadro de datos encima (a la izquierda), y la página no pide
  *    NADA a otro dominio;
@@ -36,17 +36,17 @@ run( () =>
 		await page.route( /google\.com/, ( route ) => route.fulfill( { status: 200, contentType: 'text/html', body: '<p>mapa</p>' } ) );
 		await page.goto( URL, { waitUntil: 'networkidle' } );
 
-		const first = page.locator( '.armazon-map' ).nth( 0 );
-		const second = page.locator( '.armazon-map' ).nth( 1 );
+		const first = page.locator( '.estrategia-web-map' ).nth( 0 );
+		const second = page.locator( '.estrategia-web-map' ).nth( 1 );
 
 		// 1. Imagen propia, cargada, con el recuadro encima a la izquierda.
-		const image = first.locator( 'img.armazon-map__static' );
+		const image = first.locator( 'img.estrategia-web-map__static' );
 		await image.scrollIntoViewIfNeeded();
 		await page.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await image.elementHandle() );
 		const src = await image.getAttribute( 'src' );
 		assert.equal( new globalThis.URL( src ).host, own, `la imagen no es del sitio: ${ src }` );
 		assert.match( await image.getAttribute( 'alt' ), /Pla(ç|c)a de Cort/, 'el texto alternativo no dice la dirección' );
-		const card = first.locator( '.armazon-map__card' );
+		const card = first.locator( '.estrategia-web-map__card' );
 		assert.ok( await card.isVisible(), 'con mapa estático el recuadro de datos tiene que seguir' );
 		assert.match( await card.innerText(), /Sede con mapa estático/ );
 		const imageBox = await image.boundingBox();
@@ -62,22 +62,22 @@ run( () =>
 		// este; no hay consentimiento que conceder ni cookie que guardar.
 		await first.getByRole( 'button', { name: 'Ver mapa' } ).click();
 		await page.waitForFunction( () => {
-			const frame = document.querySelectorAll( '.armazon-map__iframe' )[ 0 ];
+			const frame = document.querySelectorAll( '.estrategia-web-map__iframe' )[ 0 ];
 			return frame && ! frame.hidden && /google\.com/.test( frame.src );
 		} );
 		assert.ok( await image.isHidden(), 'cargado el mapa, la imagen estática sigue a la vista' );
-		assert.ok( ! ( await second.locator( '.armazon-map__iframe' ).getAttribute( 'src' ) ), 'sin aviso, el clic en un mapa no debería cargar los demás' );
-		assert.equal( ( await page.context().cookies() ).find( ( c ) => c.name === 'armazon_consent' ), undefined, 'sin plugin no hay cookie de consentimiento' );
+		assert.ok( ! ( await second.locator( '.estrategia-web-map__iframe' ).getAttribute( 'src' ) ), 'sin aviso, el clic en un mapa no debería cargar los demás' );
+		assert.equal( ( await page.context().cookies() ).find( ( c ) => c.name === 'estrategia_web_consent' ), undefined, 'sin plugin no hay cookie de consentimiento' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 
 		// 4. Estrecho: el recuadro debajo del mapa.
 		const narrow = await newPage( { viewport: { width: 375, height: 800 } } );
 		await narrow.goto( URL, { waitUntil: 'networkidle' } );
-		const narrowImage = narrow.locator( '.armazon-map' ).nth( 0 ).locator( 'img.armazon-map__static' );
+		const narrowImage = narrow.locator( '.estrategia-web-map' ).nth( 0 ).locator( 'img.estrategia-web-map__static' );
 		await narrowImage.scrollIntoViewIfNeeded();
 		await narrow.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await narrowImage.elementHandle() );
 		const a = await narrowImage.boundingBox();
-		const b = await narrow.locator( '.armazon-map' ).nth( 0 ).locator( '.armazon-map__card' ).boundingBox();
+		const b = await narrow.locator( '.estrategia-web-map' ).nth( 0 ).locator( '.estrategia-web-map__card' ).boundingBox();
 		assert.ok( a.height > 100, `en estrecho el mapa mide ${ a.height } px de alto` );
 		assert.ok( b.y >= a.y + a.height - 1, `en estrecho el recuadro (y=${ b.y }) no va debajo del mapa (acaba en ${ a.y + a.height })` );
 	} )

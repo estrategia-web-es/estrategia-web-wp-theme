@@ -1,6 +1,6 @@
 <?php
 /**
- * armazon/carousel — carrusel de desplazamiento horizontal.
+ * estrategia-web/carousel — carrusel de desplazamiento horizontal.
  *
  * Qué es: una fila desplazable (scroll-snap) con los bloques que se metan
  * dentro (imágenes, grupos, tarjetas: cada hijo directo es una diapositiva),
@@ -108,7 +108,7 @@
  *   atributos; un atributo nuevo lleva default para que los carruseles ya
  *   guardados sigan igual (condición 2 del padre: no obligar a tocar un hijo).
  * - Caso frontera: «quiero el carrusel con las flechas encima de las
- *   imágenes» es un AJUSTE (CSS del hijo sobre .armazon-carousel__controls);
+ *   imágenes» es un AJUSTE (CSS del hijo sobre .estrategia-web-carousel__controls);
  *   «quiero un carrusel que sincronice dos filas» es OTRA COSA: bloque del hijo.
  * - Los cortes de container query (480px / 782px) copian settings.viewport de
  *   theme.json. Si se cambian allí, se cambian en style.css: CSS no deja usar
@@ -117,7 +117,7 @@
  *   un bloque interno que no pinta nada (un párrafo vacío borrado a medias)
  *   cuenta como diapositiva invisible.
  *
- * @package armazon
+ * @package estrategia-web
  *
  * @var array    $attributes Block attributes.
  * @var string   $content    Inner blocks HTML.
@@ -132,69 +132,69 @@ defined( 'ABSPATH' ) || exit;
  * cuentan en el HTML ya pintado: antes de renderizar no se sabe cuántas
  * entradas trae.
  */
-$armazon_count = 0;
-foreach ( $block->inner_blocks as $armazon_inner ) {
-	if ( 'core/query' !== $armazon_inner->name ) {
-		++$armazon_count;
+$estrategia_web_count = 0;
+foreach ( $block->inner_blocks as $estrategia_web_inner ) {
+	if ( 'core/query' !== $estrategia_web_inner->name ) {
+		++$estrategia_web_count;
 	}
 }
 if ( str_contains( $content, 'wp-block-post-template' ) ) {
-	$armazon_tags = new WP_HTML_Tag_Processor( $content );
-	while ( $armazon_tags->next_tag( array( 'tag_name' => 'LI', 'class_name' => 'wp-block-post' ) ) ) {
-		++$armazon_count;
+	$estrategia_web_tags = new WP_HTML_Tag_Processor( $content );
+	while ( $estrategia_web_tags->next_tag( array( 'tag_name' => 'LI', 'class_name' => 'wp-block-post' ) ) ) {
+		++$estrategia_web_count;
 	}
 }
-$armazon_track_id = wp_unique_id( 'armazon-carousel-' );
+$estrategia_web_track_id = wp_unique_id( 'estrategia-web-carousel-' );
 
 // Fotos (0.7.4): prioridad a las que se ven al cargar, diferidas las demás y
 // un sizes del ancho de la diapositiva. Cómo y por qué: inc/carousel-images.php.
-armazon_carousel_images_register( $armazon_track_id, (array) $attributes );
-$content = armazon_carousel_images_mark( (string) $content, $armazon_track_id );
+estrategia_web_carousel_images_register( $estrategia_web_track_id, (array) $attributes );
+$content = estrategia_web_carousel_images_mark( (string) $content, $estrategia_web_track_id );
 
-$armazon_loop    = ! empty( $attributes['loop'] );
-$armazon_label    = '' !== trim( (string) $attributes['label'] ) ? $attributes['label'] : __( 'Carousel', 'armazon' );
+$estrategia_web_loop    = ! empty( $attributes['loop'] );
+$estrategia_web_label    = '' !== trim( (string) $attributes['label'] ) ? $attributes['label'] : __( 'Carousel', 'estrategia-web' );
 
-$armazon_per_view = array(
+$estrategia_web_per_view = array(
 	'mobile'  => max( 1, (float) $attributes['perViewMobile'] ),
 	'tablet'  => max( 1, (float) $attributes['perViewTablet'] ),
 	'desktop' => max( 1, (float) $attributes['perViewDesktop'] ),
 );
 
-$armazon_context = array(
+$estrategia_web_context = array(
 	'ready'      => false,
 	'atStart'    => true,
 	'atEnd'      => false,
 	'current'    => 0,
-	'count'      => $armazon_count,
-	'loop'       => $armazon_loop,
+	'count'      => $estrategia_web_count,
+	'loop'       => $estrategia_web_loop,
 	'autoplay'   => (bool) $attributes['autoplay'],
 	'interval'   => max( 2000, (int) $attributes['autoplayInterval'] ),
 	'playing'    => false,
 	'hover'      => false,
 	'focused'    => false,
-	'labelPause' => __( 'Pause carousel', 'armazon' ),
-	'labelPlay'  => __( 'Play carousel', 'armazon' ),
+	'labelPause' => __( 'Pause carousel', 'estrategia-web' ),
+	'labelPlay'  => __( 'Play carousel', 'estrategia-web' ),
 );
 
-$armazon_wrapper = get_block_wrapper_attributes(
+$estrategia_web_wrapper = get_block_wrapper_attributes(
 	array(
-		'class'                => 'armazon-carousel',
+		'class'                => 'estrategia-web-carousel',
 		'role'                 => 'region',
-		'aria-roledescription' => _x( 'carousel', 'ARIA role description', 'armazon' ),
-		'aria-label'           => $armazon_label,
+		'aria-roledescription' => _x( 'carousel', 'ARIA role description', 'estrategia-web' ),
+		'aria-label'           => $estrategia_web_label,
 		'style'                => sprintf(
-			'--armazon-carousel-per-view-mobile:%s;--armazon-carousel-per-view-tablet:%s;--armazon-carousel-per-view-desktop:%s;',
-			$armazon_per_view['mobile'],
-			$armazon_per_view['tablet'],
-			$armazon_per_view['desktop']
+			'--estrategia-web-carousel-per-view-mobile:%s;--estrategia-web-carousel-per-view-tablet:%s;--estrategia-web-carousel-per-view-desktop:%s;',
+			$estrategia_web_per_view['mobile'],
+			$estrategia_web_per_view['tablet'],
+			$estrategia_web_per_view['desktop']
 		),
 	)
 );
 ?>
 <div
-	<?php echo $armazon_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core. ?>
-	data-wp-interactive="armazon/carousel"
-	<?php echo wp_interactivity_data_wp_context( $armazon_context ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	<?php echo $estrategia_web_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core. ?>
+	data-wp-interactive="estrategia-web/carousel"
+	<?php echo wp_interactivity_data_wp_context( $estrategia_web_context ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	data-wp-init="callbacks.init"
 	data-wp-class--is-ready="context.ready"
 	data-wp-class--is-static="state.isStatic"
@@ -204,10 +204,10 @@ $armazon_wrapper = get_block_wrapper_attributes(
 	data-wp-on-async--focusout="actions.focusOut"
 >
 	<div
-		class="armazon-carousel__track"
-		id="<?php echo esc_attr( $armazon_track_id ); ?>"
+		class="estrategia-web-carousel__track"
+		id="<?php echo esc_attr( $estrategia_web_track_id ); ?>"
 		tabindex="0"
-		aria-label="<?php echo esc_attr( $armazon_label ); ?>"
+		aria-label="<?php echo esc_attr( $estrategia_web_label ); ?>"
 		data-wp-on-async--scroll="callbacks.onScroll"
 		data-wp-on--keydown="actions.onKeydown"
 	>
@@ -215,37 +215,37 @@ $armazon_wrapper = get_block_wrapper_attributes(
 	</div>
 
 	<?php if ( $attributes['showArrows'] || $attributes['autoplay'] ) : ?>
-	<div class="armazon-carousel__controls">
+	<div class="estrategia-web-carousel__controls">
 		<?php if ( $attributes['autoplay'] ) : ?>
 		<button
 			type="button"
-			class="armazon-carousel__toggle"
-			aria-controls="<?php echo esc_attr( $armazon_track_id ); ?>"
+			class="estrategia-web-carousel__toggle"
+			aria-controls="<?php echo esc_attr( $estrategia_web_track_id ); ?>"
 			data-wp-on--click="actions.toggleAutoplay"
-			aria-label="<?php echo esc_attr( $armazon_context['labelPause'] ); ?>"
+			aria-label="<?php echo esc_attr( $estrategia_web_context['labelPause'] ); ?>"
 			data-wp-bind--aria-label="state.toggleLabel"
 		>
-			<span class="armazon-carousel__toggle-icon" aria-hidden="true" data-wp-class--is-playing="context.playing"></span>
+			<span class="estrategia-web-carousel__toggle-icon" aria-hidden="true" data-wp-class--is-playing="context.playing"></span>
 		</button>
 		<?php endif; ?>
 		<?php if ( $attributes['showArrows'] ) : ?>
 		<button
 			type="button"
-			class="armazon-carousel__arrow armazon-carousel__prev"
-			aria-controls="<?php echo esc_attr( $armazon_track_id ); ?>"
-			aria-label="<?php echo esc_attr__( 'Previous slide', 'armazon' ); ?>"
+			class="estrategia-web-carousel__arrow estrategia-web-carousel__prev"
+			aria-controls="<?php echo esc_attr( $estrategia_web_track_id ); ?>"
+			aria-label="<?php echo esc_attr__( 'Previous slide', 'estrategia-web' ); ?>"
 			data-wp-on--click="actions.prev"
-			<?php echo $armazon_loop ? '' : 'data-wp-bind--disabled="context.atStart"'; ?>
+			<?php echo $estrategia_web_loop ? '' : 'data-wp-bind--disabled="context.atStart"'; ?>
 		>
 			<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
 		</button>
 		<button
 			type="button"
-			class="armazon-carousel__arrow armazon-carousel__next"
-			aria-controls="<?php echo esc_attr( $armazon_track_id ); ?>"
-			aria-label="<?php echo esc_attr__( 'Next slide', 'armazon' ); ?>"
+			class="estrategia-web-carousel__arrow estrategia-web-carousel__next"
+			aria-controls="<?php echo esc_attr( $estrategia_web_track_id ); ?>"
+			aria-label="<?php echo esc_attr__( 'Next slide', 'estrategia-web' ); ?>"
 			data-wp-on--click="actions.next"
-			<?php echo $armazon_loop ? '' : 'data-wp-bind--disabled="context.atEnd"'; ?>
+			<?php echo $estrategia_web_loop ? '' : 'data-wp-bind--disabled="context.atEnd"'; ?>
 		>
 			<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
 		</button>
@@ -253,15 +253,15 @@ $armazon_wrapper = get_block_wrapper_attributes(
 	</div>
 	<?php endif; ?>
 
-	<?php if ( $attributes['showDots'] && $armazon_count > 1 ) : ?>
-	<div class="armazon-carousel__dots" role="group" aria-label="<?php echo esc_attr__( 'Choose slide', 'armazon' ); ?>">
-		<?php for ( $armazon_i = 0; $armazon_i < $armazon_count; $armazon_i++ ) : ?>
+	<?php if ( $attributes['showDots'] && $estrategia_web_count > 1 ) : ?>
+	<div class="estrategia-web-carousel__dots" role="group" aria-label="<?php echo esc_attr__( 'Choose slide', 'estrategia-web' ); ?>">
+		<?php for ( $estrategia_web_i = 0; $estrategia_web_i < $estrategia_web_count; $estrategia_web_i++ ) : ?>
 		<button
 			type="button"
-			class="armazon-carousel__dot"
-			aria-controls="<?php echo esc_attr( $armazon_track_id ); ?>"
-			aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide number. */ __( 'Go to slide %d', 'armazon' ), $armazon_i + 1 ) ); ?>"
-			<?php echo wp_interactivity_data_wp_context( array( 'index' => $armazon_i ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			class="estrategia-web-carousel__dot"
+			aria-controls="<?php echo esc_attr( $estrategia_web_track_id ); ?>"
+			aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide number. */ __( 'Go to slide %d', 'estrategia-web' ), $estrategia_web_i + 1 ) ); ?>"
+			<?php echo wp_interactivity_data_wp_context( array( 'index' => $estrategia_web_i ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			data-wp-on--click="actions.goTo"
 			data-wp-bind--aria-current="state.isCurrentDot"
 		></button>

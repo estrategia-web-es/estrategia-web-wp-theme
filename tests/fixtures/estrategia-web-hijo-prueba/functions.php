@@ -1,13 +1,13 @@
 <?php
 /**
  * Hijo de prueba del padre. Ya no declara categorías de consentimiento: el
- * aviso de cookies se fue al plugin armazon-site en 0.7.0 y este WordPress de
+ * aviso de cookies se fue al plugin estrategia-web-site en 0.7.0 y este WordPress de
  * pruebas no lo tiene (así se prueba que el mapa funciona sin él).
  *
- * @package armazon-hijo-prueba
+ * @package estrategia-web-hijo-prueba
  */
 
-// Un campo de entrada para probar armazon/map enlazado a core/post-meta
+// Un campo de entrada para probar estrategia-web/map enlazado a core/post-meta
 // dentro de una Consulta (tests/map-query.test.mjs). Un tipo propio con sus
 // campos es cosa de un plugin, nunca del padre: aquí solo es la siembra.
 add_action(
@@ -31,7 +31,7 @@ add_action(
 add_action(
 	'wp_head',
 	static function () {
-		echo '<style>.rejilla-prueba .armazon-carousel__track{display:grid;grid-template-columns:repeat(3,70%);}</style>';
+		echo '<style>.rejilla-prueba .estrategia-web-carousel__track{display:grid;grid-template-columns:repeat(3,70%);}</style>';
 	}
 );
 

@@ -1,11 +1,11 @@
 <?php
 /**
- * armazon/language-switcher — selector de idioma (0.7.6).
+ * estrategia-web/language-switcher — selector de idioma (0.7.6).
  *
  * Qué pinta: un BOTÓN con el idioma actual («ES» y una flecha) y, al
  * pulsarlo, una lista de enlaces a la MISMA página en los otros idiomas:
  *
- *     <div class="armazon-language">
+ *     <div class="estrategia-web-language">
  *       <button aria-expanded="false" aria-controls="…">ES</button>
  *       <ul id="…" hidden><li><a href="/en/…" hreflang="en" lang="en">English</a></li></ul>
  *     </div>
@@ -29,8 +29,8 @@
  * - skip_missing 0: si la página no está traducida, WPML da la portada de ese
  *   idioma. Mejor llegar a la portada en inglés que no poder cambiar.
  * - Sin estilos de marca: la hoja solo coloca la lista. El hijo pone el
- *   aspecto sobre .armazon-language (Lavandería: theme/assets/css/header.css),
- *   también la flecha (.armazon-language__toggle::after).
+ *   aspecto sobre .estrategia-web-language (Lavandería: theme/assets/css/header.css),
+ *   también la flecha (.estrategia-web-language__toggle::after).
  *
  * Cómo se mantiene:
  * - Quién: quien toque la cabecera de una web con WPML. Cuándo: al añadir un
@@ -44,75 +44,75 @@
  *   sí sale. Y con dos bloques en la misma página, el id de la lista se
  *   distingue con wp_unique_id(); nunca un id fijo.
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$armazon_languages = apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) );
-if ( ! is_array( $armazon_languages ) || count( $armazon_languages ) < 2 ) {
+$estrategia_web_languages = apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) );
+if ( ! is_array( $estrategia_web_languages ) || count( $estrategia_web_languages ) < 2 ) {
 	return;
 }
 
-$armazon_current = null;
-$armazon_others  = array();
-foreach ( $armazon_languages as $armazon_language ) {
-	if ( ! empty( $armazon_language['active'] ) ) {
-		$armazon_current = $armazon_language;
+$estrategia_web_current = null;
+$estrategia_web_others  = array();
+foreach ( $estrategia_web_languages as $estrategia_web_language ) {
+	if ( ! empty( $estrategia_web_language['active'] ) ) {
+		$estrategia_web_current = $estrategia_web_language;
 	} else {
-		$armazon_others[] = $armazon_language;
+		$estrategia_web_others[] = $estrategia_web_language;
 	}
 }
-if ( ! $armazon_current || ! $armazon_others ) {
+if ( ! $estrategia_web_current || ! $estrategia_web_others ) {
 	return;
 }
 
-$armazon_name    = static fn( array $l ): string => (string) ( $l['native_name'] ?? $l['translated_name'] ?? strtoupper( (string) $l['code'] ) );
+$estrategia_web_name    = static fn( array $l ): string => (string) ( $l['native_name'] ?? $l['translated_name'] ?? strtoupper( (string) $l['code'] ) );
 
 // «inline» (0.7.7): todos los idiomas en línea, «EN – ES», sin desplegable; el
 // actual marcado con aria-current y el resto enlazados. Para el menú del móvil:
 // David, 06-10-2026, «el selector de idioma en mobile es feo, puedes poner
 // EN - ES (sin desplegable)». El orden es el de WPML. Sin JS.
 if ( 'inline' === ( $attributes['layout'] ?? 'dropdown' ) ) {
-	$armazon_text = static fn( array $l ): string => 'name' === ( $attributes['display'] ?? 'code' ) ? $armazon_name( $l ) : strtoupper( (string) $l['code'] );
-	$armazon_wrap = get_block_wrapper_attributes(
+	$estrategia_web_text = static fn( array $l ): string => 'name' === ( $attributes['display'] ?? 'code' ) ? $estrategia_web_name( $l ) : strtoupper( (string) $l['code'] );
+	$estrategia_web_wrap = get_block_wrapper_attributes(
 		array(
-			'class'      => 'armazon-language armazon-language--inline',
-			'aria-label' => __( 'Language', 'armazon' ),
+			'class'      => 'estrategia-web-language estrategia-web-language--inline',
+			'aria-label' => __( 'Language', 'estrategia-web' ),
 		)
 	);
-	echo '<nav ' . $armazon_wrap . '><ul class="armazon-language__inline">'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core.
-	foreach ( $armazon_languages as $armazon_language ) {
-		$armazon_code = (string) $armazon_language['code'];
-		$armazon_full = $armazon_name( $armazon_language );
-		if ( ! empty( $armazon_language['active'] ) ) {
-			printf( '<li><span aria-current="true" lang="%1$s" title="%2$s">%3$s</span></li>', esc_attr( $armazon_code ), esc_attr( $armazon_full ), esc_html( $armazon_text( $armazon_language ) ) );
+	echo '<nav ' . $estrategia_web_wrap . '><ul class="estrategia-web-language__inline">'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core.
+	foreach ( $estrategia_web_languages as $estrategia_web_language ) {
+		$estrategia_web_code = (string) $estrategia_web_language['code'];
+		$estrategia_web_full = $estrategia_web_name( $estrategia_web_language );
+		if ( ! empty( $estrategia_web_language['active'] ) ) {
+			printf( '<li><span aria-current="true" lang="%1$s" title="%2$s">%3$s</span></li>', esc_attr( $estrategia_web_code ), esc_attr( $estrategia_web_full ), esc_html( $estrategia_web_text( $estrategia_web_language ) ) );
 		} else {
-			printf( '<li><a href="%1$s" hreflang="%2$s" lang="%2$s" aria-label="%3$s">%4$s</a></li>', esc_url( (string) $armazon_language['url'] ), esc_attr( $armazon_code ), esc_attr( $armazon_full ), esc_html( $armazon_text( $armazon_language ) ) );
+			printf( '<li><a href="%1$s" hreflang="%2$s" lang="%2$s" aria-label="%3$s">%4$s</a></li>', esc_url( (string) $estrategia_web_language['url'] ), esc_attr( $estrategia_web_code ), esc_attr( $estrategia_web_full ), esc_html( $estrategia_web_text( $estrategia_web_language ) ) );
 		}
 	}
 	echo '</ul></nav>';
 	return;
 }
-$armazon_label   = 'name' === ( $attributes['display'] ?? 'code' ) ? $armazon_name( $armazon_current ) : strtoupper( (string) $armazon_current['code'] );
-$armazon_list_id = wp_unique_id( 'armazon-language-' );
-$armazon_wrapper = get_block_wrapper_attributes(
+$estrategia_web_label   = 'name' === ( $attributes['display'] ?? 'code' ) ? $estrategia_web_name( $estrategia_web_current ) : strtoupper( (string) $estrategia_web_current['code'] );
+$estrategia_web_list_id = wp_unique_id( 'estrategia-web-language-' );
+$estrategia_web_wrapper = get_block_wrapper_attributes(
 	array(
-		'class'               => 'armazon-language',
-		'data-wp-interactive' => 'armazon/language-switcher',
+		'class'               => 'estrategia-web-language',
+		'data-wp-interactive' => 'estrategia-web/language-switcher',
 		'data-wp-context'     => wp_json_encode( array( 'open' => false ) ),
 		'data-wp-on-document--click' => 'callbacks.closeOutside',
 		'data-wp-on--keydown' => 'callbacks.closeOnEscape',
 	)
 );
 ?>
-<div <?php echo $armazon_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core. ?>>
-	<button type="button" class="armazon-language__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $armazon_list_id ); ?>" data-wp-on--click="actions.toggle" data-wp-bind--aria-expanded="context.open">
-		<span class="screen-reader-text"><?php esc_html_e( 'Language:', 'armazon' ); ?> </span><span lang="<?php echo esc_attr( (string) $armazon_current['code'] ); ?>"><?php echo esc_html( $armazon_label ); ?></span>
+<div <?php echo $estrategia_web_wrapper; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped by core. ?>>
+	<button type="button" class="estrategia-web-language__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $estrategia_web_list_id ); ?>" data-wp-on--click="actions.toggle" data-wp-bind--aria-expanded="context.open">
+		<span class="screen-reader-text"><?php esc_html_e( 'Language:', 'estrategia-web' ); ?> </span><span lang="<?php echo esc_attr( (string) $estrategia_web_current['code'] ); ?>"><?php echo esc_html( $estrategia_web_label ); ?></span>
 	</button>
-	<ul id="<?php echo esc_attr( $armazon_list_id ); ?>" class="armazon-language__list" hidden data-wp-bind--hidden="!context.open">
-		<?php foreach ( $armazon_others as $armazon_language ) : ?>
-		<li><a href="<?php echo esc_url( (string) $armazon_language['url'] ); ?>" hreflang="<?php echo esc_attr( (string) $armazon_language['code'] ); ?>" lang="<?php echo esc_attr( (string) $armazon_language['code'] ); ?>"><?php echo esc_html( $armazon_name( $armazon_language ) ); ?></a></li>
+	<ul id="<?php echo esc_attr( $estrategia_web_list_id ); ?>" class="estrategia-web-language__list" hidden data-wp-bind--hidden="!context.open">
+		<?php foreach ( $estrategia_web_others as $estrategia_web_language ) : ?>
+		<li><a href="<?php echo esc_url( (string) $estrategia_web_language['url'] ); ?>" hreflang="<?php echo esc_attr( (string) $estrategia_web_language['code'] ); ?>" lang="<?php echo esc_attr( (string) $estrategia_web_language['code'] ); ?>"><?php echo esc_html( $estrategia_web_name( $estrategia_web_language ) ); ?></a></li>
 		<?php endforeach; ?>
 	</ul>
 </div>

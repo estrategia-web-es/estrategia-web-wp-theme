@@ -1,35 +1,35 @@
 /*
- * armazon/carousel — estilos. Todo cuelga de .armazon-carousel (ámbito por
+ * estrategia-web/carousel — estilos. Todo cuelga de .estrategia-web-carousel (ámbito por
  * prefijo de clase, la convención de los bloques de WordPress).
  * Colores y medidas: solo tokens de theme.json (var(--wp--preset--...)).
- * Un hijo ajusta con las propiedades --armazon-carousel-* o con CSS propio
+ * Un hijo ajusta con las propiedades --estrategia-web-carousel-* o con CSS propio
  * sobre estas clases; no copia este fichero.
  * Los cortes 480px / 782px repiten settings.viewport de theme.json (CSS no
  * admite variables en @container): si cambian allí, cambian aquí.
  */
-.armazon-carousel {
-	--armazon-carousel-gap: var(--wp--preset--spacing--16, 1rem);
-	--armazon-carousel-per-view: var(--armazon-carousel-per-view-mobile, 1);
-	--armazon-carousel-control-size: 2.75rem;
+.estrategia-web-carousel {
+	--estrategia-web-carousel-gap: var(--wp--preset--spacing--16, 1rem);
+	--estrategia-web-carousel-per-view: var(--estrategia-web-carousel-per-view-mobile, 1);
+	--estrategia-web-carousel-control-size: 2.75rem;
 	container-type: inline-size;
 	position: relative;
 }
 
 @container (width > 480px) {
-	.armazon-carousel__track {
-		--armazon-carousel-per-view: var(--armazon-carousel-per-view-tablet, 2);
+	.estrategia-web-carousel__track {
+		--estrategia-web-carousel-per-view: var(--estrategia-web-carousel-per-view-tablet, 2);
 	}
 }
 
 @container (width > 782px) {
-	.armazon-carousel__track {
-		--armazon-carousel-per-view: var(--armazon-carousel-per-view-desktop, 3);
+	.estrategia-web-carousel__track {
+		--estrategia-web-carousel-per-view: var(--estrategia-web-carousel-per-view-desktop, 3);
 	}
 }
 
-.armazon-carousel__track {
+.estrategia-web-carousel__track {
 	display: flex;
-	gap: var(--armazon-carousel-gap);
+	gap: var(--estrategia-web-carousel-gap);
 	overflow-x: auto;
 	overscroll-behavior-x: contain;
 	scroll-snap-type: x mandatory;
@@ -38,9 +38,9 @@
 	padding-block-end: var(--wp--preset--spacing--8, 0.5rem);
 }
 
-.armazon-carousel__track > *,
-.armazon-carousel__track > .wp-block-query > .wp-block-post-template > li {
-	flex: 0 0 calc((100% - (var(--armazon-carousel-per-view) - 1) * var(--armazon-carousel-gap)) / var(--armazon-carousel-per-view));
+.estrategia-web-carousel__track > *,
+.estrategia-web-carousel__track > .wp-block-query > .wp-block-post-template > li {
+	flex: 0 0 calc((100% - (var(--estrategia-web-carousel-per-view) - 1) * var(--estrategia-web-carousel-gap)) / var(--estrategia-web-carousel-per-view));
 	min-width: 0;
 	margin-block: 0 !important;
 	scroll-snap-align: start;
@@ -51,43 +51,43 @@
  * cada <li> pasa a ser hija flex de la pista. Va con más especificidad que el
  * «display: grid» del diseño en rejilla del post-template.
  */
-.armazon-carousel:not(.is-editing) .armazon-carousel__track > .wp-block-query,
-.armazon-carousel:not(.is-editing) .armazon-carousel__track > .wp-block-query > .wp-block-post-template {
+.estrategia-web-carousel:not(.is-editing) .estrategia-web-carousel__track > .wp-block-query,
+.estrategia-web-carousel:not(.is-editing) .estrategia-web-carousel__track > .wp-block-query > .wp-block-post-template {
 	display: contents;
 }
 
-.armazon-carousel__track > .wp-block-image img {
+.estrategia-web-carousel__track > .wp-block-image img {
 	width: 100%;
 	height: auto;
 }
 
 /* En el editor el «appender» de InnerBlocks no es una diapositiva. */
-.armazon-carousel.is-editing .armazon-carousel__track > .block-list-appender {
+.estrategia-web-carousel.is-editing .estrategia-web-carousel__track > .block-list-appender {
 	flex: 0 0 auto;
 	align-self: center;
 }
 
 /* Sin JS (o sin nada que desplazar) no hay controles: queda una fila desplazable. */
-.armazon-carousel:not(.is-ready) .armazon-carousel__controls,
-.armazon-carousel:not(.is-ready) .armazon-carousel__dots,
-.armazon-carousel.is-static .armazon-carousel__controls,
-.armazon-carousel.is-static .armazon-carousel__dots {
+.estrategia-web-carousel:not(.is-ready) .estrategia-web-carousel__controls,
+.estrategia-web-carousel:not(.is-ready) .estrategia-web-carousel__dots,
+.estrategia-web-carousel.is-static .estrategia-web-carousel__controls,
+.estrategia-web-carousel.is-static .estrategia-web-carousel__dots {
 	display: none;
 }
 
-.armazon-carousel__controls {
+.estrategia-web-carousel__controls {
 	display: flex;
 	justify-content: flex-end;
 	gap: var(--wp--preset--spacing--8, 0.5rem);
 	margin-block-start: var(--wp--preset--spacing--16, 1rem);
 }
 
-.armazon-carousel__arrow,
-.armazon-carousel__toggle {
+.estrategia-web-carousel__arrow,
+.estrategia-web-carousel__toggle {
 	display: inline-grid;
 	place-items: center;
-	inline-size: var(--armazon-carousel-control-size);
-	block-size: var(--armazon-carousel-control-size);
+	inline-size: var(--estrategia-web-carousel-control-size);
+	block-size: var(--estrategia-web-carousel-control-size);
 	padding: 0;
 	border: 1px solid var(--wp--preset--color--border, currentColor);
 	border-radius: 50%;
@@ -96,12 +96,12 @@
 	cursor: pointer;
 }
 
-.armazon-carousel__arrow:disabled {
+.estrategia-web-carousel__arrow:disabled {
 	opacity: 0.4;
 	cursor: default;
 }
 
-.armazon-carousel__toggle-icon {
+.estrategia-web-carousel__toggle-icon {
 	inline-size: 0.75rem;
 	block-size: 0.75rem;
 	/* Triángulo de «reproducir» */
@@ -109,12 +109,12 @@
 	clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
-.armazon-carousel__toggle-icon.is-playing {
+.estrategia-web-carousel__toggle-icon.is-playing {
 	/* Dos barras de «pausa» */
 	clip-path: polygon(0 0, 35% 0, 35% 100%, 0 100%, 0 0, 65% 0, 100% 0, 100% 100%, 65% 100%, 65% 0);
 }
 
-.armazon-carousel__dots {
+.estrategia-web-carousel__dots {
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
@@ -122,7 +122,7 @@
 	margin-block-start: var(--wp--preset--spacing--16, 1rem);
 }
 
-.armazon-carousel__dot {
+.estrategia-web-carousel__dot {
 	inline-size: 1.5rem;
 	block-size: 1.5rem;
 	padding: 0;
@@ -131,7 +131,7 @@
 	cursor: pointer;
 }
 
-.armazon-carousel__dot::before {
+.estrategia-web-carousel__dot::before {
 	content: "";
 	display: block;
 	inline-size: 0.625rem;
@@ -141,12 +141,12 @@
 	border: 1px solid var(--wp--preset--color--contrast, currentColor);
 }
 
-.armazon-carousel__dot[aria-current="true"]::before {
+.estrategia-web-carousel__dot[aria-current="true"]::before {
 	background: var(--wp--preset--color--contrast, currentColor);
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.armazon-carousel__track {
+	.estrategia-web-carousel__track {
 		scroll-behavior: auto;
 	}
 }

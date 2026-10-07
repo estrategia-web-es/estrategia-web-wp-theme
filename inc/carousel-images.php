@@ -1,6 +1,6 @@
 <?php
 /**
- * armazon/carousel — prioridad, carga diferida y sizes de sus fotos (0.7.4).
+ * estrategia-web/carousel — prioridad, carga diferida y sizes de sus fotos (0.7.4).
  *
  * Qué resuelve (auditoría de Lavandería, 06-10-2026): en escritorio el
  * elemento LCP del inicio era la diapositiva 2 del carrusel y solo la 1
@@ -10,9 +10,9 @@
  * hueco de ~500.
  *
  * Cómo funciona, en dos tiempos:
- * 1. render.php marca cada <img> con data-armazon-carousel="<id>:<n>" (n =
+ * 1. render.php marca cada <img> con data-estrategia-web-carousel="<id>:<n>" (n =
  *    diapositiva, desde 0) y apunta aquí, por id, cuántas diapositivas se
- *    pueden ver al cargar y qué sizes les toca (armazon_carousel_images_register).
+ *    pueden ver al cargar y qué sizes les toca (estrategia_web_carousel_images_register).
  * 2. El filtro wp_content_img_tag, que corre DESPUÉS de que WordPress haya
  *    puesto srcset, sizes, loading y fetchpriority a cada foto, lo corrige:
  *    - Diapositivas que se ven al cargar: si WordPress dio fetchpriority
@@ -31,7 +31,7 @@
  * se ve la 1 y a 1512 la 1, la 2 y la 3 (la 3, cortada). La última, en un
  * carrusel en bucle, queda a la IZQUIERDA de la primera (order de view.js) y
  * fuera de la vista: no cuenta. Se cambia con el filtro
- * armazon_carousel_eager_slides( $n, $attributes ).
+ * estrategia_web_carousel_eager_slides( $n, $attributes ).
  *
  * El sizes por defecto sale de perView y del ancho del carrusel: 100vw si es
  * align full; si no, el wideSize o el contentSize de theme.json cuando son px
@@ -42,12 +42,12 @@
  *
  * Cómo se mantiene:
  * - Quién: quien toque el carrusel. Cuándo: si cambian los cortes de
- *   style.css (480/782) se cambian también en armazon_carousel_images_sizes().
+ *   style.css (480/782) se cambian también en estrategia_web_carousel_images_sizes().
  * - Caso frontera: un hijo que pinta las diapositivas a otro ancho que el de
  *   perView (Lavandería: la portada pone a cada foto su proporción, 442 / 629
  *   / 596 de ancho a 596 de alto) NO acierta con el cálculo: escribe su sizes
  *   en el atributo imageSizes del bloque. Es un AJUSTE, no un bloque nuevo.
- *   También existe el filtro armazon_carousel_image_sizes( $sizes, $attributes ).
+ *   También existe el filtro estrategia_web_carousel_image_sizes( $sizes, $attributes ).
  * - La trampa: el filtro solo ve las fotos que pasan por
  *   wp_filter_content_tags (contenido de entradas y plantillas, que es donde
  *   vive un carrusel). Un carrusel pintado por otro camino (do_blocks en un
@@ -58,7 +58,7 @@
  *   carrusel hay otra foto grande, el carrusel no se trata como portada.
  * - Prueba: tests/carousel-images.test.mjs (nivel 3).
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -68,7 +68,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @return array<string, array{eager: int, sizes: string, hero: bool}>
  */
-function &armazon_carousel_images_registry(): array {
+function &estrategia_web_carousel_images_registry(): array {
 	static $registry = array();
 	return $registry;
 }
@@ -79,7 +79,7 @@ function &armazon_carousel_images_registry(): array {
  * @param string $id         Carousel id (the track id).
  * @param array  $attributes Block attributes.
  */
-function armazon_carousel_images_register( string $id, array $attributes ): void {
+function estrategia_web_carousel_images_register( string $id, array $attributes ): void {
 	$per_view = max(
 		(float) ( $attributes['perViewMobile'] ?? 1 ),
 		(float) ( $attributes['perViewTablet'] ?? 2 ),
@@ -92,12 +92,12 @@ function armazon_carousel_images_register( string $id, array $attributes ): void
 	 * @param int   $eager      Default: ceil( largest perView ).
 	 * @param array $attributes Block attributes.
 	 */
-	$eager = (int) apply_filters( 'armazon_carousel_eager_slides', (int) ceil( $per_view ), $attributes );
+	$eager = (int) apply_filters( 'estrategia_web_carousel_eager_slides', (int) ceil( $per_view ), $attributes );
 
-	$registry        = &armazon_carousel_images_registry();
+	$registry        = &estrategia_web_carousel_images_registry();
 	$registry[ $id ] = array(
 		'eager' => max( 0, $eager ),
-		'sizes' => armazon_carousel_images_sizes( $attributes ),
+		'sizes' => estrategia_web_carousel_images_sizes( $attributes ),
 		'hero'  => false,
 	);
 }
@@ -107,7 +107,7 @@ function armazon_carousel_images_register( string $id, array $attributes ): void
  *
  * @param array $attributes Block attributes.
  */
-function armazon_carousel_images_sizes( array $attributes ): string {
+function estrategia_web_carousel_images_sizes( array $attributes ): string {
 	$sizes = trim( (string) ( $attributes['imageSizes'] ?? '' ) );
 	if ( '' === $sizes ) {
 		$cap = null;
@@ -118,7 +118,7 @@ function armazon_carousel_images_sizes( array $attributes ): string {
 				$cap = (float) $m[1];
 			}
 		}
-		$sizes = armazon_carousel_images_sizes_for(
+		$sizes = estrategia_web_carousel_images_sizes_for(
 			max( 1, (float) ( $attributes['perViewMobile'] ?? 1 ) ),
 			max( 1, (float) ( $attributes['perViewTablet'] ?? 2 ) ),
 			max( 1, (float) ( $attributes['perViewDesktop'] ?? 3 ) ),
@@ -131,7 +131,7 @@ function armazon_carousel_images_sizes( array $attributes ): string {
 	 * @param string $sizes      Computed (or the block's imageSizes).
 	 * @param array  $attributes Block attributes.
 	 */
-	return trim( (string) apply_filters( 'armazon_carousel_image_sizes', $sizes, $attributes ) );
+	return trim( (string) apply_filters( 'estrategia_web_carousel_image_sizes', $sizes, $attributes ) );
 }
 
 /**
@@ -143,7 +143,7 @@ function armazon_carousel_images_sizes( array $attributes ): string {
  * @param float      $desktop Per view above.
  * @param float|null $cap     Max width of the carousel in px, null = the window.
  */
-function armazon_carousel_images_sizes_for( float $mobile, float $tablet, float $desktop, ?float $cap ): string {
+function estrategia_web_carousel_images_sizes_for( float $mobile, float $tablet, float $desktop, ?float $cap ): string {
 	$fmt   = static fn( float $n ): string => rtrim( rtrim( number_format( $n, 2, '.', '' ), '0' ), '.' );
 	$vw    = static fn( float $n ): string => 1.0 === $n ? '100vw' : 'calc(100vw / ' . $fmt( $n ) . ')';
 	$steps = array( array( 480.0, $mobile ), array( 782.0, $tablet ), array( INF, $desktop ) );
@@ -173,7 +173,7 @@ function armazon_carousel_images_sizes_for( float $mobile, float $tablet, float 
 }
 
 /**
- * Marks every <img> of the rendered slides with data-armazon-carousel="<id>:<slide>".
+ * Marks every <img> of the rendered slides with data-estrategia-web-carousel="<id>:<slide>".
  * A slide is each top-level element, except a core/query wrapper, whose
  * <li class="wp-block-post"> are the slides. If the HTML API cannot parse the
  * content, it is returned untouched (WordPress' own defaults stay).
@@ -181,7 +181,7 @@ function armazon_carousel_images_sizes_for( float $mobile, float $tablet, float 
  * @param string $content Inner blocks HTML.
  * @param string $id      Carousel id.
  */
-function armazon_carousel_images_mark( string $content, string $id ): string {
+function estrategia_web_carousel_images_mark( string $content, string $id ): string {
 	if ( ! str_contains( $content, '<img' ) || ! class_exists( 'WP_HTML_Processor' ) ) {
 		return $content;
 	}
@@ -204,7 +204,7 @@ function armazon_carousel_images_mark( string $content, string $id ): string {
 			++$slide;
 		}
 		if ( 'IMG' === $html->get_tag() && $slide >= 0 ) {
-			$html->set_attribute( 'data-armazon-carousel', $id . ':' . $slide );
+			$html->set_attribute( 'data-estrategia-web-carousel', $id . ':' . $slide );
 		}
 	}
 	if ( $html->get_last_error() ) {
@@ -218,17 +218,17 @@ function armazon_carousel_images_mark( string $content, string $id ): string {
  *
  * @param string $image The img tag, already with WordPress' attributes.
  */
-function armazon_carousel_images_filter( $image ) {
-	if ( ! is_string( $image ) || ! str_contains( $image, 'data-armazon-carousel' ) ) {
+function estrategia_web_carousel_images_filter( $image ) {
+	if ( ! is_string( $image ) || ! str_contains( $image, 'data-estrategia-web-carousel' ) ) {
 		return $image;
 	}
 	$tag = new WP_HTML_Tag_Processor( $image );
 	if ( ! $tag->next_tag( 'IMG' ) ) {
 		return $image;
 	}
-	$mark = (string) $tag->get_attribute( 'data-armazon-carousel' );
-	$tag->remove_attribute( 'data-armazon-carousel' );
-	$registry = &armazon_carousel_images_registry();
+	$mark = (string) $tag->get_attribute( 'data-estrategia-web-carousel' );
+	$tag->remove_attribute( 'data-estrategia-web-carousel' );
+	$registry = &estrategia_web_carousel_images_registry();
 	$at       = strrpos( $mark, ':' );
 	$id       = false === $at ? '' : substr( $mark, 0, $at );
 	if ( ! isset( $registry[ $id ] ) ) {
@@ -271,4 +271,4 @@ function armazon_carousel_images_filter( $image ) {
 	}
 	return $tag->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'armazon_carousel_images_filter', 20 );
+add_filter( 'wp_content_img_tag', 'estrategia_web_carousel_images_filter', 20 );

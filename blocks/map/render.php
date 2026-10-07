@@ -1,6 +1,6 @@
 <?php
 /**
- * armazon/map — mapa «en dos clics».
+ * estrategia-web/map — mapa «en dos clics».
  *
  * Qué es: una imagen estática (de la mediateca) con la dirección, un botón
  * «Ver mapa» que SOLO ENTONCES pone el iframe de Google Maps, y un enlace
@@ -11,12 +11,12 @@
  * - El clic del visitante es el consentimiento para ESA carga, por eso el mapa
  *   no necesita aviso de cookies. Debajo del botón se dice qué pasa al pulsar.
  * - Si el sitio declara la categoría «maps» en el consentimiento (el aviso de
- *   cookies del plugin armazon-site desde la 0.7.0 del padre; antes,
+ *   cookies del plugin estrategia-web-site desde la 0.7.0 del padre; antes,
  *   inc/consent.php) y el visitante la aceptó, el mapa carga directo, también
- *   si la acepta después con la página abierta (evento armazon:consent).
+ *   si la acepta después con la página abierta (evento estrategia-web:consent).
  *   SIN EL PLUGIN el mapa funciona igual: imagen estática o recuadro, y
  *   «Ver mapa» carga ese mapa al pulsar. Solo habla con el aviso por su
- *   contrato JS (window.armazonConsent?.…, el evento), nunca por PHP, para no
+ *   contrato JS (window.estrategiaWebConsent?.…, el evento), nunca por PHP, para no
  *   depender de que esté (tests/map.test.mjs corre sin él).
  * - La URL de embed se valida: https, host www.google.com o maps.google.com y
  *   ruta /maps/embed. Se acepta pegar el <iframe> entero que da Google
@@ -33,7 +33,7 @@
  *   excepción. Con «maps» aceptado en el consentimiento se pinta el iframe
  *   directamente, como antes.
  *   Caso frontera: el recuadro dice lo que el bloque sabe; los datos de una
- *   sede llegan por bindings (p. ej. la fuente armazon-site/location).
+ *   sede llegan por bindings (p. ej. la fuente estrategia-web-site/location).
  *   La trampa: las fuentes de bindings devuelven el texto ya escapado y con
  *   <br>; render.php lo devuelve a texto plano antes de escaparlo (si no, sale
  *   «&amp;amp;» o «<br>» a la vista).
@@ -46,13 +46,13 @@
  *   Google sin consentimiento). Se sirve desde el PROPIO sitio:
  *   staticMapUrl es una ruta del tema («assets/maps/sede.webp», se busca en
  *   el hijo y luego en el padre), una ruta del sitio («/wp-content/…») o una
- *   URL del mismo dominio; cualquier otra se descarta (armazon_map_static_url).
+ *   URL del mismo dominio; cualquier otra se descarta (estrategia_web_map_static_url).
  *   staticMapId es la misma imagen subida a la mediateca. Acepta bindings
  *   (cada sede de una Consulta, su mapa). Si hay mapa estático, la «foto»
  *   (imageId/imageUrl/useFeaturedImage) no se usa.
  *   Caso frontera: el mapa estático no se mueve ni hace zoom; quien quiera
  *   moverlo pulsa «Ver mapa», que carga Google y CONCEDE la categoría «maps»
- *   del consentimiento (window.armazonConsent.grant), así los demás mapas de
+ *   del consentimiento (window.estrategiaWebConsent.grant), así los demás mapas de
  *   la web cargan ya sin preguntar. Si la web no declara «maps», el clic solo
  *   carga ese mapa, como antes.
  *   La trampa: el marcador va en el CENTRO de la imagen y el recuadro tapa la
@@ -67,7 +67,7 @@
  *   marco no se pinta hasta que hay mapa: una caja vacía parecería rota).
  *   La dirección se sigue pasando: hace falta para el enlace a Google Maps,
  *   el título del iframe y el texto alternativo del mapa estático.
- *       <!-- wp:armazon/map {"showDetails":false,"metadata":{"bindings":{
+ *       <!-- wp:estrategia-web/map {"showDetails":false,"metadata":{"bindings":{
  *         "address":…,"embedUrl":…,"staticMapUrl":…}}} /-->
  *   Por qué un atributo y no adivinarlo: el bloque no ve lo que hay al lado
  *   (un hermano en el mismo grupo puede ser la ficha o no). Lo sabe el patrón
@@ -82,7 +82,7 @@
  *
  * Cómo se mantiene:
  * - Quién: quien toque el padre. Cuándo: si Google cambia el formato de la URL
- *   de embed (se ajusta armazon_map_embed_url) o al añadir un proveedor.
+ *   de embed (se ajusta estrategia_web_map_embed_url) o al añadir un proveedor.
  * - Caso frontera: otro proveedor (OpenStreetMap) es un AJUSTE si es otra URL
  *   de iframe con la misma mecánica: se amplía la validación aquí. Un mapa con
  *   marcadores propios y JS del proveedor es OTRA COSA: bloque del hijo.
@@ -95,21 +95,21 @@
  *   ninguna petición hasta que se pulsa; las pruebas miran PETICIONES, no
  *   apariciones de «google.com» en el HTML, que las hay por diseño.
  *
- * @package armazon
+ * @package estrategia-web
  *
  * @var array $attributes Block attributes.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! function_exists( 'armazon_map_embed_url' ) ) {
+if ( ! function_exists( 'estrategia_web_map_embed_url' ) ) {
 	/**
 	 * Returns a safe Google Maps embed URL, or '' if the value is not one.
 	 * Accepts the bare URL or the whole <iframe> code Google gives.
 	 *
 	 * @param string $value Attribute value.
 	 */
-	function armazon_map_embed_url( string $value ): string {
+	function estrategia_web_map_embed_url( string $value ): string {
 		$value = trim( html_entity_decode( $value ) );
 		if ( preg_match( '/src\s*=\s*["\']([^"\']+)["\']/i', $value, $match ) ) {
 			$value = $match[1];
@@ -128,7 +128,7 @@ if ( ! function_exists( 'armazon_map_embed_url' ) ) {
 	}
 }
 
-if ( ! function_exists( 'armazon_map_static_url' ) ) {
+if ( ! function_exists( 'estrategia_web_map_static_url' ) ) {
 	/**
 	 * URL of the static map image (0.5.0), only if it is served by THIS site.
 	 * A relative path («assets/maps/sede.webp») is a file of the active theme
@@ -137,7 +137,7 @@ if ( ! function_exists( 'armazon_map_static_url' ) ) {
 	 *
 	 * @param string $value Attribute value.
 	 */
-	function armazon_map_static_url( string $value ): string {
+	function estrategia_web_map_static_url( string $value ): string {
 		$value = trim( $value );
 		if ( '' === $value ) {
 			return '';
@@ -164,57 +164,57 @@ if ( ! function_exists( 'armazon_map_static_url' ) ) {
 }
 
 // Los datos llegan de atributos o de Block Bindings: una fuente de texto los
-// trae con <br> en vez de saltos (las de armazon-site lo hacen); se
+// trae con <br> en vez de saltos (las de estrategia-web-site lo hacen); se
 // devuelven a saltos para escaparlos aquí una sola vez.
-$armazon_text      = static fn( string $key ): string => trim( html_entity_decode( wp_strip_all_tags( preg_replace( '/<br\s*\/?>/i', "\n", (string) $attributes[ $key ] ) ), ENT_QUOTES, 'UTF-8' ) );
-$armazon_place     = $armazon_text( 'placeName' );
-$armazon_phone     = $armazon_text( 'phone' );
-$armazon_hours     = $armazon_text( 'hours' );
-$armazon_address   = $armazon_text( 'address' );
-$armazon_embed     = armazon_map_embed_url( (string) $attributes['embedUrl'] );
-$armazon_maps_url  = trim( (string) $attributes['mapsUrl'] );
-if ( '' === $armazon_maps_url && '' !== $armazon_address ) {
-	$armazon_maps_url = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $armazon_address );
+$estrategia_web_text      = static fn( string $key ): string => trim( html_entity_decode( wp_strip_all_tags( preg_replace( '/<br\s*\/?>/i', "\n", (string) $attributes[ $key ] ) ), ENT_QUOTES, 'UTF-8' ) );
+$estrategia_web_place     = $estrategia_web_text( 'placeName' );
+$estrategia_web_phone     = $estrategia_web_text( 'phone' );
+$estrategia_web_hours     = $estrategia_web_text( 'hours' );
+$estrategia_web_address   = $estrategia_web_text( 'address' );
+$estrategia_web_embed     = estrategia_web_map_embed_url( (string) $attributes['embedUrl'] );
+$estrategia_web_maps_url  = trim( (string) $attributes['mapsUrl'] );
+if ( '' === $estrategia_web_maps_url && '' !== $estrategia_web_address ) {
+	$estrategia_web_maps_url = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $estrategia_web_address );
 }
 
-if ( '' === $armazon_embed && '' === $armazon_maps_url ) {
+if ( '' === $estrategia_web_embed && '' === $estrategia_web_maps_url ) {
 	if ( wp_is_serving_rest_request() ) {
 		printf(
 			'<p %s>%s</p>',
 			get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput
-			esc_html__( 'Map: add the address and the Google Maps embed URL in the block settings.', 'armazon' )
+			esc_html__( 'Map: add the address and the Google Maps embed URL in the block settings.', 'estrategia-web' )
 		);
 	}
 	return;
 }
 
-$armazon_static = '';
+$estrategia_web_static = '';
 if ( $attributes['staticMapId'] ) {
-	$armazon_static = (string) wp_get_attachment_image_url( (int) $attributes['staticMapId'], 'full' );
+	$estrategia_web_static = (string) wp_get_attachment_image_url( (int) $attributes['staticMapId'], 'full' );
 }
-if ( '' === $armazon_static ) {
-	$armazon_static = armazon_map_static_url( $armazon_text( 'staticMapUrl' ) );
+if ( '' === $estrategia_web_static ) {
+	$estrategia_web_static = estrategia_web_map_static_url( $estrategia_web_text( 'staticMapUrl' ) );
 }
 
-$armazon_image = '';
-if ( '' !== $armazon_static ) {
-	$armazon_image = sprintf(
-		'<img class="armazon-map__static" src="%s" alt="%s" loading="lazy" decoding="async" data-wp-bind--hidden="context.loaded">',
-		esc_url( $armazon_static ),
+$estrategia_web_image = '';
+if ( '' !== $estrategia_web_static ) {
+	$estrategia_web_image = sprintf(
+		'<img class="estrategia-web-map__static" src="%s" alt="%s" loading="lazy" decoding="async" data-wp-bind--hidden="context.loaded">',
+		esc_url( $estrategia_web_static ),
 		esc_attr(
-			'' !== $armazon_address
+			'' !== $estrategia_web_address
 				/* translators: %s: postal address. */
-				? sprintf( __( 'Street map around %s', 'armazon' ), str_replace( "\n", ', ', $armazon_address ) )
-				: __( 'Street map of the area', 'armazon' )
+				? sprintf( __( 'Street map around %s', 'estrategia-web' ), str_replace( "\n", ', ', $estrategia_web_address ) )
+				: __( 'Street map of the area', 'estrategia-web' )
 		)
 	);
 } elseif ( $attributes['imageId'] ) {
-	$armazon_image = wp_get_attachment_image(
+	$estrategia_web_image = wp_get_attachment_image(
 		(int) $attributes['imageId'],
 		'large',
 		false,
 		array(
-			'class'               => 'armazon-map__image',
+			'class'               => 'estrategia-web-map__image',
 			'alt'                 => $attributes['imageAlt'],
 			'loading'             => 'lazy',
 			'data-wp-bind--hidden' => 'context.loaded',
@@ -223,22 +223,22 @@ if ( '' !== $armazon_static ) {
 }
 // Dentro de una Consulta, SOLO si se pide (useFeaturedImage, 0.3.0; en 0.2.0
 // era siempre): la imagen destacada de la entrada.
-if ( '' === $armazon_image && '' === $attributes['imageUrl'] && $attributes['useFeaturedImage'] && ! empty( $block->context['postId'] ) && has_post_thumbnail( (int) $block->context['postId'] ) ) {
-	$armazon_image = wp_get_attachment_image(
+if ( '' === $estrategia_web_image && '' === $attributes['imageUrl'] && $attributes['useFeaturedImage'] && ! empty( $block->context['postId'] ) && has_post_thumbnail( (int) $block->context['postId'] ) ) {
+	$estrategia_web_image = wp_get_attachment_image(
 		get_post_thumbnail_id( (int) $block->context['postId'] ),
 		'large',
 		false,
 		array(
-			'class'                => 'armazon-map__image',
+			'class'                => 'estrategia-web-map__image',
 			'alt'                  => $attributes['imageAlt'],
 			'loading'              => 'lazy',
 			'data-wp-bind--hidden' => 'context.loaded',
 		)
 	);
 }
-if ( '' === $armazon_image && '' !== $attributes['imageUrl'] ) {
-	$armazon_image = sprintf(
-		'<img class="armazon-map__image" src="%s" alt="%s" loading="lazy" data-wp-bind--hidden="context.loaded">',
+if ( '' === $estrategia_web_image && '' !== $attributes['imageUrl'] ) {
+	$estrategia_web_image = sprintf(
+		'<img class="estrategia-web-map__image" src="%s" alt="%s" loading="lazy" data-wp-bind--hidden="context.loaded">',
 		esc_url( $attributes['imageUrl'] ),
 		esc_attr( $attributes['imageAlt'] )
 	);
@@ -246,57 +246,57 @@ if ( '' === $armazon_image && '' !== $attributes['imageUrl'] ) {
 
 // Foto = una imagen que SUSTITUYE al recuadro (la de 0.2.0). El mapa
 // estático no es foto: va DEBAJO del recuadro de datos (0.5.0).
-$armazon_has_photo = '' !== $armazon_image && '' === $armazon_static;
+$estrategia_web_has_photo = '' !== $estrategia_web_image && '' === $estrategia_web_static;
 
 // Sin datos (0.6.0, showDetails:false): ni recuadro ni dirección bajo la foto,
 // porque la ficha de al lado ya los dice. Sin imagen, el marco no se pinta
 // hasta que hay mapa: una caja vacía antes del clic parecería rota.
-$armazon_details     = ! isset( $attributes['showDetails'] ) || false !== $attributes['showDetails'];
-$armazon_frame_later = ! $armazon_details && '' === $armazon_image;
-$armazon_no_frame    = false;
-if ( $armazon_frame_later && '' === $armazon_embed ) {
+$estrategia_web_details     = ! isset( $attributes['showDetails'] ) || false !== $attributes['showDetails'];
+$estrategia_web_frame_later = ! $estrategia_web_details && '' === $estrategia_web_image;
+$estrategia_web_no_frame    = false;
+if ( $estrategia_web_frame_later && '' === $estrategia_web_embed ) {
 	// Nada que enseñar ni antes ni después del clic: solo el enlace.
-	$armazon_frame_later = false;
-	$armazon_no_frame    = true;
+	$estrategia_web_frame_later = false;
+	$estrategia_web_no_frame    = true;
 }
 
-$armazon_title = '' !== $armazon_address
+$estrategia_web_title = '' !== $estrategia_web_address
 	/* translators: %s: postal address. */
-	? sprintf( __( 'Map: %s', 'armazon' ), $armazon_address )
-	: __( 'Map', 'armazon' );
+	? sprintf( __( 'Map: %s', 'estrategia-web' ), $estrategia_web_address )
+	: __( 'Map', 'estrategia-web' );
 ?>
 <figure
-	<?php echo get_block_wrapper_attributes( array( 'class' => 'armazon-map' . ( '' !== $armazon_static ? ' has-static-map' : '' ) . ( $armazon_details ? '' : ' is-without-details' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-	data-wp-interactive="armazon/map"
-	<?php echo wp_interactivity_data_wp_context( array( 'loaded' => false, 'embedUrl' => $armazon_embed ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	<?php echo get_block_wrapper_attributes( array( 'class' => 'estrategia-web-map' . ( '' !== $estrategia_web_static ? ' has-static-map' : '' ) . ( $estrategia_web_details ? '' : ' is-without-details' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	data-wp-interactive="estrategia-web/map"
+	<?php echo wp_interactivity_data_wp_context( array( 'loaded' => false, 'embedUrl' => $estrategia_web_embed ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	data-wp-init="callbacks.init"
 	data-wp-class--is-loaded="context.loaded"
 >
-	<?php if ( ! $armazon_no_frame ) : ?>
-	<div class="armazon-map__frame"<?php echo $armazon_frame_later ? ' hidden data-wp-bind--hidden="!context.loaded"' : ''; ?>>
-		<?php if ( '' !== $armazon_image ) : ?>
-			<?php echo $armazon_image; // phpcs:ignore WordPress.Security.EscapeOutput -- built with escaping above. ?>
+	<?php if ( ! $estrategia_web_no_frame ) : ?>
+	<div class="estrategia-web-map__frame"<?php echo $estrategia_web_frame_later ? ' hidden data-wp-bind--hidden="!context.loaded"' : ''; ?>>
+		<?php if ( '' !== $estrategia_web_image ) : ?>
+			<?php echo $estrategia_web_image; // phpcs:ignore WordPress.Security.EscapeOutput -- built with escaping above. ?>
 		<?php endif; ?>
-		<?php if ( ! $armazon_has_photo && $armazon_details ) : ?>
-			<div class="armazon-map__card" data-wp-bind--hidden="context.loaded">
-				<?php if ( '' !== $armazon_place ) : ?>
-				<p class="armazon-map__name"><?php echo esc_html( $armazon_place ); ?></p>
+		<?php if ( ! $estrategia_web_has_photo && $estrategia_web_details ) : ?>
+			<div class="estrategia-web-map__card" data-wp-bind--hidden="context.loaded">
+				<?php if ( '' !== $estrategia_web_place ) : ?>
+				<p class="estrategia-web-map__name"><?php echo esc_html( $estrategia_web_place ); ?></p>
 				<?php endif; ?>
-				<?php if ( '' !== $armazon_address ) : ?>
-				<address class="armazon-map__card-address"><?php echo nl2br( esc_html( $armazon_address ), false ); ?></address>
+				<?php if ( '' !== $estrategia_web_address ) : ?>
+				<address class="estrategia-web-map__card-address"><?php echo nl2br( esc_html( $estrategia_web_address ), false ); ?></address>
 				<?php endif; ?>
-				<?php if ( '' !== $armazon_phone ) : ?>
-				<p class="armazon-map__phone"><a href="<?php echo esc_url( 'tel:' . preg_replace( '/[^\d+]/', '', $armazon_phone ), array( 'tel' ) ); ?>"><?php echo esc_html( $armazon_phone ); ?></a></p>
+				<?php if ( '' !== $estrategia_web_phone ) : ?>
+				<p class="estrategia-web-map__phone"><a href="<?php echo esc_url( 'tel:' . preg_replace( '/[^\d+]/', '', $estrategia_web_phone ), array( 'tel' ) ); ?>"><?php echo esc_html( $estrategia_web_phone ); ?></a></p>
 				<?php endif; ?>
-				<?php if ( '' !== $armazon_hours ) : ?>
-				<p class="armazon-map__hours"><?php echo nl2br( esc_html( $armazon_hours ), false ); ?></p>
+				<?php if ( '' !== $estrategia_web_hours ) : ?>
+				<p class="estrategia-web-map__hours"><?php echo nl2br( esc_html( $estrategia_web_hours ), false ); ?></p>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
-		<?php if ( '' !== $armazon_embed ) : ?>
+		<?php if ( '' !== $estrategia_web_embed ) : ?>
 		<iframe
-			class="armazon-map__iframe"
-			title="<?php echo esc_attr( $armazon_title ); ?>"
+			class="estrategia-web-map__iframe"
+			title="<?php echo esc_attr( $estrategia_web_title ); ?>"
 			hidden
 			data-wp-bind--hidden="!context.loaded"
 			data-wp-bind--src="state.src"
@@ -306,19 +306,19 @@ $armazon_title = '' !== $armazon_address
 		<?php endif; ?>
 	</div>
 	<?php endif; ?>
-	<figcaption class="armazon-map__caption">
-		<?php if ( '' !== $armazon_address && $armazon_has_photo && $armazon_details ) : ?>
-		<address class="armazon-map__address"><?php echo esc_html( $armazon_address ); ?></address>
+	<figcaption class="estrategia-web-map__caption">
+		<?php if ( '' !== $estrategia_web_address && $estrategia_web_has_photo && $estrategia_web_details ) : ?>
+		<address class="estrategia-web-map__address"><?php echo esc_html( $estrategia_web_address ); ?></address>
 		<?php endif; ?>
-		<?php if ( '' !== $armazon_embed ) : ?>
-		<div class="armazon-map__actions" data-wp-bind--hidden="context.loaded">
-			<button type="button" class="wp-element-button armazon-map__load" data-wp-on--click="actions.load"><?php esc_html_e( 'Show map', 'armazon' ); ?></button>
-			<p class="armazon-map__notice"><?php esc_html_e( 'The map is served by Google. Loading it sends your IP address to Google, which may set its own cookies.', 'armazon' ); ?></p>
+		<?php if ( '' !== $estrategia_web_embed ) : ?>
+		<div class="estrategia-web-map__actions" data-wp-bind--hidden="context.loaded">
+			<button type="button" class="wp-element-button estrategia-web-map__load" data-wp-on--click="actions.load"><?php esc_html_e( 'Show map', 'estrategia-web' ); ?></button>
+			<p class="estrategia-web-map__notice"><?php esc_html_e( 'The map is served by Google. Loading it sends your IP address to Google, which may set its own cookies.', 'estrategia-web' ); ?></p>
 		</div>
 		<?php endif; ?>
-		<?php if ( '' !== $armazon_maps_url ) : ?>
-		<a class="armazon-map__link" href="<?php echo esc_url( $armazon_maps_url ); ?>" target="_blank" rel="noopener noreferrer">
-			<?php esc_html_e( 'Open in Google Maps', 'armazon' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'armazon' ); ?></span>
+		<?php if ( '' !== $estrategia_web_maps_url ) : ?>
+		<a class="estrategia-web-map__link" href="<?php echo esc_url( $estrategia_web_maps_url ); ?>" target="_blank" rel="noopener noreferrer">
+			<?php esc_html_e( 'Open in Google Maps', 'estrategia-web' ); ?><span class="screen-reader-text"> <?php esc_html_e( '(opens in a new tab)', 'estrategia-web' ); ?></span>
 		</a>
 		<?php endif; ?>
 	</figcaption>

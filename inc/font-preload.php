@@ -24,7 +24,7 @@
  * Cómo se mantiene:
  * - Quién: quien toque el padre. Cuándo: si WordPress cambia cómo guarda
  *   fontFamilies en los ajustes globales (hoy, por origen: theme / custom).
- * - Ajuste: filtro armazon_preload_fonts( string[] $urls ). Devolver array()
+ * - Ajuste: filtro estrategia_web_preload_fonts( string[] $urls ). Devolver array()
  *   apaga la precarga; un hijo que use una tercera fuente arriba del todo
  *   (la de un antetítulo, por ejemplo) la añade ahí.
  * - Caso frontera: una familia con cinco pesos precargaría cinco ficheros y
@@ -37,20 +37,20 @@
  * - Prueba: tests/page-loads.test.mjs no la mira; la mira el hijo
  *   (Lavandería, tests/render-blocking.test.mjs, nivel 3).
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /** Most font faces preloaded: more would compete with the LCP image. */
-const ARMAZON_PRELOAD_FONTS_MAX = 4;
+const ESTRATEGIA_WEB_PRELOAD_FONTS_MAX = 4;
 
 /**
  * Font files to preload: the woff2 of the families of body text and headings.
  *
  * @return string[] Absolute URLs.
  */
-function armazon_preload_font_urls(): array {
+function estrategia_web_preload_font_urls(): array {
 	$slugs = array();
 	$paths = array(
 		array( 'typography', 'fontFamily' ),
@@ -79,20 +79,20 @@ function armazon_preload_font_urls(): array {
 	$urls = array();
 	foreach ( array_keys( $slugs ) as $slug ) {
 		foreach ( (array) ( $families[ $slug ]['fontFace'] ?? array() ) as $face ) {
-			$url = armazon_preload_font_face_url( (array) $face );
+			$url = estrategia_web_preload_font_face_url( (array) $face );
 			if ( null !== $url ) {
 				$urls[] = $url;
 			}
 		}
 	}
-	$urls = array_slice( array_values( array_unique( $urls ) ), 0, ARMAZON_PRELOAD_FONTS_MAX );
+	$urls = array_slice( array_values( array_unique( $urls ) ), 0, ESTRATEGIA_WEB_PRELOAD_FONTS_MAX );
 
 	/**
 	 * Font files preloaded in the <head> (woff2, absolute URLs). array() turns it off.
 	 *
 	 * @param string[] $urls
 	 */
-	return array_values( array_filter( (array) apply_filters( 'armazon_preload_fonts', $urls ), 'is_string' ) );
+	return array_values( array_filter( (array) apply_filters( 'estrategia_web_preload_fonts', $urls ), 'is_string' ) );
 }
 
 /**
@@ -100,7 +100,7 @@ function armazon_preload_font_urls(): array {
  *
  * @param array<string, mixed> $face A fontFace entry of theme.json.
  */
-function armazon_preload_font_face_url( array $face ): ?string {
+function estrategia_web_preload_font_face_url( array $face ): ?string {
 	if ( ! empty( $face['unicodeRange'] ) || 'normal' !== ( $face['fontStyle'] ?? 'normal' ) ) {
 		return null;
 	}
@@ -122,9 +122,9 @@ function armazon_preload_font_face_url( array $face ): ?string {
  * @param array<int, array<string, string>> $resources
  * @return array<int, array<string, string>>
  */
-function armazon_preload_fonts( $resources ): array {
+function estrategia_web_preload_fonts( $resources ): array {
 	$resources = (array) $resources;
-	foreach ( armazon_preload_font_urls() as $url ) {
+	foreach ( estrategia_web_preload_font_urls() as $url ) {
 		$resources[] = array(
 			'href'        => $url,
 			'as'          => 'font',
@@ -134,4 +134,4 @@ function armazon_preload_fonts( $resources ): array {
 	}
 	return $resources;
 }
-add_filter( 'wp_preload_resources', 'armazon_preload_fonts' );
+add_filter( 'wp_preload_resources', 'estrategia_web_preload_fonts' );

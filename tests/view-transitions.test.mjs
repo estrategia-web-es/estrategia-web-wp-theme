@@ -4,8 +4,8 @@
  * - al navegar de /prueba-modulos/ a la portada por un enlace, la página
  *   nueva arranca CON transición (pagereveal trae viewTransition);
  * - la regla @view-transition { navigation: auto } está en las hojas;
- * - la cabecera (header de la plantilla) se llama armazon-header y el botón
- *   de WhatsApp del pie armazon-whatsapp (esta página tiene otro en el
+ * - la cabecera (header de la plantilla) se llama estrategia-web-header y el botón
+ *   de WhatsApp del pie estrategia-web-whatsapp (esta página tiene otro en el
  *   contenido: el caso que repetía el nombre), y ningún view-transition-name se repite
  *   en la página (un nombre repetido aborta la transición entera);
  * - con prefers-reduced-motion: reduce, la misma navegación va SIN transición.
@@ -17,15 +17,15 @@ import { withBrowser, run, assert, PAGE } from './browser.mjs';
 const recordReveal = ( context ) =>
 	context.addInitScript( () => {
 		window.addEventListener( 'pagereveal', ( event ) => {
-			sessionStorage.setItem( 'armazon-vt', event.viewTransition ? 'yes' : 'no' );
+			sessionStorage.setItem( 'estrategia-web-vt', event.viewTransition ? 'yes' : 'no' );
 		} );
 	} );
 
 const navigateHome = async ( page ) => {
-	await page.evaluate( () => sessionStorage.removeItem( 'armazon-vt' ) );
+	await page.evaluate( () => sessionStorage.removeItem( 'estrategia-web-vt' ) );
 	await Promise.all( [ page.waitForURL( ( url ) => url.pathname === '/' ), page.locator( '.wp-site-blocks > header .wp-block-site-title a' ).click() ] );
-	await page.waitForFunction( () => sessionStorage.getItem( 'armazon-vt' ) !== null );
-	return page.evaluate( () => sessionStorage.getItem( 'armazon-vt' ) );
+	await page.waitForFunction( () => sessionStorage.getItem( 'estrategia-web-vt' ) !== null );
+	return page.evaluate( () => sessionStorage.getItem( 'estrategia-web-vt' ) );
 };
 
 run( () =>
@@ -66,10 +66,10 @@ run( () =>
 				const el = document.querySelector( selector );
 				return el ? getComputedStyle( el ).viewTransitionName : 'NO EXISTE';
 			};
-			return { all, header: of( '.wp-site-blocks > header' ), whatsapp: of( 'footer.wp-block-template-part .armazon-whatsapp' ) };
+			return { all, header: of( '.wp-site-blocks > header' ), whatsapp: of( 'footer.wp-block-template-part .estrategia-web-whatsapp' ) };
 		} );
-		assert.equal( names.header, 'armazon-header', 'la cabecera no lleva view-transition-name: armazon-header' );
-		assert.equal( names.whatsapp, 'armazon-whatsapp', 'el WhatsApp no lleva view-transition-name: armazon-whatsapp' );
+		assert.equal( names.header, 'estrategia-web-header', 'la cabecera no lleva view-transition-name: estrategia-web-header' );
+		assert.equal( names.whatsapp, 'estrategia-web-whatsapp', 'el WhatsApp no lleva view-transition-name: estrategia-web-whatsapp' );
 		for ( const [ name, count ] of Object.entries( names.all ) ) {
 			assert.equal( count, 1, `view-transition-name «${ name }» repetido ${ count } veces: la transición se aborta` );
 		}

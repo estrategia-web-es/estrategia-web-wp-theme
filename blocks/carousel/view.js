@@ -1,5 +1,5 @@
 /**
- * armazon/carousel — comportamiento (Interactivity API, módulo ES nativo).
+ * estrategia-web/carousel — comportamiento (Interactivity API, módulo ES nativo).
  *
  * Lo que hace: mover la pista una diapositiva con las flechas, el teclado o
  * los puntos; sin bucle, marcar inicio/fin para desactivar flechas; con
@@ -62,8 +62,8 @@ import { store, getContext, getElement, withSyncEvent } from '@wordpress/interac
 const reducedMotion = () => window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 const behavior = () => ( reducedMotion() ? 'instant' : 'smooth' );
 
-const rootOf = ( element ) => element.closest( '.armazon-carousel' );
-const trackOf = ( element ) => rootOf( element ).querySelector( '.armazon-carousel__track' );
+const rootOf = ( element ) => element.closest( '.estrategia-web-carousel' );
+const trackOf = ( element ) => rootOf( element ).querySelector( '.estrategia-web-carousel__track' );
 
 /**
  * Slides of a track in LOGICAL order (DOM order, never changed): its direct
@@ -350,7 +350,7 @@ const glide = ( track, a, target, d ) => {
 	const root = rootOf( track );
 	const rootBox = root.getBoundingClientRect();
 	const layer = document.createElement( 'div' );
-	layer.className = 'armazon-carousel__ghosts';
+	layer.className = 'estrategia-web-carousel__ghosts';
 	layer.setAttribute( 'aria-hidden', 'true' );
 	layer.inert = true;
 	Object.assign( layer.style, {
@@ -494,7 +494,7 @@ const updateEdges = ( context, track ) => {
 	}
 };
 
-const { state } = store( 'armazon/carousel', {
+const { state } = store( 'estrategia-web/carousel', {
 	state: {
 		get isStatic() {
 			const context = getContext();

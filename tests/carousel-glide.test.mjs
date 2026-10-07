@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es si el paso de una diapositiva a otra SE VE deslizar o saltar, fotograma a fotograma, con la pista pintada, scroll-snap y animaciones reales.
 /**
- * armazon/carousel infinito: cada flecha DESLIZA (0.7.2). En cada paso, con
+ * estrategia-web/carousel infinito: cada flecha DESLIZA (0.7.2). En cada paso, con
  * «siguiente» y con «anterior», también al dar la vuelta (de la última a la
  * primera) y pulsando seguido sin esperar:
  * 1. entre la diapositiva de salida y la de llegada hay VARIOS fotogramas
@@ -130,8 +130,8 @@ const checkTrip = ( samples, n, distance, smooth, what ) => {
 const open = async ( page, name ) => {
 	const carousel = page.getByRole( 'region', { name, exact: true } );
 	await carousel.scrollIntoViewIfNeeded();
-	const handle = await carousel.locator( '.armazon-carousel__track' ).elementHandle();
-	await page.waitForFunction( ( el ) => el.closest( '.armazon-carousel' ).classList.contains( 'is-ready' ), handle );
+	const handle = await carousel.locator( '.estrategia-web-carousel__track' ).elementHandle();
+	await page.waitForFunction( ( el ) => el.closest( '.estrategia-web-carousel' ).classList.contains( 'is-ready' ), handle );
 	return {
 		carousel,
 		handle,
@@ -154,7 +154,7 @@ const lap = async ( page, name, n, smooth, label ) => {
 			await settledAt( page, handle, at, n, `${ label }, de la ${ from + 1 } a la ${ at + 1 }` );
 			const samples = await page.evaluate( () => window.__stop() );
 			checkTrip( samples, n, dir, smooth, `${ label }, de la ${ from + 1 } a la ${ at + 1 }` );
-			assert.equal( await carousel.locator( '.armazon-carousel__ghosts' ).count(), 0, `${ label }: quedan copias de la animación en la página` );
+			assert.equal( await carousel.locator( '.estrategia-web-carousel__ghosts' ).count(), 0, `${ label }: quedan copias de la animación en la página` );
 			assert.equal( await page.evaluate( ( el ) => window.__slides( el ).length, handle ), n, `${ label }: el número de diapositivas ha cambiado` );
 		}
 	}

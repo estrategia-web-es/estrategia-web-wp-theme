@@ -64,14 +64,14 @@
  */
 @media (prefers-reduced-motion: no-preference) {
 	.wp-block-accordion-panel {
-		--armazon-accordion-time: var(--wp--custom--motion--accordion--duration, 0.25s) var(--wp--custom--motion--accordion--easing, ease-in-out);
+		--estrategia-web-accordion-time: var(--wp--custom--motion--accordion--duration, 0.25s) var(--wp--custom--motion--accordion--easing, ease-in-out);
 		interpolate-size: allow-keywords;
 		overflow: clip;
 		overflow-clip-margin: 4px;
 		transition:
-			block-size var(--armazon-accordion-time),
-			padding-block var(--armazon-accordion-time),
-			margin-block var(--armazon-accordion-time),
+			block-size var(--estrategia-web-accordion-time),
+			padding-block var(--estrategia-web-accordion-time),
+			margin-block var(--estrategia-web-accordion-time),
 			content-visibility var(--wp--custom--motion--accordion--duration, 0.25s) allow-discrete;
 	}
 	/*
@@ -84,9 +84,9 @@
 	.wp-block-accordion-panel[hidden] {
 		block-size: 0;
 		transition:
-			block-size var(--armazon-accordion-time),
-			padding-block var(--armazon-accordion-time),
-			margin-block var(--armazon-accordion-time),
+			block-size var(--estrategia-web-accordion-time),
+			padding-block var(--estrategia-web-accordion-time),
+			margin-block var(--estrategia-web-accordion-time),
 			content-visibility var(--wp--custom--motion--accordion--duration, 0.25s) allow-discrete,
 			margin-inline 0s linear var(--wp--custom--motion--accordion--duration, 0.25s),
 			padding-inline 0s linear var(--wp--custom--motion--accordion--duration, 0.25s),
@@ -96,8 +96,8 @@
 	/* La respuesta funde y sube al abrir; funde y baja al cerrar. */
 	.wp-block-accordion-panel > * {
 		transition:
-			opacity var(--armazon-accordion-time),
-			translate var(--armazon-accordion-time);
+			opacity var(--estrategia-web-accordion-time),
+			translate var(--estrategia-web-accordion-time);
 	}
 	.wp-block-accordion-panel[hidden] > * {
 		opacity: 0;

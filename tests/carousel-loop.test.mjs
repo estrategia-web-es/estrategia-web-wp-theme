@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: dar la vuelta es desplazar la pista (scrollLeft) y leer si un botón está desactivado tras hidratar, que solo existe con la página pintada.
 /**
- * armazon/carousel en bucle (0.5.0, atributo loop, por defecto true):
+ * estrategia-web/carousel en bucle (0.5.0, atributo loop, por defecto true):
  * 1. al cargar, las DOS flechas están activas (antes «anterior» salía gris);
  * 2. «anterior» en la primera enseña la última;
  * 3. «siguiente» en la última vuelve a la primera;
@@ -41,7 +41,7 @@ run( () =>
 
 		for ( const name of [ 'Carrusel en bucle', 'Carrusel en bucle con consulta' ] ) {
 			const carousel = page.getByRole( 'region', { name, exact: true } );
-			const track = carousel.locator( '.armazon-carousel__track' );
+			const track = carousel.locator( '.estrategia-web-carousel__track' );
 			const prev = carousel.getByRole( 'button', { name: 'Diapositiva anterior' } );
 			const next = carousel.getByRole( 'button', { name: 'Diapositiva siguiente' } );
 			const handle = await track.elementHandle();
@@ -70,7 +70,7 @@ run( () =>
 		}
 
 		// Con consulta: cada entrada sigue siendo una diapositiva (seis puntos).
-		const dots = page.getByRole( 'region', { name: 'Carrusel en bucle con consulta', exact: true } ).locator( '.armazon-carousel__dot' );
+		const dots = page.getByRole( 'region', { name: 'Carrusel en bucle con consulta', exact: true } ).locator( '.estrategia-web-carousel__dot' );
 		assert.equal( await dots.count(), 6, 'con consulta debería haber un punto por entrada' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 	} )

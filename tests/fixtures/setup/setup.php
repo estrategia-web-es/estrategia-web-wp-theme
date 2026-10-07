@@ -13,12 +13,12 @@
  * a un #destino muy abajo (0.7.3). Es idempotente: si la
  * página o la entrada ya existe, la reescribe.
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 update_option( 'permalink_structure', '/%postname%/' );
-update_option( 'armazon_whatsapp_phone', '34611223344' );
-update_option( 'armazon_whatsapp_message', 'Mensaje desde la opción del sitio' );
+update_option( 'estrategia_web_whatsapp_phone', '34611223344' );
+update_option( 'estrategia_web_whatsapp_message', 'Mensaje desde la opción del sitio' );
 
 $slides = '';
 for ( $i = 1; $i <= 5; $i++ ) {
@@ -29,12 +29,12 @@ for ( $i = 1; $i <= 5; $i++ ) {
 }
 
 $content = '<!-- wp:heading --><h2 class="wp-block-heading">Carrusel</h2><!-- /wp:heading -->'
-	. '<!-- wp:armazon/carousel {"label":"Carrusel de prueba","showDots":true,"loop":false,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel de prueba","showDots":true,"loop":false,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $slides
-	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- /wp:estrategia-web/carousel -->'
 	. '<!-- wp:heading --><h2 class="wp-block-heading">Mapa</h2><!-- /wp:heading -->'
-	. '<!-- wp:armazon/map {"placeName":"Ayuntamiento de prueba","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","hours":"De lunes a viernes\nDe 9:00 a 14:00","embedUrl":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3075.5!2d2.6502!3d39.5696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMznCsDM0JzEwLjYiTiAywrAzOScwMC43IkU!5e0!3m2!1ses!2ses!4v1700000000000"} /-->'
-	. '<!-- wp:armazon/whatsapp {"phone":"+34 600 11 12 22","message":"Hola, ¿tenéis hora mañana?","position":"bottom-left"} /-->';
+	. '<!-- wp:estrategia-web/map {"placeName":"Ayuntamiento de prueba","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","hours":"De lunes a viernes\nDe 9:00 a 14:00","embedUrl":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3075.5!2d2.6502!3d39.5696!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMznCsDM0JzEwLjYiTiAywrAzOScwMC43IkU!5e0!3m2!1ses!2ses!4v1700000000000"} /-->'
+	. '<!-- wp:estrategia-web/whatsapp {"phone":"+34 600 11 12 22","message":"Hola, ¿tenéis hora mañana?","position":"bottom-left"} /-->';
 
 $existing = get_page_by_path( 'prueba-modulos' );
 $page_id  = wp_insert_post(
@@ -75,26 +75,26 @@ $query_block = static fn( int $id ): string => '<!-- wp:query {"queryId":' . $id
 
 // Carrusel en bucle (0.5.0): uno de bloques y uno con consulta, SIN el
 // atributo loop, para probar también que el bucle es el valor por defecto.
-$loop_content = '<!-- wp:armazon/carousel {"label":"Carrusel en bucle","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+$loop_content = '<!-- wp:estrategia-web/carousel {"label":"Carrusel en bucle","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $slides
-	. '<!-- /wp:armazon/carousel -->'
-	. '<!-- wp:armazon/carousel {"label":"Carrusel en bucle con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+	. '<!-- /wp:estrategia-web/carousel -->'
+	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel en bucle con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $query_block( 9 )
-	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- /wp:estrategia-web/carousel -->'
 	// Infinito (0.6.0): en rejilla de dos filas (la CSS la pone el hijo de
 	// prueba, clase rejilla-prueba), seis entradas = tres columnas.
-	. '<!-- wp:armazon/carousel {"label":"Carrusel en dos filas","className":"rejilla-prueba"} -->'
+	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel en dos filas","className":"rejilla-prueba"} -->'
 	. $query_block( 10 )
-	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- /wp:estrategia-web/carousel -->'
 	// 0.7.2: tres diapositivas y 2,4 a la vista (la portada de Lavandería):
 	// ninguna rotación deja desplazar una entera y el paso se anima aparte.
-	. '<!-- wp:armazon/carousel {"label":"Carrusel con una de más","showDots":true,"perViewMobile":1,"perViewTablet":2.4,"perViewDesktop":2.4} -->'
+	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel con una de más","showDots":true,"perViewMobile":1,"perViewTablet":2.4,"perViewDesktop":2.4} -->'
 	. implode( '<!-- /wp:group -->', array_slice( explode( '<!-- /wp:group -->', $slides ), 0, 3 ) ) . '<!-- /wp:group -->'
-	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- /wp:estrategia-web/carousel -->'
 	// Infinito (0.6.0): con una sola diapositiva no hay nada que hacer.
-	. '<!-- wp:armazon/carousel {"label":"Carrusel de una","showDots":true} -->'
+	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel de una","showDots":true} -->'
 	. '<!-- wp:paragraph --><p>Única diapositiva</p><!-- /wp:paragraph -->'
-	. '<!-- /wp:armazon/carousel -->';
+	. '<!-- /wp:estrategia-web/carousel -->';
 
 $existing_loop = get_page_by_path( 'prueba-carrusel-bucle' );
 wp_insert_post(
@@ -108,7 +108,7 @@ wp_insert_post(
 	)
 );
 
-$query_content = '<!-- wp:armazon/carousel {"label":"Carrusel con consulta","showDots":true,"loop":false,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
+$query_content = '<!-- wp:estrategia-web/carousel {"label":"Carrusel con consulta","showDots":true,"loop":false,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. '<!-- wp:query {"queryId":7,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"carrusel","inherit":false}} -->'
 	. '<div class="wp-block-query"><!-- wp:post-template -->'
 	. '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
@@ -116,7 +116,7 @@ $query_content = '<!-- wp:armazon/carousel {"label":"Carrusel con consulta","sho
 	. '<!-- /wp:group -->'
 	. '<!-- /wp:post-template --></div>'
 	. '<!-- /wp:query -->'
-	. '<!-- /wp:armazon/carousel -->';
+	. '<!-- /wp:estrategia-web/carousel -->';
 
 $existing_query = get_page_by_path( 'prueba-carrusel-consulta' );
 wp_insert_post(
@@ -167,7 +167,7 @@ for ( $i = 1; $i <= 2; $i++ ) {
 $map_content = '<!-- wp:query {"queryId":8,"query":{"perPage":2,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"mapa","inherit":false}} -->'
 	. '<div class="wp-block-query"><!-- wp:post-template -->'
 	. '<!-- wp:post-title /-->'
-	. '<!-- wp:armazon/map {"embedUrl":"https://www.google.com/maps/embed?pb=!1m18!1m12","useFeaturedImage":true,"metadata":{"bindings":{"address":{"source":"core/post-meta","args":{"key":"prueba_direccion"}}}}} /-->'
+	. '<!-- wp:estrategia-web/map {"embedUrl":"https://www.google.com/maps/embed?pb=!1m18!1m12","useFeaturedImage":true,"metadata":{"bindings":{"address":{"source":"core/post-meta","args":{"key":"prueba_direccion"}}}}} /-->'
 	. '<!-- /wp:post-template --></div>'
 	. '<!-- /wp:query -->';
 
@@ -185,11 +185,11 @@ wp_insert_post(
 
 // Mapa estático (0.5.0): dos mapas. El primero con la imagen de OSM que
 // generó tools/static-map.mjs (está en esta carpeta, que Playground sirve en
-// /wp-content/armazon-fixtures/); el segundo con una URL de OTRO dominio, que
+// /wp-content/estrategia-web-fixtures/); el segundo con una URL de OTRO dominio, que
 // el bloque tiene que descartar (cero peticiones a terceros).
 $embed          = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3075.5!2d2.6502!3d39.5696';
-$static_content = '<!-- wp:armazon/map {"placeName":"Sede con mapa estático","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/armazon-fixtures/mapa-estatico.webp"} /-->'
-	. '<!-- wp:armazon/map {"placeName":"Sede con mapa de fuera","address":"Calle de Fuera 1, Palma","embedUrl":"' . $embed . '","staticMapUrl":"https://tile.openstreetmap.org/16/33248/24911.png"} /-->';
+$static_content = '<!-- wp:estrategia-web/map {"placeName":"Sede con mapa estático","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/estrategia-web-fixtures/mapa-estatico.webp"} /-->'
+	. '<!-- wp:estrategia-web/map {"placeName":"Sede con mapa de fuera","address":"Calle de Fuera 1, Palma","embedUrl":"' . $embed . '","staticMapUrl":"https://tile.openstreetmap.org/16/33248/24911.png"} /-->';
 
 $existing_static = get_page_by_path( 'prueba-mapa-estatico' );
 wp_insert_post(
@@ -207,8 +207,8 @@ wp_insert_post(
 // sede ya dice la dirección al lado. El primero con mapa estático, el segundo
 // sin imagen; los dos con la dirección enlazada (para «Abrir en Google Maps»).
 $details_content = '<!-- wp:paragraph --><p class="ficha-sede">Plaça de Cort 1, 07001 Palma</p><!-- /wp:paragraph -->'
-	. '<!-- wp:armazon/map {"showDetails":false,"placeName":"Sede sin recuadro","address":"Plaça de Cort 1, 07001 Palma","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/armazon-fixtures/mapa-estatico.webp"} /-->'
-	. '<!-- wp:armazon/map {"showDetails":false,"placeName":"Sede sin recuadro ni imagen","address":"Calle Sin Imagen 2, Palma","embedUrl":"' . $embed . '"} /-->';
+	. '<!-- wp:estrategia-web/map {"showDetails":false,"placeName":"Sede sin recuadro","address":"Plaça de Cort 1, 07001 Palma","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/estrategia-web-fixtures/mapa-estatico.webp"} /-->'
+	. '<!-- wp:estrategia-web/map {"showDetails":false,"placeName":"Sede sin recuadro ni imagen","address":"Calle Sin Imagen 2, Palma","embedUrl":"' . $embed . '"} /-->';
 
 $existing_details = get_page_by_path( 'prueba-mapa-sin-datos' );
 wp_insert_post(
@@ -305,13 +305,13 @@ $photo_block = static function ( int $n ): string {
 		. '<figure class="wp-block-image size-full"><img src="' . esc_url( $url ) . '" alt="Foto ' . $n . '" class="wp-image-' . $id . '"/></figure>'
 		. '<!-- /wp:image -->';
 };
-$photos_content = '<!-- wp:armazon/carousel {"label":"Fotos arriba","align":"full","perViewMobile":1,"perViewTablet":2,"perViewDesktop":3} -->'
+$photos_content = '<!-- wp:estrategia-web/carousel {"label":"Fotos arriba","align":"full","perViewMobile":1,"perViewTablet":2,"perViewDesktop":3} -->'
 	. $photo_block( 1 ) . $photo_block( 2 ) . $photo_block( 3 ) . $photo_block( 4 )
-	. '<!-- /wp:armazon/carousel -->'
+	. '<!-- /wp:estrategia-web/carousel -->'
 	. '<!-- wp:spacer {"height":"3000px"} --><div style="height:3000px" aria-hidden="true" class="wp-block-spacer"></div><!-- /wp:spacer -->'
-	. '<!-- wp:armazon/carousel {"label":"Fotos abajo","perViewMobile":1,"perViewTablet":1,"perViewDesktop":1} -->'
+	. '<!-- wp:estrategia-web/carousel {"label":"Fotos abajo","perViewMobile":1,"perViewTablet":1,"perViewDesktop":1} -->'
 	. $photo_block( 5 ) . $photo_block( 6 ) . $photo_block( 7 )
-	. '<!-- /wp:armazon/carousel -->';
+	. '<!-- /wp:estrategia-web/carousel -->';
 
 $existing_photos = get_page_by_path( 'prueba-carrusel-fotos' );
 wp_insert_post(
@@ -326,4 +326,4 @@ wp_insert_post(
 );
 
 flush_rewrite_rules();
-echo 'armazon-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";
+echo 'estrategia-web-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";

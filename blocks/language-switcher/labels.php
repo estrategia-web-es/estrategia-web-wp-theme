@@ -5,5 +5,5 @@
  * Un atributo nuevo en block.json lleva su línea aquí.
  */
 return array(
-	'display' => __( 'Show the current language as (code: “ES”, name: “Español”)', 'armazon' ),
+	'display' => __( 'Show the current language as (code: “ES”, name: “Español”)', 'estrategia-web' ),
 );

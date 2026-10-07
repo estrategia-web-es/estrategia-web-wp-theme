@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es qué texto queda A LA VISTA (innerText, con lo oculto fuera) y qué caja se pinta antes y después de «Ver mapa», que solo existe con la página hidratada.
 /**
- * armazon/map sin recuadro de datos (0.6.0, atributo showDetails:false), para
+ * estrategia-web/map sin recuadro de datos (0.6.0, atributo showDetails:false), para
  * cuando la ficha de la sede ya dice la dirección al lado del mapa:
  * 1. la dirección se lee UNA vez en la página (la de la ficha), no dos;
  * 2. con mapa estático, el marco enseña solo la imagen, y debajo «Ver mapa»
@@ -29,24 +29,24 @@ run( () =>
 			assert.ok( ! text.includes( 'Sede sin recuadro' ), `a ${ width } px el nombre de la sede sale dentro del mapa` );
 
 			// 2. Con mapa estático: solo la imagen, y los dos botones.
-			const first = page.locator( '.armazon-map' ).nth( 0 );
-			assert.equal( await first.locator( '.armazon-map__card' ).count(), 0, 'con showDetails:false no se pinta el recuadro' );
-			const image = first.locator( 'img.armazon-map__static' );
+			const first = page.locator( '.estrategia-web-map' ).nth( 0 );
+			assert.equal( await first.locator( '.estrategia-web-map__card' ).count(), 0, 'con showDetails:false no se pinta el recuadro' );
+			const image = first.locator( 'img.estrategia-web-map__static' );
 			await image.scrollIntoViewIfNeeded();
 			await page.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await image.elementHandle() );
-			const frame = await first.locator( '.armazon-map__frame' ).boundingBox();
+			const frame = await first.locator( '.estrategia-web-map__frame' ).boundingBox();
 			const img = await image.boundingBox();
 			assert.ok( Math.abs( img.height - frame.height ) < 2 && img.height > 100, `a ${ width } px la imagen no llena el marco (${ img.height } de ${ frame.height })` );
 			assert.ok( await first.getByRole( 'button', { name: 'Ver mapa' } ).isVisible() );
 			assert.ok( await first.getByRole( 'link', { name: /Abrir en Google Maps/ } ).isVisible() );
 
 			// 3. Sin imagen: nada de caja vacía antes del clic; el mapa, después.
-			const second = page.locator( '.armazon-map' ).nth( 1 );
-			assert.equal( await second.locator( '.armazon-map__card' ).count(), 0 );
-			assert.ok( await second.locator( '.armazon-map__frame' ).isHidden(), `a ${ width } px sin imagen queda una caja vacía antes del clic` );
+			const second = page.locator( '.estrategia-web-map' ).nth( 1 );
+			assert.equal( await second.locator( '.estrategia-web-map__card' ).count(), 0 );
+			assert.ok( await second.locator( '.estrategia-web-map__frame' ).isHidden(), `a ${ width } px sin imagen queda una caja vacía antes del clic` );
 			assert.ok( await second.getByRole( 'link', { name: /Abrir en Google Maps/ } ).isVisible() );
 			await second.getByRole( 'button', { name: 'Ver mapa' } ).click();
-			const iframe = second.locator( '.armazon-map__iframe' );
+			const iframe = second.locator( '.estrategia-web-map__iframe' );
 			await page.waitForFunction( ( el ) => ! el.hidden && /google\.com/.test( el.src ) && el.getBoundingClientRect().height > 100, await iframe.elementHandle() );
 			assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 		}

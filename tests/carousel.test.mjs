@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: el desplazamiento (scrollLeft, scroll-snap) y el foco solo existen con la página pintada.
 /**
- * armazon/carousel: avanza y retrocede con las flechas, con el teclado (← →
+ * estrategia-web/carousel: avanza y retrocede con las flechas, con el teclado (← →
  * Fin) y con los puntos; las flechas se desactivan en los extremos.
  * Las esperas son por HECHOS (scrollLeft cambia), nunca por tiempo.
  */
@@ -11,8 +11,8 @@ run( () =>
 		const page = await newPage( { viewport: { width: 1200, height: 900 } } );
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
 
-		const carousel = page.locator( '.armazon-carousel' );
-		const track = carousel.locator( '.armazon-carousel__track' );
+		const carousel = page.locator( '.estrategia-web-carousel' );
+		const track = carousel.locator( '.estrategia-web-carousel__track' );
 		const prev = page.getByRole( 'button', { name: 'Diapositiva anterior' } );
 		const next = page.getByRole( 'button', { name: 'Diapositiva siguiente' } );
 		const scrollLeft = () => track.evaluate( ( el ) => el.scrollLeft );
@@ -45,7 +45,7 @@ run( () =>
 		// Puntos: el primero vuelve al inicio y queda marcado.
 		await page.getByRole( 'button', { name: 'Ir a la diapositiva 1' } ).click();
 		await page.waitForFunction( ( el ) => el.scrollLeft < 1, await track.elementHandle() );
-		await page.waitForFunction( () => document.querySelector( '.armazon-carousel__dot' ).getAttribute( 'aria-current' ) === 'true' );
+		await page.waitForFunction( () => document.querySelector( '.estrategia-web-carousel__dot' ).getAttribute( 'aria-current' ) === 'true' );
 
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 	} )

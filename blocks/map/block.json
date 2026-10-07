@@ -1,15 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"__comment": "armazon/map — mapa en dos clics. Documentación y mantenimiento en la cabecera de render.php.",
+	"__comment": "estrategia-web/map — mapa en dos clics. Documentación y mantenimiento en la cabecera de render.php.",
 	"apiVersion": 3,
-	"name": "armazon/map",
+	"name": "estrategia-web/map",
 	"version": "0.6.0",
 	"title": "Map (two clicks)",
 	"category": "embed",
 	"icon": "location-alt",
 	"description": "Static image with the address. The Google Maps embed only loads after the visitor asks for it.",
 	"keywords": [ "map", "google maps", "location", "address" ],
-	"textdomain": "armazon",
+	"textdomain": "estrategia-web",
 	"attributes": {
 		"placeName": { "type": "string", "default": "" },
 		"address": { "type": "string", "default": "" },

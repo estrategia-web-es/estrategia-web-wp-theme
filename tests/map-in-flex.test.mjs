@@ -1,12 +1,12 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es el ALTO que calcula el motor de maquetación para el mapa dentro de un contenedor flex, y eso solo existe con la página pintada.
 /**
- * armazon/map dentro de un Grupo vertical (flex en columna) NO SE ENCOGE.
+ * estrategia-web/map dentro de un Grupo vertical (flex en columna) NO SE ENCOGE.
  *
  * El fallo, 03-10-2026: el hijo de Lavandería redondea el mapa con
  * overflow:hidden y lo mete en un Grupo vertical; un hijo flex con overflow
  * distinto de visible tiene tamaño mínimo 0, y el mapa se quedó en 2 px con
  * todo lo de dentro cortado (la página salió un 14 % más corta). El arreglo es
- * `flex: none` en .armazon-map (blocks/map/style.css).
+ * `flex: none` en .estrategia-web-map (blocks/map/style.css).
  *
  * La prueba reproduce exactamente ese caso sobre /prueba-modulos/: envuelve el
  * mapa en lo mismo que pinta un Grupo vertical de WordPress —flex en columna,
@@ -25,7 +25,7 @@ run( () =>
 		const page = await newPage();
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
 		const medida = await page.evaluate( () => {
-			const map = document.querySelector( '.armazon-map' );
+			const map = document.querySelector( '.estrategia-web-map' );
 			const wrap = document.createElement( 'div' );
 			// Lo que pinta un Grupo vertical de WordPress alineado a la izquierda.
 			wrap.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start';
@@ -35,9 +35,9 @@ run( () =>
 			// Lo que hace el estilo «map-card» del hijo: el pie (dirección y
 			// botones) va ENCIMA del mapa, fuera del flujo. Sin esto la figura
 			// tiene contenido en flujo con ancho propio y el fallo no aparece.
-			const caption = map.querySelector( '.armazon-map__caption' );
+			const caption = map.querySelector( '.estrategia-web-map__caption' );
 			if ( caption ) caption.style.position = 'absolute';
-			const frame = map.querySelector( '.armazon-map__frame' );
+			const frame = map.querySelector( '.estrategia-web-map__frame' );
 			return { figura: map.getBoundingClientRect().height, marco: frame.getBoundingClientRect().height };
 		} );
 		// Con el fallo, el marco se mide con ancho 0 y su alto (aspect-ratio) sale 0:

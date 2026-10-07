@@ -25,7 +25,7 @@ run( () =>
 		const page = await newPage();
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
 		// Textos de los bloques traducidos (languages/es_ES.l10n.php).
-		// (El aviso de cookies ya no es del padre: está en armazon-site desde 0.7.0.)
+		// (El aviso de cookies ya no es del padre: está en estrategia-web-site desde 0.7.0.)
 		for ( const text of [ 'Ver mapa' ] ) {
 			assert.ok( await page.getByRole( 'button', { name: text, exact: true } ).isVisible(), `falta el botón «${ text }»` );
 		}
@@ -41,7 +41,7 @@ run( () =>
 		assert.ok( await notFound.getByRole( 'heading', { name: 'Página no encontrada' } ).isVisible(), '404 sin traducir' );
 
 		// Portada en modo «últimas entradas» (el de Playground): lista entradas,
-		// no el contenido de la primera (ver armazon_front_page_only_when_static).
+		// no el contenido de la primera (ver estrategia_web_front_page_only_when_static).
 		const home = await newPage();
 		await home.goto( `${ BASE_URL }/` );
 		assert.ok( ( await home.locator( '.wp-block-post-template .wp-block-post-title a' ).count() ) > 0, 'la portada no lista entradas' );

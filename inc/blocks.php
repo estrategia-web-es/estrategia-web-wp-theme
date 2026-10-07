@@ -24,7 +24,7 @@
  *   del padre. Un hijo no copia carpetas de blocks/ del padre: hace las suyas
  *   con otro nombre.
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,12 +32,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers every block found in blocks/.
  */
-function armazon_register_blocks(): void {
+function estrategia_web_register_blocks(): void {
 	foreach ( glob( get_template_directory() . '/blocks/*/block.json' ) ?: array() as $metadata_file ) {
 		register_block_type( dirname( $metadata_file ) );
 	}
 }
-add_action( 'init', 'armazon_register_blocks' );
+add_action( 'init', 'estrategia_web_register_blocks' );
 
 /**
  * Attributes of the parent's blocks that accept Block Bindings (0.2.0).
@@ -60,20 +60,20 @@ add_action( 'init', 'armazon_register_blocks' );
  *
  * @return array<string, string[]>
  */
-function armazon_bindable_attributes(): array {
+function estrategia_web_bindable_attributes(): array {
 	return array(
-		'armazon/map'      => array( 'placeName', 'address', 'phone', 'hours', 'embedUrl', 'mapsUrl', 'imageUrl', 'imageAlt', 'staticMapUrl' ),
-		'armazon/whatsapp' => array( 'phone', 'message', 'label' ),
+		'estrategia-web/map'      => array( 'placeName', 'address', 'phone', 'hours', 'embedUrl', 'mapsUrl', 'imageUrl', 'imageAlt', 'staticMapUrl' ),
+		'estrategia-web/whatsapp' => array( 'phone', 'message', 'label' ),
 	);
 }
 
-foreach ( armazon_bindable_attributes() as $armazon_block_name => $armazon_block_attributes ) {
+foreach ( estrategia_web_bindable_attributes() as $estrategia_web_block_name => $estrategia_web_block_attributes ) {
 	add_filter(
-		"block_bindings_supported_attributes_{$armazon_block_name}",
-		static fn( $supported ) => array_values( array_unique( array_merge( (array) $supported, $armazon_block_attributes ) ) )
+		"block_bindings_supported_attributes_{$estrategia_web_block_name}",
+		static fn( $supported ) => array_values( array_unique( array_merge( (array) $supported, $estrategia_web_block_attributes ) ) )
 	);
 }
-unset( $armazon_block_name, $armazon_block_attributes );
+unset( $estrategia_web_block_name, $estrategia_web_block_attributes );
 
 /**
  * Adds translated labels to the auto-generated controls of autoRegister blocks.
@@ -81,8 +81,8 @@ unset( $armazon_block_name, $armazon_block_attributes );
  * @param array $metadata Block metadata read from block.json.
  * @return array
  */
-function armazon_block_attribute_labels( array $metadata ): array {
-	if ( empty( $metadata['name'] ) || ! str_starts_with( $metadata['name'], 'armazon/' ) || empty( $metadata['file'] ) ) {
+function estrategia_web_block_attribute_labels( array $metadata ): array {
+	if ( empty( $metadata['name'] ) || ! str_starts_with( $metadata['name'], 'estrategia-web/' ) || empty( $metadata['file'] ) ) {
 		return $metadata;
 	}
 	$labels_file = dirname( $metadata['file'] ) . '/labels.php';
@@ -97,21 +97,21 @@ function armazon_block_attribute_labels( array $metadata ): array {
 	}
 	return $metadata;
 }
-add_filter( 'block_type_metadata', 'armazon_block_attribute_labels' );
+add_filter( 'block_type_metadata', 'estrategia_web_block_attribute_labels' );
 
 /**
  * Passes the theme translations to wp.i18n for the editor scripts (edit.js).
  *
- * WordPress expects JSON files per script (armazon-es_ES-<md5>.json), which
+ * WordPress expects JSON files per script (estrategia-web-es_ES-<md5>.json), which
  * need a build step to generate. Instead, the same PHP translations that the
  * server uses (languages/<locale>.l10n.php) are handed to wp.i18n.setLocaleData
  * inline. One source of truth, no build.
  */
-function armazon_editor_script_translations(): void {
-	$translations = get_translations_for_domain( 'armazon' );
+function estrategia_web_editor_script_translations(): void {
+	$translations = get_translations_for_domain( 'estrategia-web' );
 	$locale_data  = array(
 		'' => array(
-			'domain' => 'armazon',
+			'domain' => 'estrategia-web',
 			'lang'   => determine_locale(),
 		),
 	);
@@ -122,10 +122,10 @@ function armazon_editor_script_translations(): void {
 		$key                 = $entry->context ? $entry->context . "\u{0004}" . $entry->singular : $entry->singular;
 		$locale_data[ $key ] = $entry->translations;
 	}
-	$script = sprintf( 'wp.i18n.setLocaleData( %s, "armazon" );', wp_json_encode( $locale_data ) );
+	$script = sprintf( 'wp.i18n.setLocaleData( %s, "estrategia-web" );', wp_json_encode( $locale_data ) );
 
 	foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $name => $block_type ) {
-		if ( ! str_starts_with( $name, 'armazon/' ) ) {
+		if ( ! str_starts_with( $name, 'estrategia-web/' ) ) {
 			continue;
 		}
 		foreach ( $block_type->editor_script_handles as $handle ) {
@@ -133,4 +133,4 @@ function armazon_editor_script_translations(): void {
 		}
 	}
 }
-add_action( 'enqueue_block_editor_assets', 'armazon_editor_script_translations' );
+add_action( 'enqueue_block_editor_assets', 'estrategia_web_editor_script_translations' );

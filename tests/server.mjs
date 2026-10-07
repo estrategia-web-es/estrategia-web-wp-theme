@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const repo = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
-export const PORT = Number( process.env.ARMAZON_PORT || 9401 );
+export const PORT = Number( process.env.ESTRATEGIA_WEB_PORT || 9401 );
 export const BASE_URL = `http://127.0.0.1:${ PORT }`;
 
 export function start( { log = false } = {} ) {
@@ -34,9 +34,9 @@ export function start( { log = false } = {} ) {
 		'--wp=7.1',
 		'--php=8.3',
 		`--port=${ PORT }`,
-		'--mount-dir', repo, '/wordpress/wp-content/themes/armazon',
-		'--mount-dir', path.join( repo, 'tests/fixtures/armazon-hijo-prueba' ), '/wordpress/wp-content/themes/armazon-hijo-prueba',
-		'--mount-dir', path.join( repo, 'tests/fixtures/setup' ), '/wordpress/wp-content/armazon-fixtures',
+		'--mount-dir', repo, '/wordpress/wp-content/themes/estrategia-web',
+		'--mount-dir', path.join( repo, 'tests/fixtures/estrategia-web-hijo-prueba' ), '/wordpress/wp-content/themes/estrategia-web-hijo-prueba',
+		'--mount-dir', path.join( repo, 'tests/fixtures/setup' ), '/wordpress/wp-content/estrategia-web-fixtures',
 		`--blueprint=${ path.join( repo, 'tests/fixtures/blueprint.json' ) }`,
 		'--login',
 	];

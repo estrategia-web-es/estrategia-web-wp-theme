@@ -5,8 +5,8 @@
  * Un atributo nuevo en block.json lleva su línea aquí.
  */
 return array(
-	'phone'    => __( 'Phone in international format (empty: site option)', 'armazon' ),
-	'message'  => __( 'Predefined message (empty: site option)', 'armazon' ),
-	'position' => __( 'Position', 'armazon' ),
-	'label'    => __( 'Accessible name (empty: “Chat on WhatsApp”)', 'armazon' ),
+	'phone'    => __( 'Phone in international format (empty: site option)', 'estrategia-web' ),
+	'message'  => __( 'Predefined message (empty: site option)', 'estrategia-web' ),
+	'position' => __( 'Position', 'estrategia-web' ),
+	'label'    => __( 'Accessible name (empty: “Chat on WhatsApp”)', 'estrategia-web' ),
 );

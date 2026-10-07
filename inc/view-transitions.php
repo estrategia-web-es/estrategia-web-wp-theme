@@ -20,25 +20,25 @@
  * theme.json se cachea; en local, WP_DEVELOPMENT_MODE='theme' para ver el
  * cambio sin vaciar caché. Prueba: tests/view-transitions.test.mjs.
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /** Whether the theme (parent or child theme.json) leaves page transitions on. */
-function armazon_view_transitions_enabled(): bool {
+function estrategia_web_view_transitions_enabled(): bool {
 	$enabled = wp_get_global_settings( array( 'custom', 'motion', 'page', 'enabled' ) );
 	return ! ( false === $enabled || 'false' === $enabled || 0 === $enabled || '0' === $enabled );
 }
 
 /** Adds the transitions CSS after the parent's style.css. */
-function armazon_view_transitions_styles(): void {
-	if ( ! armazon_view_transitions_enabled() ) {
+function estrategia_web_view_transitions_styles(): void {
+	if ( ! estrategia_web_view_transitions_enabled() ) {
 		return;
 	}
 	$css = file_get_contents( get_template_directory() . '/assets/view-transitions.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	if ( $css ) {
-		wp_add_inline_style( 'armazon-style', $css );
+		wp_add_inline_style( 'estrategia-web-style', $css );
 	}
 }
-add_action( 'wp_enqueue_scripts', 'armazon_view_transitions_styles', 20 );
+add_action( 'wp_enqueue_scripts', 'estrategia_web_view_transitions_styles', 20 );

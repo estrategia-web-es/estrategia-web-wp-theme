@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: qué foto del srcset se descarga lo decide el navegador con el sizes y el ancho pintado; sin pintar no hay currentSrc.
 /**
- * armazon/carousel con fotos (0.7.4), en /prueba-carrusel-fotos/:
+ * estrategia-web/carousel con fotos (0.7.4), en /prueba-carrusel-fotos/:
  * - el carrusel de ARRIBA (1/2/3 a la vista, cuatro fotos): las tres primeras
  *   diapositivas, las que se pueden ver al cargar, llevan fetchpriority="high"
  *   y ninguna loading="lazy"; la cuarta, que no se ve, va diferida
@@ -10,7 +10,7 @@
  * - a 1512 y a 402 de ancho, la foto descargada de cada diapositiva visible
  *   es como mínimo de su ancho pintado y no más del doble: el sizes dice el
  *   ancho de la diapositiva, no el de la ventana.
- * - la marca interna data-armazon-carousel no llega a la página.
+ * - la marca interna data-estrategia-web-carousel no llega a la página.
  * Contra la 0.7.3 falla: solo la primera llevaba prioridad, la cuarta no
  * iba diferida y a 1512 bajaba la de 1536 para un hueco de ~500.
  */
@@ -26,19 +26,19 @@ const fileWidth = ( src ) => {
 
 const inspect = ( page ) =>
 	page.evaluate( () =>
-		[ ...document.querySelectorAll( '.armazon-carousel' ) ].map( ( carousel ) => ( {
+		[ ...document.querySelectorAll( '.estrategia-web-carousel' ) ].map( ( carousel ) => ( {
 			label: carousel.getAttribute( 'aria-label' ),
-			images: [ ...carousel.querySelectorAll( '.armazon-carousel__track img' ) ].map( ( img ) => ( {
+			images: [ ...carousel.querySelectorAll( '.estrategia-web-carousel__track img' ) ].map( ( img ) => ( {
 				alt: img.alt,
 				loading: img.getAttribute( 'loading' ),
 				priority: img.getAttribute( 'fetchpriority' ),
 				sizes: img.getAttribute( 'sizes' ),
-				marker: img.hasAttribute( 'data-armazon-carousel' ),
+				marker: img.hasAttribute( 'data-estrategia-web-carousel' ),
 				src: img.currentSrc,
 				width: img.getBoundingClientRect().width,
 				visible: ( () => {
 					const r = img.getBoundingClientRect();
-					const t = carousel.querySelector( '.armazon-carousel__track' ).getBoundingClientRect();
+					const t = carousel.querySelector( '.estrategia-web-carousel__track' ).getBoundingClientRect();
 					return r.right > t.left + 1 && r.left < t.right - 1 && r.top < innerHeight;
 				} )(),
 			} ) ),
@@ -51,16 +51,16 @@ run( () =>
 			const page = await newPage( { viewport: { width, height: 900 } } );
 			await page.goto( URL, { waitUntil: 'load' } );
 			await page.waitForFunction( () =>
-				[ ...document.querySelectorAll( '.armazon-carousel' ) ][ 0 ]
+				[ ...document.querySelectorAll( '.estrategia-web-carousel' ) ][ 0 ]
 					.querySelectorAll( 'img' )
-					.length && [ ...document.querySelectorAll( '.armazon-carousel' )[ 0 ].querySelectorAll( 'img' ) ].slice( 0, 3 ).every( ( i ) => i.complete && i.currentSrc )
+					.length && [ ...document.querySelectorAll( '.estrategia-web-carousel' )[ 0 ].querySelectorAll( 'img' ) ].slice( 0, 3 ).every( ( i ) => i.complete && i.currentSrc )
 			);
 			const [ top, bottom ] = await inspect( page );
 			assert.equal( top.label, 'Fotos arriba' );
 			assert.equal( top.images.length, 4 );
 
 			top.images.forEach( ( img, i ) => {
-				assert.equal( img.marker, false, `${ img.alt }: la marca data-armazon-carousel llegó a la página` );
+				assert.equal( img.marker, false, `${ img.alt }: la marca data-estrategia-web-carousel llegó a la página` );
 				if ( i < 3 ) {
 					assert.equal( img.priority, 'high', `${ img.alt } (diapositiva ${ i + 1 }, visible al cargar) sin fetchpriority="high"` );
 					assert.equal( img.loading, null, `${ img.alt } (visible al cargar) va con loading="${ img.loading }"` );

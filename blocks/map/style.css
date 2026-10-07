@@ -1,9 +1,9 @@
 /*
- * armazon/map — estilos. Solo tokens de theme.json. La proporción del
- * recuadro se ajusta en el hijo con --armazon-map-ratio (por defecto 16/9).
+ * estrategia-web/map — estilos. Solo tokens de theme.json. La proporción del
+ * recuadro se ajusta en el hijo con --estrategia-web-map-ratio (por defecto 16/9).
  */
-.armazon-map {
-	--armazon-map-ratio: 16 / 9;
+.estrategia-web-map {
+	--estrategia-web-map-ratio: 16 / 9;
 	margin-inline: 0;
 	/*
 	 * OCUPA TODO EL ANCHO, siempre. Un Grupo vertical de WordPress es un flex
@@ -21,24 +21,24 @@
 	flex: none;
 }
 
-.armazon-map__frame {
+.estrategia-web-map__frame {
 	position: relative;
-	aspect-ratio: var(--armazon-map-ratio);
+	aspect-ratio: var(--estrategia-web-map-ratio);
 	overflow: hidden;
 	background: var(--wp--preset--color--surface, #eee);
 	border-radius: 4px;
 }
 
-.armazon-map__image,
-.armazon-map__iframe,
-.armazon-map__placeholder {
+.estrategia-web-map__image,
+.estrategia-web-map__iframe,
+.estrategia-web-map__placeholder {
 	display: block;
 	inline-size: 100%;
 	block-size: 100%;
 	border: 0;
 }
 
-.armazon-map__image {
+.estrategia-web-map__image {
 	object-fit: cover;
 }
 
@@ -48,7 +48,7 @@
  * Maps como «foto» se veía mal y mentía (no se puede mover). Un hijo lo viste
  * sobre estas clases o con su propio fondo decorativo.
  */
-.armazon-map__card {
+.estrategia-web-map__card {
 	position: absolute;
 	inset: 0;
 	display: grid;
@@ -59,15 +59,15 @@
 	color: var(--wp--preset--color--contrast, inherit);
 }
 
-.armazon-map__card > * {
+.estrategia-web-map__card > * {
 	margin: 0;
 }
 
-.armazon-map__name {
+.estrategia-web-map__name {
 	font-weight: 600;
 }
 
-.armazon-map__card-address {
+.estrategia-web-map__card-address {
 	font-style: normal;
 }
 
@@ -77,18 +77,18 @@
  * en el centro. En un bloque estrecho no cabe encima: el marco pierde la
  * proporción, el mapa la lleva él y el recuadro va debajo.
  */
-.armazon-map.has-static-map {
+.estrategia-web-map.has-static-map {
 	container-type: inline-size;
 }
 
-.armazon-map__static {
+.estrategia-web-map__static {
 	display: block;
 	inline-size: 100%;
 	block-size: 100%;
 	object-fit: cover;
 }
 
-.armazon-map.has-static-map .armazon-map__card {
+.estrategia-web-map.has-static-map .estrategia-web-map__card {
 	inset: var(--wp--preset--spacing--16, 1rem) auto auto var(--wp--preset--spacing--16, 1rem);
 	max-inline-size: min(22rem, 42%);
 	border-radius: 4px;
@@ -96,15 +96,15 @@
 }
 
 @container (max-width: 479px) {
-	.armazon-map.has-static-map .armazon-map__frame {
+	.estrategia-web-map.has-static-map .estrategia-web-map__frame {
 		aspect-ratio: auto;
 	}
-	.armazon-map.has-static-map .armazon-map__static,
-	.armazon-map.has-static-map .armazon-map__iframe {
-		aspect-ratio: var(--armazon-map-ratio);
+	.estrategia-web-map.has-static-map .estrategia-web-map__static,
+	.estrategia-web-map.has-static-map .estrategia-web-map__iframe {
+		aspect-ratio: var(--estrategia-web-map-ratio);
 		block-size: auto;
 	}
-	.armazon-map.has-static-map .armazon-map__card {
+	.estrategia-web-map.has-static-map .estrategia-web-map__card {
 		position: static;
 		max-inline-size: none;
 		border-radius: 0;
@@ -112,27 +112,27 @@
 	}
 }
 
-.armazon-map [hidden] {
+.estrategia-web-map [hidden] {
 	display: none;
 }
 
-.armazon-map__caption {
+.estrategia-web-map__caption {
 	display: grid;
 	gap: var(--wp--preset--spacing--8, 0.5rem);
 	margin-block-start: var(--wp--preset--spacing--16, 1rem);
 }
 
-.armazon-map__address {
+.estrategia-web-map__address {
 	font-style: normal;
 	font-weight: 600;
 }
 
-.armazon-map__notice {
+.estrategia-web-map__notice {
 	margin: var(--wp--preset--spacing--8, 0.5rem) 0 0;
 	font-size: var(--wp--preset--font-size--small, 0.875rem);
 	color: var(--wp--preset--color--muted, inherit);
 }
 
-.armazon-map__load {
+.estrategia-web-map__load {
 	cursor: pointer;
 }

@@ -13,7 +13,7 @@
  * Sobre /prueba-anclas/ (tests/fixtures/setup/setup.php): un enlace arriba y
  * un h2#destino 2400 px más abajo. La cabecera fija de 80 px y el token
  * --wp--custom--layout--cabecera los pone el hijo de prueba SOLO en esa
- * página (tests/fixtures/armazon-hijo-prueba/functions.php), como haría un
+ * página (tests/fixtures/estrategia-web-hijo-prueba/functions.php), como haría un
  * hijo con cabecera fija (Lavandería).
  * Vista fallar el 06-10-2026 con la 0.7.2: el clic saltaba de 0 al final en
  * un fotograma, y el destino quedaba a 0 px, debajo de la cabecera de 80.

@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: que cada entrada de la Consulta sea una diapositiva es medida de cajas (anchos, scrollLeft), que solo existe pintado.
 /**
- * armazon/carousel con un core/query dentro (0.2.0): cada <li> del
+ * estrategia-web/carousel con un core/query dentro (0.2.0): cada <li> del
  * post-template es una diapositiva — se ven dos por fila, hay un punto por
  * entrada, la flecha avanza UNA entrada y «Fin» llega a la última.
  * Página sembrada en tests/fixtures/setup/setup.php (/prueba-carrusel-consulta/).
@@ -12,8 +12,8 @@ run( () =>
 		const page = await newPage( { viewport: { width: 1200, height: 900 } } );
 		await page.goto( `${ BASE_URL }/prueba-carrusel-consulta/`, { waitUntil: 'networkidle' } );
 
-		const carousel = page.locator( '.armazon-carousel' );
-		const track = carousel.locator( '.armazon-carousel__track' );
+		const carousel = page.locator( '.estrategia-web-carousel' );
+		const track = carousel.locator( '.estrategia-web-carousel__track' );
 		const slides = track.locator( '.wp-block-post-template > li' );
 		await carousel.scrollIntoViewIfNeeded();
 
@@ -28,7 +28,7 @@ run( () =>
 		assert.ok( boxes[ 1 ].left > boxes[ 0 ].left, 'la segunda entrada no está a la derecha de la primera' );
 
 		// Un punto por entrada, no uno por bloque interno (que sería uno: la consulta).
-		assert.equal( await page.locator( '.armazon-carousel__dot' ).count(), 6, 'debería haber un punto por entrada' );
+		assert.equal( await page.locator( '.estrategia-web-carousel__dot' ).count(), 6, 'debería haber un punto por entrada' );
 
 		// La flecha avanza exactamente una entrada.
 		const offsets = await slides.evaluateAll( ( els ) => els.map( ( el ) => el.offsetLeft - els[ 0 ].offsetLeft ) );
@@ -40,7 +40,7 @@ run( () =>
 		await page.keyboard.press( 'End' );
 		const next = page.getByRole( 'button', { name: 'Diapositiva siguiente' } );
 		await page.waitForFunction( ( el ) => el.disabled, await next.elementHandle() );
-		await page.waitForFunction( () => document.querySelectorAll( '.armazon-carousel__dot' )[ 5 ].getAttribute( 'aria-current' ) === 'true' );
+		await page.waitForFunction( () => document.querySelectorAll( '.estrategia-web-carousel__dot' )[ 5 ].getAttribute( 'aria-current' ) === 'true' );
 
 		// Un punto concreto lleva a su entrada.
 		await page.getByRole( 'button', { name: 'Ir a la diapositiva 2' } ).click();

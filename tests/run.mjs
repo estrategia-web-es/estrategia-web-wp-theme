@@ -2,7 +2,7 @@
 /**
  *     node tests/run.mjs            levanta Playground, corre todo, lo para
  *     node tests/run.mjs carousel   solo las pruebas cuyo nombre contiene «carousel»
- *     ARMAZON_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs
+ *     ESTRATEGIA_WEB_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs
  *                                   usa un WordPress ya levantado (node tests/server.mjs)
  *
  * Cómo funciona y cómo se mantiene:
@@ -13,7 +13,7 @@
  * - Cada prueba es un proceso aparte que recibe BASE_URL y sale con 0 o 1.
  * - La trampa: Playground tarda ~1 minuto en arrancar (descarga WordPress y la
  *   traducción la primera vez). Para iterar, se levanta una vez con
- *   tests/server.mjs y se pasa ARMAZON_BASE_URL.
+ *   tests/server.mjs y se pasa ESTRATEGIA_WEB_BASE_URL.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,7 +39,7 @@ const tests = fs
 	.sort( ( a, b ) => a.level - b.level || a.file.localeCompare( b.file ) );
 
 let server = null;
-let baseUrl = process.env.ARMAZON_BASE_URL;
+let baseUrl = process.env.ESTRATEGIA_WEB_BASE_URL;
 let failed = false;
 try {
 	if ( ! baseUrl && tests.some( ( t ) => t.level >= 2 ) ) {

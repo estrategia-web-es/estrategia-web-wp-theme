@@ -25,13 +25,13 @@
  *   sale en todas las páginas y donde lo pone parts/footer.html. Uno más en
  *   el contenido de una página (la de pruebas lo tiene) se funde con ella:
  *   nombrar los dos repetiría el nombre. Medido el 06-10-2026: con
- *   .armazon-whatsapp a secas, /prueba-modulos/ tenía dos y no había
+ *   .estrategia-web-whatsapp a secas, /prueba-modulos/ tenía dos y no había
  *   transición.
  * - Quietos: de su pareja de imágenes se quita la vieja y la nueva entra sin
  *   animación. Si la cabecera cambia (el enlace activo del menú), se ve ya
  *   cambiada, sin fundido.
  * - El aviso de cookies NO es de aquí: se nombra a sí mismo en su plugin
- *   (armazon-site), que es quien sabe si está a la vista.
+ *   (estrategia-web-site), que es quien sabe si está a la vista.
  *
  * Cómo se mantiene:
  * - Quién: quien toque el padre. Cuándo: si cambia la estructura de la
@@ -43,7 +43,7 @@
  *   cabecera es un hijo con position: fixed (.lm-header) dentro del <header>
  *   de la plantilla, el <header> mide 0 de alto y su captura sale VACÍA: a
  *   mitad de transición la cabecera desaparece, que es justo el parpadeo que
- *   se quería evitar. Para eso está la clase armazon-vt-header: el hijo se
+ *   se quería evitar. Para eso está la clase estrategia-web-vt-header: el hijo se
  *   la pone al elemento fijo (en el bloque, «Clase CSS adicional») y el
  *   nombre pasa a él. Solo UNO por cabecera, o el nombre se repite.
  *   tests/view-transitions.test.mjs cuenta los nombres de la página.
@@ -60,23 +60,23 @@
 	animation-timing-function: var(--wp--custom--motion--page--easing, ease);
 }
 
-.wp-site-blocks > header.wp-block-template-part:first-of-type:not(:has(.armazon-vt-header)),
-.wp-site-blocks > header.wp-block-template-part:first-of-type .armazon-vt-header {
-	view-transition-name: armazon-header;
+.wp-site-blocks > header.wp-block-template-part:first-of-type:not(:has(.estrategia-web-vt-header)),
+.wp-site-blocks > header.wp-block-template-part:first-of-type .estrategia-web-vt-header {
+	view-transition-name: estrategia-web-header;
 }
 
-footer.wp-block-template-part .armazon-whatsapp {
-	view-transition-name: armazon-whatsapp;
+footer.wp-block-template-part .estrategia-web-whatsapp {
+	view-transition-name: estrategia-web-whatsapp;
 }
 
-::view-transition-group(armazon-header),
-::view-transition-group(armazon-whatsapp),
-::view-transition-new(armazon-header),
-::view-transition-new(armazon-whatsapp) {
+::view-transition-group(estrategia-web-header),
+::view-transition-group(estrategia-web-whatsapp),
+::view-transition-new(estrategia-web-header),
+::view-transition-new(estrategia-web-whatsapp) {
 	animation: none;
 }
 
-::view-transition-old(armazon-header),
-::view-transition-old(armazon-whatsapp) {
+::view-transition-old(estrategia-web-header),
+::view-transition-old(estrategia-web-whatsapp) {
 	display: none;
 }

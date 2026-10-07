@@ -1,6 +1,6 @@
 // NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es lo que ve el visitante antes del clic (recuadro con datos, sin imagen) y que no salga ninguna petición a Google, y eso solo existe con la página pintada.
 /**
- * armazon/map 0.3.0, sin imagen (lo normal): en vez de una foto de mapa, un
+ * estrategia-web/map 0.3.0, sin imagen (lo normal): en vez de una foto de mapa, un
  * recuadro con los DATOS del sitio en texto real (nombre, dirección, teléfono
  * con enlace tel:, horario con sus saltos), el botón «Ver mapa» y el enlace
  * «Abrir en Google Maps». Ninguna <img> y ninguna petición a Google hasta el
@@ -16,11 +16,11 @@ run( () =>
 		const seen = [];
 		page.on( 'request', ( request ) => isGoogle( request.url() ) && seen.push( request.url() ) );
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
-		const map = page.locator( '.armazon-map' );
+		const map = page.locator( '.estrategia-web-map' );
 		await map.scrollIntoViewIfNeeded();
 
 		assert.equal( await map.locator( 'img' ).count(), 0, 'sin imagen elegida no debería haber <img>' );
-		const card = map.locator( '.armazon-map__card' );
+		const card = map.locator( '.estrategia-web-map__card' );
 		assert.ok( await card.isVisible(), 'falta el recuadro con los datos' );
 		const text = await card.innerText();
 		for ( const expected of [ 'Ayuntamiento de prueba', 'Plaça de Cort 1, 07001 Palma', '+34 971 22 59 00', 'De lunes a viernes\nDe 9:00 a 14:00' ] ) {

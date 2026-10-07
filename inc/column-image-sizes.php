@@ -13,7 +13,7 @@
  *
  * Cómo, en dos tiempos (como el carrusel, inc/carousel-images.php):
  * 1. Al pintar un core/column (render_block) se marca cada <img> con
- *    data-armazon-column="<parte>|<tope>|<apila>". El srcset y el sizes aún no
+ *    data-estrategia-web-column="<parte>|<tope>|<apila>". El srcset y el sizes aún no
  *    existen: los pone wp_filter_content_tags DESPUÉS de pintar los bloques.
  *    - parte: el «width» de la columna en % o, sin él, 100 / nº de columnas
  *      (se apunta al empezar a pintar el core/columns, render_block_data);
@@ -41,27 +41,27 @@
  *   dentro (se pinta primero) y la de fuera ya no remarca.
  * - Las fotos que caben en su hueco (un icono de 64) no se tocan: el sizes
  *   de WordPress ya es su ancho.
- * - Ajuste: filtro armazon_column_image_sizes( $sizes, $img, $column ).
+ * - Ajuste: filtro estrategia_web_column_image_sizes( $sizes, $img, $column ).
  * - La trampa: el core/column no sabe cuántas hermanas tiene; lo sabe el
  *   core/columns ANTES de pintar las suyas. Por eso la pila. Y la marca solo
  *   se quita en las fotos que pasan por wp_filter_content_tags (contenido y
  *   plantillas): en otra, queda en el HTML sin hacer nada.
  * - Prueba: la mira el hijo (Lavandería, tests/render-blocking.test.mjs).
  *
- * @package armazon
+ * @package estrategia-web
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /** The core stacks columns below this width (block-library/columns). */
-const ARMAZON_COLUMNS_STACK_MAX = 781;
+const ESTRATEGIA_WEB_COLUMNS_STACK_MAX = 781;
 
 /**
  * Columns being rendered: { count, cap (px or 0), stacked }.
  *
  * @return array<int, array{count:int, cap:float, stacked:bool}>
  */
-function &armazon_columns_stack(): array {
+function &estrategia_web_columns_stack(): array {
 	static $stack = array();
 	return $stack;
 }
@@ -72,7 +72,7 @@ function &armazon_columns_stack(): array {
  * @param array<string, mixed> $parsed_block
  * @return array<string, mixed>
  */
-function armazon_columns_push( $parsed_block ): array {
+function estrategia_web_columns_push( $parsed_block ): array {
 	$parsed_block = (array) $parsed_block;
 	if ( 'core/columns' === ( $parsed_block['blockName'] ?? '' ) ) {
 		$count = 0;
@@ -83,7 +83,7 @@ function armazon_columns_push( $parsed_block ): array {
 		$align   = (string) ( $attrs['align'] ?? '' );
 		$layout  = (array) wp_get_global_settings( array( 'layout' ) );
 		$size    = 'full' === $align ? '' : (string) ( 'wide' === $align ? ( $layout['wideSize'] ?? '' ) : ( $layout['contentSize'] ?? '' ) );
-		$stack   = &armazon_columns_stack();
+		$stack   = &estrategia_web_columns_stack();
 		$stack[] = array(
 			'count'   => max( 1, $count ),
 			'cap'     => preg_match( '/^(\d+(?:\.\d+)?)px$/', trim( $size ), $m ) ? (float) $m[1] : 0.0,
@@ -92,19 +92,19 @@ function armazon_columns_push( $parsed_block ): array {
 	}
 	return $parsed_block;
 }
-add_filter( 'render_block_data', 'armazon_columns_push' );
+add_filter( 'render_block_data', 'estrategia_web_columns_push' );
 
 /**
  * Pops it when it is done.
  *
  * @param string $content
  */
-function armazon_columns_pop( $content ): string {
-	$stack = &armazon_columns_stack();
+function estrategia_web_columns_pop( $content ): string {
+	$stack = &estrategia_web_columns_stack();
 	array_pop( $stack );
 	return (string) $content;
 }
-add_filter( 'render_block_core/columns', 'armazon_columns_pop', 99 );
+add_filter( 'render_block_core/columns', 'estrategia_web_columns_pop', 99 );
 
 /**
  * Step 1: marks the pictures of a column with its share of the row.
@@ -112,9 +112,9 @@ add_filter( 'render_block_core/columns', 'armazon_columns_pop', 99 );
  * @param string               $content
  * @param array<string, mixed> $block
  */
-function armazon_column_images_mark( $content, $block ): string {
+function estrategia_web_column_images_mark( $content, $block ): string {
 	$content = (string) $content;
-	$stack   = &armazon_columns_stack();
+	$stack   = &estrategia_web_columns_stack();
 	$row     = end( $stack );
 	if ( false === $row || ! str_contains( $content, '<img' ) ) {
 		return $content;
@@ -127,13 +127,13 @@ function armazon_column_images_mark( $content, $block ): string {
 	$mark  = implode( '|', array( round( $share, 2 ), $row['cap'], $row['stacked'] ? 1 : 0 ) );
 	$p     = new WP_HTML_Tag_Processor( $content );
 	while ( $p->next_tag( 'img' ) ) {
-		if ( null === $p->get_attribute( 'data-armazon-column' ) && null === $p->get_attribute( 'sizes' ) ) {
-			$p->set_attribute( 'data-armazon-column', $mark );
+		if ( null === $p->get_attribute( 'data-estrategia-web-column' ) && null === $p->get_attribute( 'sizes' ) ) {
+			$p->set_attribute( 'data-estrategia-web-column', $mark );
 		}
 	}
 	return $p->get_updated_html();
 }
-add_filter( 'render_block_core/column', 'armazon_column_images_mark', 10, 2 );
+add_filter( 'render_block_core/column', 'estrategia_web_column_images_mark', 10, 2 );
 
 /**
  * The sizes of a picture in a column. Pure.
@@ -143,12 +143,12 @@ add_filter( 'render_block_core/column', 'armazon_column_images_mark', 10, 2 );
  * @param bool  $stacked If the columns stack under 782.
  * @param float $zoom    How much a cover-cropped picture is enlarged (>= 1).
  */
-function armazon_column_image_sizes_for( float $share, float $cap, bool $stacked, float $zoom ): string {
+function estrategia_web_column_image_sizes_for( float $share, float $cap, bool $stacked, float $zoom ): string {
 	$fmt     = static fn( float $n ): string => rtrim( rtrim( number_format( $n, 1, '.', '' ), '0' ), '.' );
 	$vw      = $fmt( $share * $zoom ) . 'vw';
 	$desktop = $cap > 0 ? sprintf( 'min(%s, %dpx)', $vw, (int) ceil( $cap * $share / 100 * $zoom ) ) : $vw;
 	$mobile  = $stacked ? $fmt( 100 * $zoom ) . 'vw' : $vw;
-	return sprintf( '(max-width: %dpx) %s, %s', ARMAZON_COLUMNS_STACK_MAX, $mobile, $desktop );
+	return sprintf( '(max-width: %dpx) %s, %s', ESTRATEGIA_WEB_COLUMNS_STACK_MAX, $mobile, $desktop );
 }
 
 /**
@@ -156,17 +156,17 @@ function armazon_column_image_sizes_for( float $share, float $cap, bool $stacked
  *
  * @param string $image The <img> tag, with srcset and sizes.
  */
-function armazon_column_image_sizes( $image ): string {
+function estrategia_web_column_image_sizes( $image ): string {
 	$image = (string) $image;
-	if ( ! str_contains( $image, 'data-armazon-column' ) ) {
+	if ( ! str_contains( $image, 'data-estrategia-web-column' ) ) {
 		return $image;
 	}
 	$p = new WP_HTML_Tag_Processor( $image );
 	if ( ! $p->next_tag( 'img' ) ) {
 		return $image;
 	}
-	list( $share, $cap, $stacked ) = array_map( 'floatval', explode( '|', (string) $p->get_attribute( 'data-armazon-column' ) ) + array( 100, 0, 1 ) );
-	$p->remove_attribute( 'data-armazon-column' );
+	list( $share, $cap, $stacked ) = array_map( 'floatval', explode( '|', (string) $p->get_attribute( 'data-estrategia-web-column' ) ) + array( 100, 0, 1 ) );
+	$p->remove_attribute( 'data-estrategia-web-column' );
 
 	$sizes = (string) $p->get_attribute( 'sizes' );
 	$w     = (int) $p->get_attribute( 'width' );
@@ -180,7 +180,7 @@ function armazon_column_image_sizes( $image ): string {
 			$box  = (float) $ar[1] / (float) ( $ar[2] ?? 1 );
 			$zoom = $box > 0 ? max( 1.0, ( $w / $h ) / $box ) : 1.0;
 		}
-		$new = armazon_column_image_sizes_for( $share, $cap, (bool) $stacked, round( $zoom, 2 ) );
+		$new = estrategia_web_column_image_sizes_for( $share, $cap, (bool) $stacked, round( $zoom, 2 ) );
 		/**
 		 * The sizes of a picture in a column.
 		 *
@@ -188,9 +188,9 @@ function armazon_column_image_sizes( $image ): string {
 		 * @param array<string, mixed> $img    width, height, style of the <img>.
 		 * @param array<string, mixed> $column share (%), cap (px, 0 = none), stacked.
 		 */
-		$new = (string) apply_filters( 'armazon_column_image_sizes', $new, compact( 'w', 'h', 'style' ), compact( 'share', 'cap', 'stacked' ) );
+		$new = (string) apply_filters( 'estrategia_web_column_image_sizes', $new, compact( 'w', 'h', 'style' ), compact( 'share', 'cap', 'stacked' ) );
 		$p->set_attribute( 'sizes', ( $m[1] ? 'auto, ' : '' ) . $new );
 	}
 	return $p->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'armazon_column_image_sizes', 25 );
+add_filter( 'wp_content_img_tag', 'estrategia_web_column_image_sizes', 25 );

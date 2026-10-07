@@ -1,5 +1,5 @@
 /**
- * armazon/map — editor. Script CLÁSICO, sin compilar (ver blocks/carousel/edit.js
+ * estrategia-web/map — editor. Script CLÁSICO, sin compilar (ver blocks/carousel/edit.js
  * para el porqué). Existe solo por el selector de imagen de la mediateca, que
  * los controles automáticos de autoRegister no ofrecen. La vista previa la
  * pinta el servidor (ServerSideRender) con el mismo render.php del front.
@@ -12,7 +12,7 @@
 	const ServerSideRender = wp.serverSideRender;
 	const { __ } = wp.i18n;
 
-	registerBlockType( 'armazon/map', {
+	registerBlockType( 'estrategia-web/map', {
 		edit( { attributes, setAttributes } ) {
 			const blockProps = useBlockProps();
 			const text = ( label, key, help ) =>
@@ -31,45 +31,45 @@
 					null,
 					h(
 						PanelBody,
-						{ title: __( 'Map settings', 'armazon' ) },
+						{ title: __( 'Map settings', 'estrategia-web' ) },
 						h( wp.components.ToggleControl, {
-							label: __( 'Show the place details', 'armazon' ),
-							help: __( 'Turn it off when the address is already next to the map.', 'armazon' ),
+							label: __( 'Show the place details', 'estrategia-web' ),
+							help: __( 'Turn it off when the address is already next to the map.', 'estrategia-web' ),
 							checked: attributes.showDetails,
 							onChange: ( value ) => setAttributes( { showDetails: value } ),
 						} ),
-						text( __( 'Place name', 'armazon' ), 'placeName' ),
+						text( __( 'Place name', 'estrategia-web' ), 'placeName' ),
 						h( TextareaControl, {
-							label: __( 'Address', 'armazon' ),
+							label: __( 'Address', 'estrategia-web' ),
 							value: attributes.address,
 							onChange: ( value ) => setAttributes( { address: value } ),
 						} ),
-						text( __( 'Phone', 'armazon' ), 'phone' ),
+						text( __( 'Phone', 'estrategia-web' ), 'phone' ),
 						h( TextareaControl, {
-							label: __( 'Opening hours', 'armazon' ),
+							label: __( 'Opening hours', 'estrategia-web' ),
 							value: attributes.hours,
 							onChange: ( value ) => setAttributes( { hours: value } ),
 						} ),
 						h( TextareaControl, {
-							label: __( 'Google Maps embed URL', 'armazon' ),
-							help: __( 'Google Maps › Share › Embed a map. You can paste the whole iframe code.', 'armazon' ),
+							label: __( 'Google Maps embed URL', 'estrategia-web' ),
+							help: __( 'Google Maps › Share › Embed a map. You can paste the whole iframe code.', 'estrategia-web' ),
 							value: attributes.embedUrl,
 							onChange: ( value ) => setAttributes( { embedUrl: value } ),
 						} ),
 						text(
-							__( 'Google Maps link', 'armazon' ),
+							__( 'Google Maps link', 'estrategia-web' ),
 							'mapsUrl',
-							__( 'Optional. Empty: a search for the address.', 'armazon' )
+							__( 'Optional. Empty: a search for the address.', 'estrategia-web' )
 						)
 					),
 					h(
 						PanelBody,
-						{ title: __( 'Static map', 'armazon' ), initialOpen: false },
-						h( 'p', null, __( 'An OpenStreetMap image made with tools/static-map.mjs, shown under the place details until the visitor loads Google Maps. It must be served by this site.', 'armazon' ) ),
+						{ title: __( 'Static map', 'estrategia-web' ), initialOpen: false },
+						h( 'p', null, __( 'An OpenStreetMap image made with tools/static-map.mjs, shown under the place details until the visitor loads Google Maps. It must be served by this site.', 'estrategia-web' ) ),
 						text(
-							__( 'Static map image', 'armazon' ),
+							__( 'Static map image', 'estrategia-web' ),
 							'staticMapUrl',
-							__( 'A theme path (assets/maps/place.webp) or a URL of this site.', 'armazon' )
+							__( 'A theme path (assets/maps/place.webp) or a URL of this site.', 'estrategia-web' )
 						),
 						h(
 							MediaUploadCheck,
@@ -82,7 +82,7 @@
 									h(
 										Button,
 										{ variant: 'secondary', onClick: open },
-										attributes.staticMapId ? __( 'Replace image', 'armazon' ) : __( 'Choose from the media library', 'armazon' )
+										attributes.staticMapId ? __( 'Replace image', 'estrategia-web' ) : __( 'Choose from the media library', 'estrategia-web' )
 									),
 							} )
 						),
@@ -90,17 +90,17 @@
 							? h(
 									Button,
 									{ variant: 'link', isDestructive: true, onClick: () => setAttributes( { staticMapId: 0 } ) },
-									__( 'Remove image', 'armazon' )
+									__( 'Remove image', 'estrategia-web' )
 							  )
 							: null
 					),
 					h(
 						PanelBody,
-						{ title: __( 'Static image', 'armazon' ), initialOpen: false },
-						h( 'p', null, __( 'Optional. Without an image the map shows a box with the place details.', 'armazon' ) ),
+						{ title: __( 'Static image', 'estrategia-web' ), initialOpen: false },
+						h( 'p', null, __( 'Optional. Without an image the map shows a box with the place details.', 'estrategia-web' ) ),
 						h( wp.components.ToggleControl, {
-							label: __( 'Use the featured image of the post', 'armazon' ),
-							help: __( 'Inside a Query Loop.', 'armazon' ),
+							label: __( 'Use the featured image of the post', 'estrategia-web' ),
+							help: __( 'Inside a Query Loop.', 'estrategia-web' ),
 							checked: attributes.useFeaturedImage,
 							onChange: ( value ) => setAttributes( { useFeaturedImage: value } ),
 						} ),
@@ -120,7 +120,7 @@
 									h(
 										Button,
 										{ variant: 'secondary', onClick: open },
-										attributes.imageId ? __( 'Replace image', 'armazon' ) : __( 'Choose image', 'armazon' )
+										attributes.imageId ? __( 'Replace image', 'estrategia-web' ) : __( 'Choose image', 'estrategia-web' )
 									),
 							} )
 						),
@@ -132,13 +132,13 @@
 										isDestructive: true,
 										onClick: () => setAttributes( { imageId: 0, imageUrl: '' } ),
 									},
-									__( 'Remove image', 'armazon' )
+									__( 'Remove image', 'estrategia-web' )
 							  )
 							: null,
-						text( __( 'Image alternative text', 'armazon' ), 'imageAlt' )
+						text( __( 'Image alternative text', 'estrategia-web' ), 'imageAlt' )
 					)
 				),
-				h( 'div', blockProps, h( ServerSideRender, { block: 'armazon/map', attributes } ) )
+				h( 'div', blockProps, h( ServerSideRender, { block: 'estrategia-web/map', attributes } ) )
 			);
 		},
 		save() {
