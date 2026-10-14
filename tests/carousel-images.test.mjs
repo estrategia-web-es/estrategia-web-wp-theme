@@ -62,7 +62,10 @@ run( () =>
 			top.images.forEach( ( img, i ) => {
 				assert.equal( img.marker, false, `${ img.alt }: la marca data-estrategia-web-carousel llegó a la página` );
 				if ( i < 3 ) {
-					assert.equal( img.priority, 'high', `${ img.alt } (diapositiva ${ i + 1 }, visible al cargar) sin fetchpriority="high"` );
+					// 0.7.9: «high» SOLO la primera; las otras visibles cargan ya, sin prioridad.
+					// (La prueba se quedó en 0.7.4 y estaba en rojo desde el 06-10-2026;
+					// se puso al día el 14-10-2026, comprobado contra la 1.0.0 sin tocar.)
+					assert.equal( img.priority, 0 === i ? 'high' : null, `${ img.alt } (diapositiva ${ i + 1 }, visible al cargar): fetchpriority="${ img.priority }"` );
 					assert.equal( img.loading, null, `${ img.alt } (visible al cargar) va con loading="${ img.loading }"` );
 				} else {
 					assert.equal( img.loading, 'lazy', `${ img.alt } (no se ve al cargar) no va diferida` );
