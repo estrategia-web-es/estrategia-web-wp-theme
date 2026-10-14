@@ -331,5 +331,24 @@ wp_insert_post(
 	)
 );
 
+// Recorte para el móvil (plugin 1.1.x, mobileRatio): las fotos 1-3, horizontales
+// (1920×1280), en un carrusel cuya caja en el móvil es 4/5. Lo mira
+// tests/carousel-mobile-crop.test.mjs.
+$existing_crop = get_page_by_path( 'prueba-carrusel-movil' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_crop ? $existing_crop->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de carrusel con recorte para el móvil',
+		'post_name'    => 'prueba-carrusel-movil',
+		'post_content' => wp_slash(
+			'<!-- wp:estrategia-web/carousel {"label":"Fotos recortadas","align":"full","perViewMobile":1,"perViewTablet":2,"perViewDesktop":3,"mobileRatio":"4/5","mobileImageSizes":"100vw"} -->'
+			. $photo_block( 1 ) . $photo_block( 2 ) . $photo_block( 3 )
+			. '<!-- /wp:estrategia-web/carousel -->'
+		),
+	)
+);
+
 flush_rewrite_rules();
 echo 'estrategia-web-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";

@@ -45,6 +45,13 @@ run( () =>
 			assert.equal( await second.locator( '.estrategia-web-map__card' ).count(), 0 );
 			assert.ok( await second.locator( '.estrategia-web-map__frame' ).isHidden(), `a ${ width } px sin imagen queda una caja vacía antes del clic` );
 			assert.ok( await second.getByRole( 'link', { name: /Abrir en Google Maps/ } ).isVisible() );
+			// 1.1.x del plugin: dos enlaces a destinos distintos no pueden llamarse
+			// igual (Lighthouse, accesibilidad). El nombre empieza por el texto visible.
+			const names = await page.locator( '.estrategia-web-map__link' ).evaluateAll( ( links ) => links.map( ( a ) => a.getAttribute( 'aria-label' ) || a.textContent.trim() ) );
+			assert.equal( new Set( names ).size, names.length, `nombres de enlace repetidos: ${ names.join( ' | ' ) }` );
+			for ( const name of names ) {
+				assert.ok( name.startsWith( 'Abrir en Google Maps' ), `el nombre no empieza por el texto visible: ${ name }` );
+			}
 			await second.getByRole( 'button', { name: 'Ver mapa' } ).click();
 			const iframe = second.locator( '.estrategia-web-map__iframe' );
 			await page.waitForFunction( ( el ) => ! el.hidden && /google\.com/.test( el.src ) && el.getBoundingClientRect().height > 100, await iframe.elementHandle() );

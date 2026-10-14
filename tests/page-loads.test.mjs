@@ -30,8 +30,10 @@ run( () =>
 			assert.ok( await page.getByRole( 'button', { name: text, exact: true } ).isVisible(), `falta el botón «${ text }»` );
 		}
 		assert.ok(
-			await page.getByRole( 'link', { name: 'Abrir en Google Maps (se abre en una pestaña nueva)' } ).isVisible(),
-			'falta el enlace «Abrir en Google Maps» con su aviso de pestaña nueva'
+			// Desde la 1.1.x del plugin el nombre lleva la sede (o la dirección):
+			// «Abrir en Google Maps: <sede> (se abre en una pestaña nueva)».
+			await page.getByRole( 'link', { name: /^Abrir en Google Maps: .+ \(se abre en una pestaña nueva\)$/ } ).first().isVisible(),
+			'falta el enlace «Abrir en Google Maps» con su sede y su aviso de pestaña nueva'
 		);
 		assert.ok( await page.getByRole( 'button', { name: 'Diapositiva siguiente' } ).isVisible(), 'flecha sin traducir' );
 
