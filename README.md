@@ -5,12 +5,18 @@ tiene un **tema hijo** copiado de una plantilla, y el hijo es del proyecto desde
 el primer día. La decisión y sus tres condiciones están en
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **0.7.9**
+- Requiere **WordPress 7.1** y **PHP 8.1**. Versión actual: **1.1.0**
   (notas de cambios en «Versiones», al final).
-- **El aviso de cookies NO está aquí desde la 0.7.0**: es del plugin
-  **Estrategia Web Site** (`armazon-wp-sitio`, 0.5.0 o superior). Una web con
-  cookies opcionales necesita ese plugin; sin él no hay aviso, y el mapa
-  sigue funcionando en dos clics.
+- **Solo diseño desde la 1.1.0** (14-10-2026, «un tema + un plugin»): no
+  registra ningún bloque, requisito de WordPress.org. Los bloques que usan
+  sus plantillas y partes (`estrategia-web/carousel`, `…/map`, `…/whatsapp`,
+  `…/language-switcher`) son módulos del plugin **Estrategia Web**
+  (`E:\Repositories\armazon-wp-sitio`, carpeta `modules/`). **Sin el plugin,
+  o con el módulo apagado, el bloque no se pinta y no hay error**: el pie
+  sale sin botón de WhatsApp, y ya está.
+- **El aviso de cookies tampoco está aquí desde la 0.7.0**: es el módulo
+  `consent` del mismo plugin. Sin él no hay aviso, y el mapa sigue
+  funcionando en dos clics.
 - Se instala en `wp-content/themes/estrategia-web/` (el slug de carpeta es `estrategia-web`:
   los hijos lo nombran en `Template: estrategia-web`).
 - Sin paso de compilación: ni `@wordpress/scripts` ni `node_modules`.
@@ -21,11 +27,14 @@ el primer día. La decisión y sus tres condiciones están en
 |---|---|
 | plantillas y partes genéricas (`templates/`, `parts/`) | los colores, fuentes y medidas de la marca (redefiniendo los slugs de abajo) |
 | `theme.json` base: escala de espaciado, tipografía fluida, paleta neutra, cortes de `viewport` | patrones (las secciones de la web), estilos de sección, plantillas propias |
-| los módulos comunes como bloques: carrusel, mapa, WhatsApp | textos de la web, logotipo, páginas |
+| cómo se ven los bloques del plugin dentro del diseño (`assets/view-transitions.css`, tokens) | textos de la web, logotipo, páginas |
 | sus traducciones (`languages/`) | qué categorías de cookies declara la web (filtro del plugin) |
 
+**Un bloque nuevo NO va aquí** (1.1.0): va como módulo del plugin Estrategia
+Web. El tema solo puede USAR bloques en sus plantillas, partes y patrones.
+
 **Lo que funciona y se guarda, aunque se vea en todas las webs, NO va aquí**:
-va al plugin Estrategia Web Site, porque una web que cambie de tema no puede
+va al plugin Estrategia Web, porque una web que cambie de tema no puede
 perderlo. Es el caso del aviso de cookies (se fue en la 0.7.0): el padre no
 le pone ningún estilo propio, porque el plugin trae una hoja neutra que lee
 los tokens de `theme.json` (`base`, `contrast`, `border`, espaciado, tamaños);
@@ -42,14 +51,12 @@ cosa**, al hijo.
     style.css            cabecera + lo que theme.json no expresa (foco, salto al contenido, anclas); lo encola el padre
     theme.json           base v3: layout, viewport, paleta, espaciado, tipografía, partes
     functions.php        solo carga inc/*.php
-    inc/                 setup.php · blocks.php · core-blocks.php · whatsapp.php · carousel-images.php ·
-                         view-transitions.php · rendimiento (0.7.8): critical-css.php · font-preload.php ·
-                         column-image-sizes.php
+    inc/                 setup.php · core-blocks.php · view-transitions.php · rendimiento (0.7.8):
+                         critical-css.php · font-preload.php · column-image-sizes.php
     assets/core-blocks/  comportamiento común de bloques del núcleo (accordion.css), uno por bloque
     templates/           index, front-page, page, single, archive, search, 404
     parts/               header, footer, navigation-overlay
     patterns/            404, no-results (textos traducibles de las plantillas)
-    blocks/<nombre>/     block.json + render.php (+ view.js, edit.js, style.css)
     languages/           estrategia-web.pot · es_ES.po · es_ES.l10n.php
     tests/               pruebas de navegador + WordPress de pruebas (Playground)
     tools/i18n.mjs       extrae, fusiona y genera las traducciones
@@ -151,11 +158,19 @@ actualización del padre no se ve en una web con esa parte personalizada. Antes
 de cada despliegue se miran y se borran esas personalizaciones. Y `theme.json`
 se cachea: en local, `WP_DEVELOPMENT_MODE='theme'`.
 
-## Los módulos y cómo se mantiene cada uno
+## Los bloques que usa (y ya no son suyos)
+
+**Desde la 1.1.0 estos bloques viven en el plugin Estrategia Web**, cada uno
+en su módulo (`armazon-wp-sitio/modules/<bloque>/`), con su código, su
+`render.php` y su documentación. Se dejan aquí el resumen y las notas porque
+el tema los usa en sus plantillas y porque **sus pruebas siguen en este
+repo** (`tests/`): miden los bloques pintados con el CSS del tema, y el
+servidor de pruebas monta el plugin (ver `tests/server.mjs`). La herramienta
+`tools/static-map.mjs` tampoco se ha movido.
 
 La documentación completa de cada uno (decisiones, quién, cuándo, caso
-frontera y la trampa) está **en la cabecera de su `render.php`**, que es donde
-aterriza quien lo toque. Aquí, el resumen.
+frontera y la trampa) está **en la cabecera de su `render.php`**, en el
+plugin, que es donde aterriza quien lo toque. Aquí, el resumen.
 
 | Bloque | Qué hace | Editor | Comportamiento |
 |---|---|---|---|
@@ -192,8 +207,11 @@ esas llamadas no hacen nada y el mapa va en dos clics (`tests/map.test.mjs`).
     node tools/i18n.mjs
 
 Que actualiza `estrategia-web.pot`, fusiona el `.po` y genera `es_ES.l10n.php` (formato
-PHP de WordPress 6.5+, sin `.mo`). El editor recibe las mismas traducciones
-(`inc/blocks.php`), así que no hay JSON por script. **Dentro de un tema el
+PHP de WordPress 6.5+, sin `.mo`). Desde la 1.1.0 el tema ya no tiene
+scripts de editor; los textos de los bloques están en el `.po` del plugin,
+que usa el MISMO dominio (`estrategia-web`): WordPress junta los dos
+ficheros. Lo que quedó en `es_ES.po` como `#~` son los textos de los bloques
+de antes, obsoletos. **Dentro de un tema el
 fichero se llama por el locale (`es_ES.l10n.php`), no `estrategia-web-es_ES`**: con el
 nombre largo está, pesa lo que toca y no se carga (ver `inc/setup.php`).
 
@@ -206,7 +224,11 @@ nombre largo está, pesa lo que toca y no se carga (ver `inc/setup.php`).
 
 Todas son de **nivel 3** (navegador, Playwright tomado de `portal-hs`) y cada
 una dice por qué en su primera línea. El WordPress de pruebas activa el **hijo
-de prueba**, así que todo se prueba con el padre funcionando como padre.
+de prueba**, así que todo se prueba con el padre funcionando como padre, y
+desde la 1.1.0 **el plugin Estrategia Web** (montado desde
+`E:/Repositories/armazon-wp-sitio`, o `ESTRATEGIA_WEB_PLUGIN`) con solo los
+módulos de bloques encendidos (sin `consent`, para seguir probando el mapa
+sin aviso de cookies).
 
 Trampas de Playground en Windows, todas medidas el 01-10-2026 y detalladas en
 la cabecera de `tests/server.mjs`: `--mount=E:/…:/…` no vale (se usa
@@ -220,6 +242,26 @@ bonitas inexistentes devuelven la portada con 200 (el 404 se prueba con
 Una entrada por versión, la más nueva arriba: qué cambia y si obliga a tocar
 algún hijo. Quien suba la versión (cabecera de `style.css` y `version` del
 `block.json` que cambie) escribe aquí su entrada en el mismo commit.
+
+### 1.1.0 — 14-10-2026 (los bloques se van al plugin: OBLIGA a instalar el plugin Estrategia Web 1.1.0)
+
+- **El tema ya no registra bloques** (requisito de WordPress.org). Fuera
+  `blocks/`, `inc/blocks.php`, `inc/carousel-images.php`, `inc/whatsapp.php`
+  e `inc/legacy-names.php`. Todo eso es ahora el plugin **Estrategia Web**
+  1.1.0 (módulos `carousel`, `map`, `whatsapp`, `language-switcher`), con los
+  MISMOS nombres: bloques `estrategia-web/…`, opciones
+  `estrategia_web_whatsapp_*`, filtros `estrategia_web_carousel_*`, alias
+  `armazon/…`.
+- **Qué cambiar en un hijo: nada**, si tiene el plugin activo. Lavandería no
+  llamaba a ninguna función del padre de las que se fueron (las de
+  `carousel-images.php` pasan a `EstrategiaWeb\Carousel\images_*()`).
+- **Sin el plugin**: las plantillas y patrones que usan esos bloques no dan
+  error; el bloque no se pinta (WordPress no pinta un bloque sin registrar).
+- **No mezclar** este tema con los plugins de la 1.0.0 ni el tema 1.0.0 con
+  el plugin 1.1.0 (bloques registrados dos veces). Ninguna de las dos 1.0.0
+  se publicó nunca.
+- Pruebas: siguen aquí, con el plugin montado (`tests/server.mjs`,
+  `tests/fixtures/setup/setup.php` enciende solo sus módulos de bloques).
 
 ### 1.0.0 — 07-10-2026 (MAYOR: cambio de nombre, OBLIGA a tocar los hijos)
 

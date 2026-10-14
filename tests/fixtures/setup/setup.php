@@ -20,6 +20,12 @@ update_option( 'permalink_structure', '/%postname%/' );
 update_option( 'estrategia_web_whatsapp_phone', '34611223344' );
 update_option( 'estrategia_web_whatsapp_message', 'Mensaje desde la opción del sitio' );
 
+// 1.1.0: los bloques ya no son del tema sino del plugin Estrategia Web (lo
+// monta tests/server.mjs). Solo sus módulos de BLOQUES: sin «consent», como
+// antes de la 1.1.0, para seguir probando que el mapa funciona sin aviso de
+// cookies (tests/map.test.mjs), y sin «site» ni «forms», que aquí no pintan nada.
+update_option( 'estrategia_web_modules', array( 'carousel', 'map', 'whatsapp', 'language-switcher' ) );
+
 $slides = '';
 for ( $i = 1; $i <= 5; $i++ ) {
 	$slides .= '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'

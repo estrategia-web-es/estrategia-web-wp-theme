@@ -1,8 +1,9 @@
 <?php
 /**
  * Hijo de prueba del padre. Ya no declara categorías de consentimiento: el
- * aviso de cookies se fue al plugin estrategia-web-site en 0.7.0 y este WordPress de
- * pruebas no lo tiene (así se prueba que el mapa funciona sin él).
+ * aviso de cookies se fue al plugin en 0.7.0 y este WordPress de pruebas
+ * tiene el plugin Estrategia Web con el módulo «consent» APAGADO (así se
+ * prueba que el mapa funciona sin él; ver tests/fixtures/setup/setup.php).
  *
  * @package estrategia-web-hijo-prueba
  */

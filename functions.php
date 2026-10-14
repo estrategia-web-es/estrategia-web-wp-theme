@@ -3,8 +3,10 @@
  * Estrategia Web — tema padre de bloques.
  *
  * Este fichero solo carga inc/*.php. La lógica vive allí, un fichero por
- * asunto (setup, bloques, WhatsApp, traducciones de editor). El aviso de
- * cookies ya no es de aquí: es del plugin estrategia-web-site desde la 0.7.0.
+ * asunto (setup, bloques del núcleo, transiciones, rendimiento). Desde la
+ * 1.1.0 el tema no registra bloques: el carrusel, el mapa, el WhatsApp y el
+ * selector de idioma son módulos del plugin Estrategia Web, igual que el
+ * aviso de cookies (que se fue en la 0.7.0). Un bloque nuevo va allí.
  *
  * Cómo se mantiene:
  * - Un asunto nuevo es un fichero nuevo en inc/, no un bloque más aquí.

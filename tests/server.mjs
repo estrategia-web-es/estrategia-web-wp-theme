@@ -17,16 +17,27 @@
  *   taskkill /T /F sobre el árbol entero.
  * - La siembra (blueprint + tests/fixtures/setup/setup.php) se ejecuta en
  *   cada arranque: Playground empieza de cero cada vez.
+ * - 1.1.0: los bloques (carrusel, mapa, WhatsApp, selector de idioma) ya no
+ *   son del tema: son módulos del PLUGIN Estrategia Web (repo
+ *   armazon-wp-sitio), que se monta como plugins/estrategia-web y se activa
+ *   con solo esos cuatro módulos (setup.php). Sus pruebas siguen aquí porque
+ *   miden los bloques con el CSS del tema. Otra carpeta del plugin:
+ *   ESTRATEGIA_WEB_PLUGIN=E:/otra/ruta node tests/run.mjs
  */
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 import path from 'node:path';
 
 const repo = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
+const PLUGIN = process.env.ESTRATEGIA_WEB_PLUGIN || 'E:/Repositories/armazon-wp-sitio';
 export const PORT = Number( process.env.ESTRATEGIA_WEB_PORT || 9401 );
 export const BASE_URL = `http://127.0.0.1:${ PORT }`;
 
 export function start( { log = false } = {} ) {
+	if ( ! fs.existsSync( path.join( PLUGIN, 'estrategia-web.php' ) ) ) {
+		throw new Error( `No encuentro el plugin Estrategia Web en ${ PLUGIN } (ESTRATEGIA_WEB_PLUGIN)` );
+	}
 	const args = [
 		'-y',
 		'@wp-playground/cli@latest',
@@ -37,6 +48,7 @@ export function start( { log = false } = {} ) {
 		'--mount-dir', repo, '/wordpress/wp-content/themes/estrategia-web',
 		'--mount-dir', path.join( repo, 'tests/fixtures/estrategia-web-hijo-prueba' ), '/wordpress/wp-content/themes/estrategia-web-hijo-prueba',
 		'--mount-dir', path.join( repo, 'tests/fixtures/setup' ), '/wordpress/wp-content/estrategia-web-fixtures',
+		'--mount-dir', PLUGIN, '/wordpress/wp-content/plugins/estrategia-web',
 		`--blueprint=${ path.join( repo, 'tests/fixtures/blueprint.json' ) }`,
 		'--login',
 	];

@@ -4,6 +4,7 @@
 	"steps": [
 		{ "step": "setSiteLanguage", "language": "es_ES" },
 		{ "step": "activateTheme", "themeFolderName": "estrategia-web-hijo-prueba" },
+		{ "step": "activatePlugin", "pluginPath": "estrategia-web/estrategia-web.php" },
 		{
 			"step": "runPHP",
 			"code": "<?php require_once '/wordpress/wp-load.php'; require '/wordpress/wp-content/estrategia-web-fixtures/setup.php';"

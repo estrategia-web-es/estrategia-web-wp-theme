@@ -11,6 +11,13 @@
  *   trampa: con el nombre largo el fichero está, pesa lo que toca y no se usa.
  * - El hijo tiene SU dominio (el slug del hijo) y su carpeta: no mezcla
  *   cadenas con «estrategia-web».
+ * - 1.1.0: el plugin Estrategia Web usa el MISMO dominio. Desde WordPress
+ *   6.7 cada dominio tiene UNA carpeta para la carga justo a tiempo, y es la
+ *   de aquí: el plugin no la pisa, fuerza esta carga y le junta su fichero
+ *   (ver EstrategiaWeb\Plugin::load_textdomain en el plugin). Si alguien
+ *   cambia esta línea por load_textdomain() o le cambia la carpeta, mirar
+ *   allí; la prueba que lo vigila es tests/page-loads.test.mjs («404 sin
+ *   traducir»).
  *
  * @package estrategia-web
  */
