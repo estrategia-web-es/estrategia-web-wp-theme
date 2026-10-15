@@ -1,6 +1,6 @@
-# Lo que NO viaja al tema instalado. `git archive` lo deja fuera del zip
-# (ver «Cómo se versiona» en el README). Si se añade una carpeta de trabajo
-# al repo, se añade aquí en el mismo commit.
+# What does NOT travel to the installed theme. `git archive` leaves it out of
+# the zip (see "Cómo se versiona" in the README). If a working folder is added
+# to the repo, it is added here in the same commit.
 /tests export-ignore
 /tools export-ignore
 /.gitattributes export-ignore

@@ -1,52 +1,55 @@
 <?php
 /**
- * sizes de las fotos dentro de una columna (0.7.8).
+ * sizes of the pictures inside a column (0.7.8).
  *
- * Qué resuelve (PageSpeed de Lavandería, 06-10-2026: «mejorar la entrega de
- * imágenes»): WordPress pone a cada foto el sizes «(max-width: Wpx) 100vw,
- * Wpx», con W el ancho del fichero. En una columna de la mitad, en escritorio,
- * eso pide el doble de píxeles de los que se pintan. Medido a 1512: la nave
- * de Quiénes somos se pinta a 543 y bajaba la de 1536; las tarjetas de
- * Clientes, a 286 y bajaban la de 768; la del Autoservicio, a 660 y bajaba la
- * de 1312. En el móvil acertaba por casualidad: las columnas se apilan y
- * entonces sí es 100vw.
+ * What it solves (Lavandería's PageSpeed, 06-10-2026: "improve image
+ * delivery"): WordPress gives each picture the sizes "(max-width: Wpx) 100vw,
+ * Wpx", with W the file's width. In a half-width column, on desktop, that
+ * requests twice the pixels that are painted. Measured at 1512: the warehouse
+ * picture on Quiénes somos is painted at 543 and downloaded the 1536 one; the
+ * Clientes cards, at 286 and downloaded the 768 one; the Autoservicio one, at
+ * 660 and downloaded the 1312 one. On mobile it was right by chance: the
+ * columns stack and then it really is 100vw.
  *
- * Cómo, en dos tiempos (como el carrusel, inc/carousel-images.php):
- * 1. Al pintar un core/column (render_block) se marca cada <img> con
- *    data-estrategia-web-column="<parte>|<tope>|<apila>". El srcset y el sizes aún no
- *    existen: los pone wp_filter_content_tags DESPUÉS de pintar los bloques.
- *    - parte: el «width» de la columna en % o, sin él, 100 / nº de columnas
- *      (se apunta al empezar a pintar el core/columns, render_block_data);
- *    - tope: esa parte del ancho del core/columns, wideSize si es align
- *      wide, contentSize si no, ninguno si es full (theme.json, solo en px);
- *    - apila: si las columnas se apilan bajo 782 (isStackedOnMobile).
- * 2. En wp_content_img_tag (prioridad 25: después del «auto, » del núcleo y
- *    del carrusel, 20) se cambia el sizes SOLO si es exactamente el de
- *    WordPress (con o sin «auto, », que se conserva):
+ * How, in two steps (like the carousel, inc/carousel-images.php):
+ * 1. When a core/column is rendered (render_block) each <img> is marked with
+ *    data-estrategia-web-column="<share>|<cap>|<stacked>". The srcset and the
+ *    sizes do not exist yet: wp_filter_content_tags adds them AFTER the blocks
+ *    are rendered.
+ *    - share: the column's "width" in % or, without it, 100 / number of
+ *      columns (noted when the core/columns starts rendering,
+ *      render_block_data);
+ *    - cap: that share of the core/columns width, wideSize if it is align
+ *      wide, contentSize otherwise, none if it is full (theme.json, px only);
+ *    - stacked: whether the columns stack below 782 (isStackedOnMobile).
+ * 2. In wp_content_img_tag (priority 25: after core's "auto, " and the
+ *    carousel's, 20) the sizes is changed ONLY if it is exactly WordPress's
+ *    (with or without "auto, ", which is kept):
  *        (max-width: 781px) 100vw, min(50vw, 692px)
- *    Foto recortada (object-fit: cover con un aspect-ratio más alto que el
- *    fichero): todo se multiplica por cuánto hay que ampliarla para cubrir.
- *    Sin eso, la de portada de Lavandería industrial (3:2 en un hueco casi
- *    cuadrado) se vería borrosa. Al final se quita la marca.
- * Se ignoran el hueco entre columnas y los rellenos: sobrestima unos píxeles,
- * y mejor un poco grande que borrosa (lo mismo que el carrusel, 0.7.4).
+ *    Cropped picture (object-fit: cover with an aspect-ratio taller than the
+ *    file): everything is multiplied by how much it must be enlarged to cover.
+ *    Without that, the hero picture of Lavandería industrial (3:2 in an almost
+ *    square slot) would look blurry. At the end the mark is removed.
+ * The gap between columns and the paddings are ignored: it overestimates by a
+ * few pixels, and slightly too large is better than blurry (same as the
+ * carousel, 0.7.4).
  *
- * Cómo se mantiene:
- * - Quién: quien toque el padre. Cuándo: si el núcleo cambia su corte de
- *   apilar columnas (781/782 en la hoja de core/columns) o el formato de su
- *   sizes por defecto: entonces la expresión deja de casar y esto no hace
- *   nada (no rompe: queda el de WordPress).
- * - Caso frontera: un sizes escrito a mano o el del carrusel no casan con el
- *   de WordPress y no se tocan. Una columna dentro de otra: marca la de
- *   dentro (se pinta primero) y la de fuera ya no remarca.
- * - Las fotos que caben en su hueco (un icono de 64) no se tocan: el sizes
- *   de WordPress ya es su ancho.
- * - Ajuste: filtro estrategia_web_column_image_sizes( $sizes, $img, $column ).
- * - La trampa: el core/column no sabe cuántas hermanas tiene; lo sabe el
- *   core/columns ANTES de pintar las suyas. Por eso la pila. Y la marca solo
- *   se quita en las fotos que pasan por wp_filter_content_tags (contenido y
- *   plantillas): en otra, queda en el HTML sin hacer nada.
- * - Prueba: la mira el hijo (Lavandería, tests/render-blocking.test.mjs).
+ * How to maintain:
+ * - Who: whoever touches the parent. When: if core changes its column
+ *   stacking breakpoint (781/782 in the core/columns stylesheet) or the format
+ *   of its default sizes: then the expression stops matching and this does
+ *   nothing (nothing breaks: WordPress's stays).
+ * - Edge case: a hand-written sizes or the carousel's do not match
+ *   WordPress's and are left alone. A column inside another: the inner one
+ *   marks (it renders first) and the outer one does not re-mark.
+ * - Pictures that fit in their slot (a 64 px icon) are left alone: WordPress's
+ *   sizes is already their width.
+ * - Tuning: filter estrategia_web_column_image_sizes( $sizes, $img, $column ).
+ * - The trap: core/column does not know how many siblings it has; core/columns
+ *   knows it BEFORE rendering them. Hence the stack. And the mark is only
+ *   removed on pictures that go through wp_filter_content_tags (content and
+ *   templates): elsewhere, it stays in the HTML doing nothing.
+ * - Test: the child checks it (Lavandería, tests/render-blocking.test.mjs).
  *
  * @package estrategia-web
  */

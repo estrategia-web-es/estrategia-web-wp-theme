@@ -1,17 +1,18 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es qué texto queda A LA VISTA (innerText, con lo oculto fuera) y qué caja se pinta antes y después de «Ver mapa», que solo existe con la página hidratada.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: what is tested is which text is IN VIEW (innerText, leaving out what is hidden) and which box is painted before and after "Ver mapa", which only exists with the page hydrated.
 /**
- * estrategia-web/map sin recuadro de datos (0.6.0, atributo showDetails:false), para
- * cuando la ficha de la sede ya dice la dirección al lado del mapa:
- * 1. la dirección se lee UNA vez en la página (la de la ficha), no dos;
- * 2. con mapa estático, el marco enseña solo la imagen, y debajo «Ver mapa»
- *    y «Abrir en Google Maps»;
- * 3. sin imagen, antes del clic no hay una caja vacía: solo los botones; y
- *    «Ver mapa» pinta el mapa con su alto.
+ * estrategia-web/map without the details card (0.6.0, showDetails:false
+ * attribute), for when the location's card already gives the address next to
+ * the map:
+ * 1. the address is read ONCE on the page (the card's), not twice;
+ * 2. with a static map, the frame shows only the image, and below it "Ver
+ *    mapa" (show map) and "Abrir en Google Maps" (open in Google Maps);
+ * 3. without an image, before the click there is no empty box: only the
+ *    buttons; and "Ver mapa" paints the map with its height.
  *
- * Página sembrada en tests/fixtures/setup/setup.php (/prueba-mapa-sin-datos/).
- * Google se corta con page.route: la prueba no sale a Internet.
- * Vista fallar el 03-10-2026 con la 0.5.0: la dirección salía dos veces (el
- * atributo no existía y el recuadro se pintaba siempre).
+ * Page seeded in tests/fixtures/setup/setup.php (/prueba-mapa-sin-datos/).
+ * Google is cut off with page.route: the test does not go out to the Internet.
+ * Seen failing on 03-10-2026 with 0.5.0: the address came out twice (the
+ * attribute did not exist and the card was always painted).
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
 
@@ -22,35 +23,35 @@ run( () =>
 			await page.route( /google\.com/, ( route ) => route.fulfill( { status: 200, contentType: 'text/html', body: '<p>mapa</p>' } ) );
 			await page.goto( `${ BASE_URL }/prueba-mapa-sin-datos/`, { waitUntil: 'networkidle' } );
 
-			// 1. La dirección, una sola vez a la vista.
+			// 1. The address, only once in view.
 			const text = await page.locator( 'body' ).innerText();
 			const times = text.split( 'Plaça de Cort 1' ).length - 1;
-			assert.equal( times, 1, `a ${ width } px la dirección sale ${ times } veces` );
-			assert.ok( ! text.includes( 'Sede sin recuadro' ), `a ${ width } px el nombre de la sede sale dentro del mapa` );
+			assert.equal( times, 1, `at ${ width } px the address comes out ${ times } times` );
+			assert.ok( ! text.includes( 'Sede sin recuadro' ), `at ${ width } px the location name comes out inside the map` );
 
-			// 2. Con mapa estático: solo la imagen, y los dos botones.
+			// 2. With a static map: only the image, and the two buttons.
 			const first = page.locator( '.estrategia-web-map' ).nth( 0 );
-			assert.equal( await first.locator( '.estrategia-web-map__card' ).count(), 0, 'con showDetails:false no se pinta el recuadro' );
+			assert.equal( await first.locator( '.estrategia-web-map__card' ).count(), 0, 'with showDetails:false the card is not painted' );
 			const image = first.locator( 'img.estrategia-web-map__static' );
 			await image.scrollIntoViewIfNeeded();
 			await page.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await image.elementHandle() );
 			const frame = await first.locator( '.estrategia-web-map__frame' ).boundingBox();
 			const img = await image.boundingBox();
-			assert.ok( Math.abs( img.height - frame.height ) < 2 && img.height > 100, `a ${ width } px la imagen no llena el marco (${ img.height } de ${ frame.height })` );
+			assert.ok( Math.abs( img.height - frame.height ) < 2 && img.height > 100, `at ${ width } px the image does not fill the frame (${ img.height } of ${ frame.height })` );
 			assert.ok( await first.getByRole( 'button', { name: 'Ver mapa' } ).isVisible() );
 			assert.ok( await first.getByRole( 'link', { name: /Abrir en Google Maps/ } ).isVisible() );
 
-			// 3. Sin imagen: nada de caja vacía antes del clic; el mapa, después.
+			// 3. Without an image: no empty box before the click; the map, after.
 			const second = page.locator( '.estrategia-web-map' ).nth( 1 );
 			assert.equal( await second.locator( '.estrategia-web-map__card' ).count(), 0 );
-			assert.ok( await second.locator( '.estrategia-web-map__frame' ).isHidden(), `a ${ width } px sin imagen queda una caja vacía antes del clic` );
+			assert.ok( await second.locator( '.estrategia-web-map__frame' ).isHidden(), `at ${ width } px without an image an empty box is left before the click` );
 			assert.ok( await second.getByRole( 'link', { name: /Abrir en Google Maps/ } ).isVisible() );
-			// 1.1.x del plugin: dos enlaces a destinos distintos no pueden llamarse
-			// igual (Lighthouse, accesibilidad). El nombre empieza por el texto visible.
+			// Plugin 1.1.x: two links to different destinations cannot have the
+			// same name (Lighthouse, accessibility). The name starts with the visible text.
 			const names = await page.locator( '.estrategia-web-map__link' ).evaluateAll( ( links ) => links.map( ( a ) => a.getAttribute( 'aria-label' ) || a.textContent.trim() ) );
-			assert.equal( new Set( names ).size, names.length, `nombres de enlace repetidos: ${ names.join( ' | ' ) }` );
+			assert.equal( new Set( names ).size, names.length, `repeated link names: ${ names.join( ' | ' ) }` );
 			for ( const name of names ) {
-				assert.ok( name.startsWith( 'Abrir en Google Maps' ), `el nombre no empieza por el texto visible: ${ name }` );
+				assert.ok( name.startsWith( 'Abrir en Google Maps' ), `the name does not start with the visible text: ${ name }` );
 			}
 			await second.getByRole( 'button', { name: 'Ver mapa' } ).click();
 			const iframe = second.locator( '.estrategia-web-map__iframe' );

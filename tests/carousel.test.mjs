@@ -1,8 +1,8 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: el desplazamiento (scrollLeft, scroll-snap) y el foco solo existen con la página pintada.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: scrolling (scrollLeft, scroll-snap) and focus only exist with the page painted.
 /**
- * estrategia-web/carousel: avanza y retrocede con las flechas, con el teclado (← →
- * Fin) y con los puntos; las flechas se desactivan en los extremos.
- * Las esperas son por HECHOS (scrollLeft cambia), nunca por tiempo.
+ * estrategia-web/carousel: moves forward and back with the arrows, with the
+ * keyboard (← → End) and with the dots; the arrows get disabled at the ends.
+ * The waits are for FACTS (scrollLeft changes), never for time.
  */
 import { withBrowser, run, assert, PAGE } from './browser.mjs';
 
@@ -18,31 +18,31 @@ run( () =>
 		const scrollLeft = () => track.evaluate( ( el ) => el.scrollLeft );
 
 		await carousel.scrollIntoViewIfNeeded();
-		assert.ok( await carousel.evaluate( ( el ) => el.classList.contains( 'is-ready' ) ), 'no se hidrató (sin is-ready)' );
+		assert.ok( await carousel.evaluate( ( el ) => el.classList.contains( 'is-ready' ) ), 'it did not hydrate (no is-ready)' );
 		assert.equal( await carousel.getAttribute( 'aria-roledescription' ), 'carrusel' );
-		assert.ok( await prev.isDisabled(), 'al empezar, «anterior» debería estar desactivada' );
+		assert.ok( await prev.isDisabled(), 'at the start, "previous" should be disabled' );
 
-		// Flecha siguiente.
+		// Next arrow.
 		await next.click();
 		await page.waitForFunction( ( el ) => el.scrollLeft > 50, await track.elementHandle() );
 		await page.waitForFunction( ( el ) => ! el.disabled, await prev.elementHandle() );
 		const afterArrow = await scrollLeft();
 
-		// Teclado: foco en la pista y flecha derecha.
+		// Keyboard: focus on the track and right arrow.
 		await track.focus();
 		await page.keyboard.press( 'ArrowRight' );
 		await page.waitForFunction( ( [ el, before ] ) => el.scrollLeft > before + 50, [ await track.elementHandle(), afterArrow ] );
 
-		// Fin: llega al final y «siguiente» se desactiva.
+		// End: it reaches the end and "next" gets disabled.
 		await page.keyboard.press( 'End' );
 		await page.waitForFunction( ( el ) => el.disabled, await next.elementHandle() );
 
-		// Flecha anterior retrocede.
+		// The previous arrow goes back.
 		const atEnd = await scrollLeft();
 		await prev.click();
 		await page.waitForFunction( ( [ el, before ] ) => el.scrollLeft < before - 50, [ await track.elementHandle(), atEnd ] );
 
-		// Puntos: el primero vuelve al inicio y queda marcado.
+		// Dots: the first one goes back to the start and stays marked.
 		await page.getByRole( 'button', { name: 'Ir a la diapositiva 1' } ).click();
 		await page.waitForFunction( ( el ) => el.scrollLeft < 1, await track.elementHandle() );
 		await page.waitForFunction( () => document.querySelector( '.estrategia-web-carousel__dot' ).getAttribute( 'aria-current' ) === 'true' );

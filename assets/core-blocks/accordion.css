@@ -1,66 +1,69 @@
 /*
- * core/accordion — abrir y cerrar deslizando y fundiendo, sin saltos de
- * texto (0.4.0; 0.5.0; rehecho en 0.7.3).
+ * core/accordion — open and close by sliding and fading, without text jumps
+ * (0.4.0; 0.5.0; redone in 0.7.3).
  *
- * Qué pinta el núcleo (WordPress 7.1): un botón con aria-expanded y un panel
- * <div role="region"> que, cerrado, lleva hidden="until-found" (lo pone y lo
- * quita su store de la Interactivity API, «core/accordion»). Cerrado, el
- * navegador le da content-visibility:hidden: el panel sigue en la página
- * (la búsqueda del navegador lo encuentra y lo abre) pero mide 0.
- * Sin esto, abrir o cerrar es un salto de 0 al alto entero.
+ * What core renders (WordPress 7.1): a button with aria-expanded and a panel
+ * <div role="region"> that, when closed, has hidden="until-found" (set and
+ * removed by its Interactivity API store, "core/accordion"). When closed, the
+ * browser gives it content-visibility:hidden: the panel is still on the page
+ * (the browser's find-in-page finds it and opens it) but measures 0.
+ * Without this, opening or closing is a jump from 0 to the full height.
  *
- * El modelo (0.7.3), medido fotograma a fotograma en el FAQ que le gustó a
- * David (miquelcapellaiassociats.es, 06-10-2026): todo en 0,25 s ease-in-out;
- * el alto crece, la respuesta pasa de opacidad 0 a 1 subiendo desde abajo
- * (allí, translate 50 % → 0) y el «+» gira 135° hasta quedar en «×». Al
- * cerrar, lo mismo al revés. Aquí se reproduce con la técnica propia, sin
- * JavaScript (el store del núcleo sigue mandando: aria-expanded, foco y
- * teclado):
- * - block-size: 0 con [hidden] y auto abierto, interpolando entre 0 y «auto»
- *   con interpolate-size: allow-keywords;
- * - content-visibility con transition-behavior allow-discrete: al CERRAR el
- *   contenido sigue visible mientras se pliega y se oculta al final;
- * - los HIJOS del panel funden (opacity) y suben (translate, «rise»); al
- *   abrir, el punto de partida lo da @starting-style, porque el panel venía
- *   de content-visibility:hidden y no hay estilo previo del que transicionar;
- * - el relleno y el margen de ARRIBA y ABAJO del panel también se animan: el
- *   núcleo los quita al panel cerrado y un hijo suele dárselos solo al
- *   abierto; si no se animan, la pregunta entera cambia de alto de golpe;
- * - el giro del icono, con la misma duración y curva.
+ * The model (0.7.3), measured frame by frame on the FAQ David liked
+ * (miquelcapellaiassociats.es, 06-10-2026): everything in 0.25 s ease-in-out;
+ * the height grows, the answer goes from opacity 0 to 1 rising from below
+ * (there, translate 50 % → 0) and the "+" turns 135° until it becomes "×". On
+ * closing, the same in reverse. Here it is reproduced with our own technique,
+ * without JavaScript (core's store is still in charge: aria-expanded, focus
+ * and keyboard):
+ * - block-size: 0 with [hidden] and auto when open, interpolating between 0
+ *   and "auto" with interpolate-size: allow-keywords;
+ * - content-visibility with transition-behavior allow-discrete: on CLOSING the
+ *   content stays visible while it folds and is hidden at the end;
+ * - the panel's CHILDREN fade (opacity) and rise (translate, "rise"); on
+ *   opening, the starting point is given by @starting-style, because the panel
+ *   came from content-visibility:hidden and there is no previous style to
+ *   transition from;
+ * - the panel's TOP and BOTTOM padding and margin are animated too: core
+ *   removes them from the closed panel and a child usually gives them only to
+ *   the open one; if they are not animated, the whole question changes height
+ *   at once;
+ * - the icon's turn, with the same duration and curve.
  *
- * Tokens (theme.json del padre, settings.custom.motion.accordion; un hijo
- * los cambia en el suyo): --wp--custom--motion--accordion--duration,
- * --easing, --rise (cuánto sube la respuesta al aparecer) y --turn (el giro
- * del icono abierto; el núcleo gira 45°). Un hijo con un icono que no sea
- * simétrico (una flecha) pone su --turn.
+ * Tokens (parent's theme.json, settings.custom.motion.accordion; a child
+ * changes them in its own): --wp--custom--motion--accordion--duration,
+ * --easing, --rise (how far the answer rises when it appears) and --turn (the
+ * open icon's rotation; core rotates 45°). A child with an icon that is not
+ * symmetrical (an arrow) sets its own --turn.
  *
- * Caso frontera: un navegador sin interpolate-size (Firefox y Safari a
- * octubre de 2026) abre y cierra el alto de golpe, pero la respuesta sigue
- * fundiendo: se degrada, no se rompe. Con «reducir movimiento», sin
- * animación ninguna (ni la del núcleo).
+ * Edge case: a browser without interpolate-size (Firefox and Safari as of
+ * October 2026) opens and closes the height at once, but the answer still
+ * fades: it degrades, it does not break. With "reduce motion", no animation at
+ * all (not even core's).
  *
- * La trampa de la 0.7.3 («da un salto el texto», David en Lavandería): el
- * hijo da al panel abierto margin-top -0.5rem, y el margen se anima de 0 a
- * -8 px. Con la respuesta a opacidad 1 desde el primer fotograma, se veía el
- * texto aparecer y subir 8 px ya entero: se «recolocaba». No se arregla
- * dejando de animar el margen (entonces la pregunta entera encoge 8 px en el
- * primer fotograma y lo de abajo da un tirón): se arregla haciendo que ese
- * desplazamiento ocurra MIENTRAS la respuesta funde y sube, en el mismo
- * sentido y con la misma curva, que es lo que hace la referencia.
- * La trampa de la 0.5.0 («efecto muy raro con el texto al cerrarse»): el
- * núcleo pone padding 0 !important al panel cerrado y los hijos le dan
- * margen y relleno LATERAL solo al abierto (:not([hidden])). Al cerrar, eso
- * saltaba en el primer fotograma: el texto se ensanchaba y se reajustaba en
- * menos líneas mientras la altura bajaba. Por eso lo lateral se retiene
- * hasta el final del cierre (regla [hidden] de abajo); una transición pisa
- * incluso el !important del núcleo. Si se añade otra propiedad al panel
- * abierto en un hijo y «baila» al cerrar, va a esa lista con retraso.
- * La otra trampa: sin overflow:clip el contenido se ve fuera del panel mientras
- * éste mide menos que su contenido; y NO vale overflow:hidden con un foco
- * visible que sobresale: clip con overflow-clip-margin deja ver el anillo.
- * Lo prueba tests/accordion.test.mjs (alto que solo crece o solo mengua,
- * texto sin cambiar de x ni de líneas, opacidad que solo sube o solo baja,
- * teclado y foco, giro; nada con «reducir movimiento»).
+ * The 0.7.3 trap ("the text jumps", David on Lavandería): the child gives the
+ * open panel margin-top -0.5rem, and the margin animates from 0 to -8 px. With
+ * the answer at opacity 1 from the first frame, the text could be seen
+ * appearing and then rising 8 px already whole: it "repositioned itself". It
+ * is not fixed by no longer animating the margin (then the whole question
+ * shrinks 8 px in the first frame and what is below jerks): it is fixed by
+ * making that shift happen WHILE the answer fades and rises, in the same
+ * direction and with the same curve, which is what the reference does.
+ * The 0.5.0 trap ("very weird effect with the text when closing"): core sets
+ * padding 0 !important on the closed panel and children give SIDE margin and
+ * padding only to the open one (:not([hidden])). On closing, that jumped in
+ * the first frame: the text widened and reflowed into fewer lines while the
+ * height went down. That is why the side values are held until the end of the
+ * closing (the [hidden] rule below); a transition overrides even core's
+ * !important. If a child adds another property to the open panel and it
+ * "dances" on closing, it goes into that list with a delay.
+ * The other trap: without overflow:clip the content shows outside the panel
+ * while the panel is smaller than its content; and overflow:hidden does NOT
+ * work with a visible focus ring that sticks out: clip with
+ * overflow-clip-margin lets the ring show.
+ * Tested by tests/accordion.test.mjs (height that only grows or only shrinks,
+ * text that does not change x or line count, opacity that only goes up or only
+ * down, keyboard and focus, turn; nothing with "reduce motion").
  */
 @media (prefers-reduced-motion: no-preference) {
 	.wp-block-accordion-panel {
@@ -75,11 +78,11 @@
 			content-visibility var(--wp--custom--motion--accordion--duration, 0.25s) allow-discrete;
 	}
 	/*
-	 * Al CERRAR (la transición que vale es la del estado de destino, [hidden]):
-	 * lo LATERAL —margen, relleno y borde— se queda como estaba hasta que el
-	 * panel termina de plegarse (duración 0 con retraso = la duración), y solo
-	 * entonces salta a lo de cerrado, ya con 0 de alto. Al abrir, sin retraso:
-	 * el panel nace ya con su ancho final (0.5.0).
+	 * On CLOSING (the transition that applies is the target state's, [hidden]):
+	 * the SIDE values —margin, padding and border— stay as they were until the
+	 * panel finishes folding (duration 0 with delay = the duration), and only
+	 * then jump to the closed values, already at 0 height. On opening, no
+	 * delay: the panel starts with its final width (0.5.0).
 	 */
 	.wp-block-accordion-panel[hidden] {
 		block-size: 0;
@@ -93,7 +96,7 @@
 			border-width 0s linear var(--wp--custom--motion--accordion--duration, 0.25s);
 	}
 
-	/* La respuesta funde y sube al abrir; funde y baja al cerrar. */
+	/* The answer fades in and rises on opening; fades out and drops on closing. */
 	.wp-block-accordion-panel > * {
 		transition:
 			opacity var(--estrategia-web-accordion-time),
@@ -115,7 +118,7 @@
 	}
 }
 
-/* El giro abierto: el del modelo (135°) en vez del del núcleo (45°); con «+» acaban igual, en «×». */
+/* The open turn: the model's (135°) instead of core's (45°); with "+" both end the same, as "×". */
 .wp-block-accordion-item.is-open > .wp-block-accordion-heading .wp-block-accordion-heading__toggle-icon {
 	transform: rotate(var(--wp--custom--motion--accordion--turn, 135deg));
 }

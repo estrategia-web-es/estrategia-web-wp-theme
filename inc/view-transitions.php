@@ -1,24 +1,24 @@
 <?php
 /**
- * Transiciones entre páginas (0.7.5): mete assets/view-transitions.css en
- * línea detrás de style.css, salvo que el tema lo apague.
+ * Transitions between pages (0.7.5): inlines assets/view-transitions.css after
+ * style.css, unless the theme turns it off.
  *
- * Por qué en línea y no como hoja aparte: es poco CSS y una hoja más sería
- * otra petición que bloquea el pintado (la auditoría de Lavandería del
- * 06-10-2026 ya contaba 34). Por qué en PHP y no en style.css: la regla
- * @view-transition no se puede condicionar a una variable CSS, y el hijo
- * tiene que poder apagarla desde theme.json.
+ * Why inline and not as a separate stylesheet: it is little CSS and one more
+ * stylesheet would be another render-blocking request (Lavandería's audit of
+ * 06-10-2026 already counted 34). Why in PHP and not in style.css: the
+ * @view-transition rule cannot be made conditional on a CSS variable, and the
+ * child must be able to turn it off from theme.json.
  *
- * Apagar, en el theme.json del hijo:
+ * To turn it off, in the child's theme.json:
  *     "settings": { "custom": { "motion": { "page": { "enabled": false } } } }
- * Afinar: "duration" y "easing" en el mismo sitio (los lee el CSS como
- * --wp--custom--motion--page--duration / --easing).
+ * To fine-tune: "duration" and "easing" in the same place (the CSS reads them
+ * as --wp--custom--motion--page--duration / --easing).
  *
- * Cómo se mantiene: el qué y el porqué de cada regla, en la cabecera de
- * assets/view-transitions.css. Caso frontera: "enabled": "false" (texto)
- * también apaga; cualquier otro valor, o ninguno, la deja puesta. La trampa:
- * theme.json se cachea; en local, WP_DEVELOPMENT_MODE='theme' para ver el
- * cambio sin vaciar caché. Prueba: tests/view-transitions.test.mjs.
+ * How to maintain: the what and the why of each rule are in the header of
+ * assets/view-transitions.css. Edge case: "enabled": "false" (a string) also
+ * turns it off; any other value, or none, leaves it on. The trap: theme.json
+ * is cached; locally, use WP_DEVELOPMENT_MODE='theme' to see the change
+ * without flushing the cache. Test: tests/view-transitions.test.mjs.
  *
  * @package estrategia-web
  */

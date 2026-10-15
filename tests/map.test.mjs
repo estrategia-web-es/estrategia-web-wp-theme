@@ -1,19 +1,20 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba son las PETICIONES de red que hace la página, y solo existen al ejecutarla.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: what is tested are the network REQUESTS the page makes, and they only exist when it runs.
 /**
- * estrategia-web/map SIN el plugin del aviso de cookies (0.7.0: el aviso se fue a
- * estrategia-web-site, y este WordPress de pruebas no lo tiene): ninguna petición a
- * Google antes del clic; tras «Ver mapa», sí. No hay aviso ni
- * window.estrategiaWebConsent, y el mapa no lo echa en falta (sin errores).
- * Lo de «aceptar mapas en el aviso lo carga sin clic» se prueba donde está el
- * aviso: armazon-wp-sitio (contrato) y la web (tests/consent-maps.test.mjs de
- * Lavandería, padre + plugin juntos).
+ * estrategia-web/map WITHOUT the cookie notice plugin (0.7.0: the notice moved
+ * to estrategia-web-site, and this test WordPress does not have it): no
+ * request to Google before the click; after "Ver mapa" (show map), yes. There
+ * is no notice nor window.estrategiaWebConsent, and the map does not miss it
+ * (no errors).
+ * "Accepting maps in the notice loads it without a click" is tested where the
+ * notice is: armazon-wp-sitio (contract) and the site
+ * (Lavandería's tests/consent-maps.test.mjs, parent + plugin together).
  *
- * Se miran PETICIONES a *.google.com, no apariciones del texto «google.com»
- * en el HTML: el enlace «Abrir en Google Maps» está ahí por diseño.
+ * REQUESTS to *.google.com are checked, not occurrences of the text
+ * "google.com" in the HTML: the "Abrir en Google Maps" link is there by design.
  *
- * Vista fallar el 05-10-2026: con blocks/map/view.js llamando a
- * window.estrategiaWebConsent.grant() sin «?.» revienta al pulsar (pageerror) y el
- * iframe no carga.
+ * Seen failing on 05-10-2026: with blocks/map/view.js calling
+ * window.estrategiaWebConsent.grant() without "?." it blows up on click
+ * (pageerror) and the iframe does not load.
  */
 import { withBrowser, run, assert, PAGE } from './browser.mjs';
 
@@ -35,23 +36,23 @@ run( () =>
 		const google = recordGoogle( page );
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
 
-		// Sin el plugin: ni aviso ni API.
-		assert.equal( await page.locator( '#estrategia-web-consent' ).count(), 0, 'el padre ya no pinta el aviso de cookies' );
-		assert.equal( await page.evaluate( () => typeof window.estrategiaWebConsent ), 'undefined', 'sin plugin no debería haber window.estrategiaWebConsent' );
+		// Without the plugin: neither notice nor API.
+		assert.equal( await page.locator( '#estrategia-web-consent' ).count(), 0, 'the parent no longer paints the cookie notice' );
+		assert.equal( await page.evaluate( () => typeof window.estrategiaWebConsent ), 'undefined', 'without the plugin there should be no window.estrategiaWebConsent' );
 
-		// Dos clics: nada antes, la carga después.
+		// Two clicks: nothing before, the load after.
 		await page.locator( '.estrategia-web-map' ).scrollIntoViewIfNeeded();
 		await page.waitForLoadState( 'networkidle' );
-		assert.deepEqual( google, [], `peticiones a Google antes del clic:\n${ google.join( '\n' ) }` );
-		// Sin src o con src="" (about:blank): la hidratación deja "" — ver blocks/map/view.js.
+		assert.deepEqual( google, [], `requests to Google before the click:\n${ google.join( '\n' ) }` );
+		// No src or src="" (about:blank): hydration leaves "" — see blocks/map/view.js.
 		const srcBefore = await page.locator( '.estrategia-web-map__iframe' ).getAttribute( 'src' );
-		assert.ok( ! srcBefore, `el iframe ya tiene src antes del clic: ${ srcBefore }` );
+		assert.ok( ! srcBefore, `the iframe already has a src before the click: ${ srcBefore }` );
 
 		const embedRequest = page.waitForRequest( ( request ) => /google\.com\/maps\/embed/.test( request.url() ) );
 		await page.getByRole( 'button', { name: 'Ver mapa' } ).click();
 		await embedRequest;
-		assert.ok( await page.locator( '.estrategia-web-map__iframe' ).isVisible(), 'el iframe no se ve tras el clic' );
-		assert.ok( await page.getByRole( 'button', { name: 'Ver mapa' } ).isHidden(), 'el botón sigue visible' );
+		assert.ok( await page.locator( '.estrategia-web-map__iframe' ).isVisible(), 'the iframe is not visible after the click' );
+		assert.ok( await page.getByRole( 'button', { name: 'Ver mapa' } ).isHidden(), 'the button is still visible' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 	} )
 );

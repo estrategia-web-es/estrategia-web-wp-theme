@@ -1,18 +1,20 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: el registro de bloques en el editor (edit.js clásico, autoRegister) solo existe ejecutando el editor de WordPress.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: block registration in the editor (classic edit.js, autoRegister) only exists when running the WordPress editor.
 /**
- * Los tres bloques (el del aviso de cookies se fue a estrategia-web-site en 0.7.0) existen en el editor, con títulos en castellano; se
- * insertan sin errores; el carrusel acepta bloques internos; y los controles
- * automáticos de autoRegister llevan las etiquetas traducidas de labels.php.
- * Ojo: el --login de Playground NO sirve a un navegador nuevo; se entra por
- * wp-login.php.
+ * The three blocks (the cookie notice one moved to estrategia-web-site in
+ * 0.7.0) exist in the editor, with Spanish titles (the test site's locale);
+ * they insert without errors; the carousel accepts inner blocks; and the
+ * automatic autoRegister controls carry the translated labels from
+ * labels.php.
+ * Careful: Playground's --login does NOT serve a new browser; it logs in
+ * through wp-login.php.
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
 
 run( () =>
 	withBrowser( async ( { newPage } ) => {
 		const page = await newPage( { viewport: { width: 1400, height: 1000 } } );
-		// Usuario por defecto de Playground: solo existe en este WordPress efímero
-		// de pruebas, que muere al acabar (fila 21: no es una credencial real).
+		// Playground's default user: it only exists in this ephemeral test
+		// WordPress, which dies when done (row 21: not a real credential).
 		await page.goto( `${ BASE_URL }/wp-login.php` );
 		await page.fill( '#user_login', 'admin' );
 		await page.fill( '#user_pass', 'password' );
@@ -26,14 +28,14 @@ run( () =>
 				return type && { name, title: type.title, label: type.attributes.phone?.label };
 			} )
 		);
-		assert.ok( types.every( Boolean ), `faltan bloques en el editor: ${ JSON.stringify( types ) }` );
+		assert.ok( types.every( Boolean ), `blocks missing in the editor: ${ JSON.stringify( types ) }` );
 		assert.deepEqual(
 			types.map( ( t ) => t.title ),
 			[ 'Carrusel', 'Mapa (en dos clics)', 'Botón de WhatsApp' ]
 		);
-		assert.equal( types[ 2 ].label, 'Teléfono en formato internacional (vacío: la opción del sitio)', 'etiqueta de autoRegister sin traducir' );
+		assert.equal( types[ 2 ].label, 'Teléfono en formato internacional (vacío: la opción del sitio)', 'autoRegister label untranslated' );
 
-		// Insertar los tres; el carrusel con su plantilla de bloques internos.
+		// Insert the three; the carousel with its inner block template.
 		const inserted = await page.evaluate( () => {
 			const { createBlock } = window.wp.blocks;
 			const carousel = createBlock( 'estrategia-web/carousel', {}, [ createBlock( 'core/paragraph', { content: 'Uno' } ), createBlock( 'core/paragraph', { content: 'Dos' } ) ] );
@@ -50,7 +52,7 @@ run( () =>
 			[ 'estrategia-web/whatsapp', true, 0 ],
 		] );
 
-		// La vista previa del servidor (ServerSideRender) del mapa llega.
+		// The map's server preview (ServerSideRender) arrives.
 		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
 		await editorFrame.getByText( 'Calle Falsa 1' ).first().waitFor( { timeout: 30000 } );
 

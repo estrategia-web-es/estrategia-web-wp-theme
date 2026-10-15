@@ -1,16 +1,16 @@
 <?php
 /**
- * Hijo de prueba del padre. Ya no declara categorías de consentimiento: el
- * aviso de cookies se fue al plugin en 0.7.0 y este WordPress de pruebas
- * tiene el plugin Estrategia Web con el módulo «consent» APAGADO (así se
- * prueba que el mapa funciona sin él; ver tests/fixtures/setup/setup.php).
+ * Test child of the parent theme. It no longer declares consent categories:
+ * the cookie notice moved to the plugin in 0.7.0 and this test WordPress has
+ * the Estrategia Web plugin with the "consent" module turned OFF (that is how
+ * it tests that the map works without it; see tests/fixtures/setup/setup.php).
  *
  * @package estrategia-web-hijo-prueba
  */
 
-// Un campo de entrada para probar estrategia-web/map enlazado a core/post-meta
-// dentro de una Consulta (tests/map-query.test.mjs). Un tipo propio con sus
-// campos es cosa de un plugin, nunca del padre: aquí solo es la siembra.
+// A post field to test estrategia-web/map bound to core/post-meta inside a
+// Query (tests/map-query.test.mjs). A custom type with its fields belongs in a
+// plugin, never in the parent: here it is only the seed.
 add_action(
 	'init',
 	static function () {
@@ -26,9 +26,9 @@ add_action(
 	}
 );
 
-// Un carrusel en REJILLA de dos filas, como la franja de clientes de
-// Lavandería (tests/carousel-infinite.test.mjs): el infinito rota por
-// columnas y ninguna ficha cambia de fila. Lo pone el hijo, como allí.
+// A carousel in a two-row GRID, like Lavandería's client strip
+// (tests/carousel-infinite.test.mjs): the infinite mode rotates by columns
+// and no card changes row. The child sets it, as there.
 add_action(
 	'wp_head',
 	static function () {
@@ -36,11 +36,11 @@ add_action(
 	}
 );
 
-// Una cabecera FIJA de 80 px, como la de Lavandería, solo en /prueba-anclas/
-// (tests/anchors.test.mjs): el destino de un ancla no puede quedar debajo.
-// El alto lo declara el token que un hijo pone en su theme.json
-// (settings.custom.layout.cabecera); aquí, a mano. Solo en esa página: en
-// las demás taparía lo que otras pruebas pulsan.
+// A STICKY 80 px header, like Lavandería's, only on /prueba-anclas/
+// (tests/anchors.test.mjs): an anchor's target must not end up under it.
+// The height is declared by the token a child sets in its theme.json
+// (settings.custom.layout.cabecera); here, by hand. Only on that page: on the
+// others it would cover what other tests click.
 add_action(
 	'wp_head',
 	static function () {

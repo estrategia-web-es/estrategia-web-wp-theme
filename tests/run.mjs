@@ -1,19 +1,19 @@
-// NIVEL: BANCO DE TRABAJO — no es una prueba. Corredor de pruebas por niveles (fila 7 del Armazón).
+// NIVEL: WORKBENCH — not a test. Test runner by levels (row 7 of the Armazón).
 /**
- *     node tests/run.mjs            levanta Playground, corre todo, lo para
- *     node tests/run.mjs carousel   solo las pruebas cuyo nombre contiene «carousel»
+ *     node tests/run.mjs            starts Playground, runs everything, stops it
+ *     node tests/run.mjs carousel   only the tests whose name contains "carousel"
  *     ESTRATEGIA_WEB_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs
- *                                   usa un WordPress ya levantado (node tests/server.mjs)
+ *                                   uses a WordPress that is already running (node tests/server.mjs)
  *
- * Cómo funciona y cómo se mantiene:
- * - Descubre tests/*.test.mjs; NO hay lista. La primera línea de cada prueba
- *   dice su nivel con «// NIVEL: n — ...». Una prueba sin nivel no se corre y
- *   PARA todo: una prueba que no corre parece que cubre algo.
- * - Orden 1 → 2 → 3 y se para en la primera que falle.
- * - Cada prueba es un proceso aparte que recibe BASE_URL y sale con 0 o 1.
- * - La trampa: Playground tarda ~1 minuto en arrancar (descarga WordPress y la
- *   traducción la primera vez). Para iterar, se levanta una vez con
- *   tests/server.mjs y se pasa ESTRATEGIA_WEB_BASE_URL.
+ * How it works and how to maintain it:
+ * - It discovers tests/*.test.mjs; there is NO list. The first line of each test
+ *   states its level with "// NIVEL: n — ...". A test without a level is not run
+ *   and STOPS everything: a test that does not run looks like it covers something.
+ * - Order 1 → 2 → 3, and it stops at the first one that fails.
+ * - Each test is a separate process that receives BASE_URL and exits with 0 or 1.
+ * - The trap: Playground takes ~1 minute to start (it downloads WordPress and the
+ *   translation the first time). To iterate, start it once with
+ *   tests/server.mjs and pass ESTRATEGIA_WEB_BASE_URL.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,7 +31,7 @@ const tests = fs
 		const first = fs.readFileSync( path.join( dir, file ), 'utf8' ).split( '\n' )[ 0 ];
 		const match = first.match( /^\/\/ NIVEL: (\d) — / );
 		if ( ! match ) {
-			console.error( `✗ ${ file }: la primera línea no declara «// NIVEL: n — ...». No se corre nada.` );
+			console.error( `✗ ${ file }: the first line does not declare "// NIVEL: n — ...". Nothing is run.` );
 			process.exit( 1 );
 		}
 		return { file, level: Number( match[ 1 ] ) };
@@ -43,7 +43,7 @@ let baseUrl = process.env.ESTRATEGIA_WEB_BASE_URL;
 let failed = false;
 try {
 	if ( ! baseUrl && tests.some( ( t ) => t.level >= 2 ) ) {
-		console.log( 'Levantando WordPress (Playground)…' );
+		console.log( 'Starting WordPress (Playground)…' );
 		server = ( await start() ).child;
 		baseUrl = BASE_URL;
 	}

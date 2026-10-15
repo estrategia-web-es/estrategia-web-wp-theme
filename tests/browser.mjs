@@ -1,8 +1,8 @@
-// NIVEL: BANCO DE TRABAJO — no es una prueba. Utilidades compartidas por las pruebas de navegador.
+// NIVEL: WORKBENCH — not a test. Utilities shared by the browser tests.
 /**
- * Playwright sin node_modules propio: se toma el de portal-hs y los
- * navegadores de la caché compartida (~/AppData/Local/ms-playwright).
- * Si portal-hs cambia de sitio, se cambia la ruta aquí y solo aquí.
+ * Playwright without its own node_modules: it takes portal-hs's copy and the
+ * browsers from the shared cache (~/AppData/Local/ms-playwright).
+ * If portal-hs moves, the path is changed here and only here.
  */
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';

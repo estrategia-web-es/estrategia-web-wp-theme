@@ -1,22 +1,22 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba es el ALTO que calcula el motor de maquetación para el mapa dentro de un contenedor flex, y eso solo existe con la página pintada.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: what is tested is the HEIGHT the layout engine computes for the map inside a flex container, and that only exists with the page painted.
 /**
- * estrategia-web/map dentro de un Grupo vertical (flex en columna) NO SE ENCOGE.
+ * estrategia-web/map inside a vertical Group (column flex) does NOT SHRINK.
  *
- * El fallo, 03-10-2026: el hijo de Lavandería redondea el mapa con
- * overflow:hidden y lo mete en un Grupo vertical; un hijo flex con overflow
- * distinto de visible tiene tamaño mínimo 0, y el mapa se quedó en 2 px con
- * todo lo de dentro cortado (la página salió un 14 % más corta). El arreglo es
- * `flex: none` en .estrategia-web-map (blocks/map/style.css).
+ * The bug, 03-10-2026: Lavandería's child rounds the map with overflow:hidden
+ * and puts it inside a vertical Group; a flex child with overflow other than
+ * visible has a minimum size of 0, and the map ended up 2 px tall with
+ * everything inside cut off (the page came out 14 % shorter). The fix is
+ * `flex: none` on .estrategia-web-map (blocks/map/style.css).
  *
- * La prueba reproduce exactamente ese caso sobre /prueba-modulos/: envuelve el
- * mapa en lo mismo que pinta un Grupo vertical de WordPress —flex en columna,
- * align-items:flex-start, ALTO AUTOMÁTICO— y le pone overflow:hidden, y
- * comprueba que la figura sigue midiendo lo que su marco.
+ * The test reproduces exactly that case on /prueba-modulos/: it wraps the map
+ * in the same thing a WordPress vertical Group renders —column flex,
+ * align-items:flex-start, AUTOMATIC HEIGHT— and sets overflow:hidden on it,
+ * and checks that the figure is still as tall as its frame.
  *
- * La TRAMPA, que costó una versión: la primera prueba (0.3.1) le ponía al
- * contenedor un alto fijo de 200 px. Así el fallo era otro (encogerse) y la
- * prueba pasaba con un arreglo que en la web real no arreglaba nada. Una prueba
- * tiene que reproducir el caso real, no uno parecido.
+ * The TRAP, which cost a version: the first test (0.3.1) gave the container a
+ * fixed height of 200 px. That way the bug was a different one (shrinking) and
+ * the test passed with a fix that fixed nothing on the real site. A test must
+ * reproduce the real case, not a similar one.
  */
 import { withBrowser, run, assert, PAGE } from './browser.mjs';
 
@@ -24,28 +24,28 @@ run( () =>
 	withBrowser( async ( { newPage } ) => {
 		const page = await newPage();
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
-		const medida = await page.evaluate( () => {
+		const measure = await page.evaluate( () => {
 			const map = document.querySelector( '.estrategia-web-map' );
 			const wrap = document.createElement( 'div' );
-			// Lo que pinta un Grupo vertical de WordPress alineado a la izquierda.
+			// What a left-aligned WordPress vertical Group renders.
 			wrap.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start';
 			map.before( wrap );
 			wrap.append( map );
 			map.style.overflow = 'hidden';
-			// Lo que hace el estilo «map-card» del hijo: el pie (dirección y
-			// botones) va ENCIMA del mapa, fuera del flujo. Sin esto la figura
-			// tiene contenido en flujo con ancho propio y el fallo no aparece.
+			// What the child's "map-card" style does: the caption (address and
+			// buttons) goes ON TOP of the map, out of the flow. Without this the
+			// figure has in-flow content with its own width and the bug does not show.
 			const caption = map.querySelector( '.estrategia-web-map__caption' );
 			if ( caption ) caption.style.position = 'absolute';
 			const frame = map.querySelector( '.estrategia-web-map__frame' );
-			return { figura: map.getBoundingClientRect().height, marco: frame.getBoundingClientRect().height };
+			return { figure: map.getBoundingClientRect().height, frame: frame.getBoundingClientRect().height };
 		} );
-		// Con el fallo, el marco se mide con ancho 0 y su alto (aspect-ratio) sale 0:
-		// un mapa de menos de 100 px de alto es el fallo, no una prueba sin datos.
-		assert.ok( medida.marco > 100 && medida.figura > 100, `el mapa se aplasta dentro de un Grupo vertical: figura ${ medida.figura } px, marco ${ medida.marco } px` );
+		// With the bug, the frame is measured with width 0 and its height (aspect-ratio) comes out 0:
+		// a map less than 100 px tall is the bug, not a test without data.
+		assert.ok( measure.frame > 100 && measure.figure > 100, `the map gets squashed inside a vertical Group: figure ${ measure.figure } px, frame ${ measure.frame } px` );
 		assert.ok(
-			medida.figura >= medida.marco,
-			`el mapa se encoge dentro de un flex: la figura mide ${ medida.figura } px y su marco ${ medida.marco } px`
+			measure.figure >= measure.frame,
+			`the map shrinks inside a flex: the figure is ${ measure.figure } px and its frame ${ measure.frame } px`
 		);
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 	} )

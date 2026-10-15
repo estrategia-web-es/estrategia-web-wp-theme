@@ -1,23 +1,24 @@
 <?php
 /**
- * Arranque del tema: dominio de traducción y soportes.
+ * Theme bootstrap: translation domain and supports.
  *
- * Cómo se mantiene:
- * - Las traducciones del PADRE viven en languages/ del padre y se llaman por
- *   el LOCALE, no por el dominio: languages/es_ES.l10n.php y es_ES.po. Así lo
- *   busca WordPress dentro de la carpeta de un tema (wp-includes/l10n.php,
- *   _load_textdomain_just_in_time: "{$path}{$locale}.mo"). El nombre
- *   «estrategia-web-es_ES» solo vale en wp-content/languages/themes/. Esa es la
- *   trampa: con el nombre largo el fichero está, pesa lo que toca y no se usa.
- * - El hijo tiene SU dominio (el slug del hijo) y su carpeta: no mezcla
- *   cadenas con «estrategia-web».
- * - 1.1.0: el plugin Estrategia Web usa el MISMO dominio. Desde WordPress
- *   6.7 cada dominio tiene UNA carpeta para la carga justo a tiempo, y es la
- *   de aquí: el plugin no la pisa, fuerza esta carga y le junta su fichero
- *   (ver EstrategiaWeb\Plugin::load_textdomain en el plugin). Si alguien
- *   cambia esta línea por load_textdomain() o le cambia la carpeta, mirar
- *   allí; la prueba que lo vigila es tests/page-loads.test.mjs («404 sin
- *   traducir»).
+ * How to maintain:
+ * - The PARENT's translations live in the parent's languages/ and are named by
+ *   LOCALE, not by domain: languages/es_ES.l10n.php and es_ES.po. That is how
+ *   WordPress looks for them inside a theme folder (wp-includes/l10n.php,
+ *   _load_textdomain_just_in_time: "{$path}{$locale}.mo"). The name
+ *   "estrategia-web-es_ES" only works in wp-content/languages/themes/. That is
+ *   the trap: with the long name the file is there, has the right size and is
+ *   not used.
+ * - The child has ITS OWN domain (the child's slug) and its own folder: it does
+ *   not mix strings with "estrategia-web".
+ * - 1.1.0: the Estrategia Web plugin uses the SAME domain. Since WordPress 6.7
+ *   each domain has ONE folder for just-in-time loading, and it is this one:
+ *   the plugin does not override it, it forces this load and merges its own
+ *   file into it (see EstrategiaWeb\Plugin::load_textdomain in the plugin). If
+ *   someone changes this line to load_textdomain() or changes its folder, look
+ *   there; the test that guards it is tests/page-loads.test.mjs ("404
+ *   untranslated").
  *
  * @package estrategia-web
  */
@@ -55,13 +56,13 @@ add_filter( 'frontpage_template_hierarchy', 'estrategia_web_front_page_only_when
 /**
  * Loads the parent's own style.css (focus, skip link, anchors) on the front.
  *
- * Hasta la 0.7.2 nadie lo cargaba salvo que el hijo lo encolase (Lavandería
- * lo hace con el handle «estrategia-web-style»): en un hijo que no lo hacía, el foco
- * visible y el salto al contenido no existían. Desde la 0.7.3 lo encola el
- * padre con ESE MISMO handle, así que el hijo que ya lo encolaba no lo
- * duplica (el segundo wp_enqueue_style de un handle es un no-op) y el que no,
- * lo recibe. La trampa: si un hijo lo encola con OTRO handle, sale dos veces;
- * es inocuo (las mismas reglas), pero sobra: que lo quite.
+ * Up to 0.7.2 nobody loaded it unless the child enqueued it (Lavandería does
+ * it with the handle "estrategia-web-style"): in a child that did not, visible
+ * focus and the skip link did not exist. Since 0.7.3 the parent enqueues it
+ * with THAT SAME handle, so a child that already enqueued it does not
+ * duplicate it (a second wp_enqueue_style of a handle is a no-op) and one that
+ * did not, gets it. The trap: if a child enqueues it with ANOTHER handle, it
+ * comes out twice; harmless (the same rules), but redundant: remove it.
  */
 function estrategia_web_styles(): void {
 	wp_enqueue_style( 'estrategia-web-style', get_template_directory_uri() . '/style.css', array(), estrategia_web_version() );

@@ -1,11 +1,12 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: se comprueba el nombre accesible y que el botón está fijo y visible en pantalla, que es estilo calculado.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: it checks the accessible name and that the button is fixed and visible on screen, which is computed style.
 /**
- * estrategia-web/whatsapp: el enlace wa.me es correcto con atributos (número con
- * espacios y «+», mensaje con acentos) y con la opción del sitio (el del pie),
- * se abre en pestaña nueva, tiene nombre accesible y queda fijo en su esquina.
- * Desde 0.7.1, la distancia a la esquina suma el margen seguro del móvil
- * (env(safe-area-inset-*)): se mira en la hoja, porque en un navegador de
- * escritorio env() vale 0 y el estilo calculado no lo distingue.
+ * estrategia-web/whatsapp: the wa.me link is correct with attributes (number
+ * with spaces and "+", message with accents) and with the site option (the
+ * footer one), it opens in a new tab, has an accessible name and stays fixed
+ * in its corner.
+ * Since 0.7.1, the distance to the corner adds the mobile safe area
+ * (env(safe-area-inset-*)): it is checked in the stylesheet, because in a
+ * desktop browser env() is 0 and the computed style does not tell it apart.
  */
 import { withBrowser, run, assert, PAGE } from './browser.mjs';
 
@@ -15,16 +16,16 @@ run( () =>
 		await page.goto( PAGE, { waitUntil: 'networkidle' } );
 
 		const buttons = page.getByRole( 'link', { name: /Escríbenos por WhatsApp/ } );
-		assert.equal( await buttons.count(), 2, 'se esperaban dos: el de la página y el del pie' );
+		assert.equal( await buttons.count(), 2, 'two were expected: the page one and the footer one' );
 
 		const hrefs = await buttons.evaluateAll( ( links ) => links.map( ( a ) => a.getAttribute( 'href' ) ) );
 		assert.ok(
 			hrefs.includes( 'https://wa.me/34600111222?text=' + encodeURIComponent( 'Hola, ¿tenéis hora mañana?' ) ),
-			`falta el enlace con atributos: ${ hrefs.join( ' ' ) }`
+			`the link with attributes is missing: ${ hrefs.join( ' ' ) }`
 		);
 		assert.ok(
 			hrefs.includes( 'https://wa.me/34611223344?text=' + encodeURIComponent( 'Mensaje desde la opción del sitio' ) ),
-			`falta el enlace de la opción del sitio: ${ hrefs.join( ' ' ) }`
+			`the site option's link is missing: ${ hrefs.join( ' ' ) }`
 		);
 
 		for ( const link of await buttons.all() ) {
@@ -32,15 +33,15 @@ run( () =>
 			assert.match( await link.getAttribute( 'rel' ), /noopener/ );
 			assert.equal( await link.evaluate( ( el ) => getComputedStyle( el ).position ), 'fixed' );
 			const box = await link.boundingBox();
-			assert.ok( box && box.width >= 44 && box.height >= 44, 'diana táctil menor de 44 px' );
+			assert.ok( box && box.width >= 44 && box.height >= 44, 'touch target smaller than 44 px' );
 		}
 
-		// Posición: el de la página va a la izquierda, el del pie a la derecha.
+		// Position: the page one goes on the left, the footer one on the right.
 		const left = await page.locator( '.estrategia-web-whatsapp.is-position-bottom-left' ).boundingBox();
 		const right = await page.locator( '.estrategia-web-whatsapp.is-position-bottom-right' ).boundingBox();
-		assert.ok( left.x < 100 && right.x > 1000, `posiciones inesperadas: ${ left.x } / ${ right.x }` );
+		assert.ok( left.x < 100 && right.x > 1000, `unexpected positions: ${ left.x } / ${ right.x }` );
 
-		// Margen seguro (0.7.1): abajo y en el lado de su esquina, cada uno el suyo.
+		// Safe area (0.7.1): at the bottom and on its corner's side, each its own.
 		const insets = await page.evaluate( () => {
 			const found = {};
 			const walk = ( rules ) => {

@@ -1,9 +1,9 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: que cada entrada de la Consulta sea una diapositiva es medida de cajas (anchos, scrollLeft), que solo existe pintado.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: that each post of the Query is a slide is a measurement of boxes (widths, scrollLeft), which only exists when painted.
 /**
- * estrategia-web/carousel con un core/query dentro (0.2.0): cada <li> del
- * post-template es una diapositiva — se ven dos por fila, hay un punto por
- * entrada, la flecha avanza UNA entrada y «Fin» llega a la última.
- * Página sembrada en tests/fixtures/setup/setup.php (/prueba-carrusel-consulta/).
+ * estrategia-web/carousel with a core/query inside (0.2.0): each <li> of the
+ * post-template is a slide — two are seen per row, there is one dot per
+ * post, the arrow advances ONE post and "End" reaches the last one.
+ * Page seeded in tests/fixtures/setup/setup.php (/prueba-carrusel-consulta/).
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
 
@@ -17,32 +17,32 @@ run( () =>
 		const slides = track.locator( '.wp-block-post-template > li' );
 		await carousel.scrollIntoViewIfNeeded();
 
-		assert.equal( await slides.count(), 6, 'la consulta debería traer seis entradas' );
-		assert.ok( await carousel.evaluate( ( el ) => el.classList.contains( 'is-ready' ) ), 'no se hidrató (sin is-ready)' );
+		assert.equal( await slides.count(), 6, 'the query should bring six posts' );
+		assert.ok( await carousel.evaluate( ( el ) => el.classList.contains( 'is-ready' ) ), 'it did not hydrate (no is-ready)' );
 
-		// Dos por fila: cada entrada mide menos de la mitad de la pista y están EN FILA.
+		// Two per row: each post is less than half the track wide and they are IN A ROW.
 		const trackWidth = await track.evaluate( ( el ) => el.clientWidth );
 		const boxes = await slides.evaluateAll( ( els ) => els.map( ( el ) => el.getBoundingClientRect() ) );
-		assert.ok( boxes[ 0 ].width <= trackWidth / 2 + 1, `la entrada mide ${ boxes[ 0 ].width }px en una pista de ${ trackWidth }px` );
-		assert.ok( Math.abs( boxes[ 1 ].top - boxes[ 0 ].top ) < 2, 'las entradas no están en fila (se apilan)' );
-		assert.ok( boxes[ 1 ].left > boxes[ 0 ].left, 'la segunda entrada no está a la derecha de la primera' );
+		assert.ok( boxes[ 0 ].width <= trackWidth / 2 + 1, `the post is ${ boxes[ 0 ].width }px wide in a ${ trackWidth }px track` );
+		assert.ok( Math.abs( boxes[ 1 ].top - boxes[ 0 ].top ) < 2, 'the posts are not in a row (they stack)' );
+		assert.ok( boxes[ 1 ].left > boxes[ 0 ].left, 'the second post is not to the right of the first' );
 
-		// Un punto por entrada, no uno por bloque interno (que sería uno: la consulta).
-		assert.equal( await page.locator( '.estrategia-web-carousel__dot' ).count(), 6, 'debería haber un punto por entrada' );
+		// One dot per post, not one per inner block (which would be one: the query).
+		assert.equal( await page.locator( '.estrategia-web-carousel__dot' ).count(), 6, 'there should be one dot per post' );
 
-		// La flecha avanza exactamente una entrada.
+		// The arrow advances exactly one post.
 		const offsets = await slides.evaluateAll( ( els ) => els.map( ( el ) => el.offsetLeft - els[ 0 ].offsetLeft ) );
 		await page.getByRole( 'button', { name: 'Diapositiva siguiente' } ).click();
 		await page.waitForFunction( ( [ el, target ] ) => Math.abs( el.scrollLeft - target ) < 2, [ await track.elementHandle(), offsets[ 1 ] ] );
 
-		// Fin: llega al final y «siguiente» se desactiva; el último punto queda marcado.
+		// End: it reaches the end and "next" gets disabled; the last dot stays marked.
 		await track.focus();
 		await page.keyboard.press( 'End' );
 		const next = page.getByRole( 'button', { name: 'Diapositiva siguiente' } );
 		await page.waitForFunction( ( el ) => el.disabled, await next.elementHandle() );
 		await page.waitForFunction( () => document.querySelectorAll( '.estrategia-web-carousel__dot' )[ 5 ].getAttribute( 'aria-current' ) === 'true' );
 
-		// Un punto concreto lleva a su entrada.
+		// A specific dot leads to its post.
 		await page.getByRole( 'button', { name: 'Ir a la diapositiva 2' } ).click();
 		await page.waitForFunction( ( [ el, target ] ) => Math.abs( el.scrollLeft - target ) < 2, [ await track.elementHandle(), offsets[ 1 ] ] );
 
