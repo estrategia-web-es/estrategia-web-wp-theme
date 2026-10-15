@@ -1,17 +1,20 @@
 <?php
 /**
- * Siembra del WordPress de pruebas (Playground). La llama el blueprint
- * (tests/fixtures/blueprint.json) con runPHP después de cargar WordPress.
+ * Seed of the test WordPress (Playground). Called by the blueprint
+ * (tests/fixtures/blueprint.json) with runPHP after WordPress loads.
  *
- * Deja: enlaces permanentes bonitos, la opción de WhatsApp del sitio, y la
- * página /prueba-modulos/ con los bloques del padre; y /prueba-carrusel-consulta/
- * con seis entradas en un carrusel con core/query; y /prueba-acordeon/ con
- * un core/accordion de respuesta larga (0.4.0); /prueba-carrusel-bucle/ y
- * /prueba-mapa-estatico/ (0.5.0); /prueba-mapa-sin-datos/ y un carrusel de una
- * sola diapositiva en /prueba-carrusel-bucle/ (0.6.0), y allí mismo uno de
- * tres diapositivas con 2,4 a la vista (0.7.2); /prueba-anclas/ con un enlace
- * a un #destino muy abajo (0.7.3). Es idempotente: si la
- * página o la entrada ya existe, la reescribe.
+ * It leaves: pretty permalinks, the site's WhatsApp option, and the page
+ * /prueba-modulos/ with the parent's blocks; /prueba-carrusel-consulta/ with
+ * six posts in a carousel with core/query; /prueba-acordeon/ with a
+ * core/accordion with a long answer (0.4.0); /prueba-carrusel-bucle/ and
+ * /prueba-mapa-estatico/ (0.5.0); /prueba-mapa-sin-datos/ and a single-slide
+ * carousel on /prueba-carrusel-bucle/ (0.6.0), and on that same page one with
+ * three slides and 2.4 in view (0.7.2); /prueba-anclas/ with a link to a
+ * #destino far below (0.7.3). It is idempotent: if the page or the post
+ * already exists, it rewrites it.
+ *
+ * The content (titles, labels, texts) is in Spanish on purpose: it is test
+ * data for a Spanish site and the tests look for those literals.
  *
  * @package estrategia-web
  */
@@ -20,10 +23,11 @@ update_option( 'permalink_structure', '/%postname%/' );
 update_option( 'estrategia_web_whatsapp_phone', '34611223344' );
 update_option( 'estrategia_web_whatsapp_message', 'Mensaje desde la opción del sitio' );
 
-// 1.1.0: los bloques ya no son del tema sino del plugin Estrategia Web (lo
-// monta tests/server.mjs). Solo sus módulos de BLOQUES: sin «consent», como
-// antes de la 1.1.0, para seguir probando que el mapa funciona sin aviso de
-// cookies (tests/map.test.mjs), y sin «site» ni «forms», que aquí no pintan nada.
+// 1.1.0: the blocks no longer belong to the theme but to the Estrategia Web
+// plugin (mounted by tests/server.mjs). Only its BLOCK modules: without
+// "consent", as before 1.1.0, to keep testing that the map works without a
+// cookie notice (tests/map.test.mjs), and without "site" or "forms", which
+// have no role here.
 update_option( 'estrategia_web_modules', array( 'carousel', 'map', 'whatsapp', 'language-switcher' ) );
 
 $slides = '';
@@ -54,8 +58,8 @@ $page_id  = wp_insert_post(
 	)
 );
 
-// Carrusel con una Consulta dentro (0.2.0): seis entradas y una página cuyo
-// carrusel lleva un core/query; cada <li> de su post-template es diapositiva.
+// Carousel with a Query inside (0.2.0): six posts and a page whose carousel
+// holds a core/query; each <li> of its post-template is a slide.
 for ( $i = 1; $i <= 6; $i++ ) {
 	$slug = 'entrada-carrusel-' . $i;
 	$post = get_page_by_path( $slug, OBJECT, 'post' );
@@ -70,7 +74,7 @@ for ( $i = 1; $i <= 6; $i++ ) {
 	);
 }
 
-// La consulta de las seis entradas, para los dos carruseles que la usan.
+// The query of the six posts, for the two carousels that use it.
 $query_block = static fn( int $id ): string => '<!-- wp:query {"queryId":' . $id . ',"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"carrusel","inherit":false}} -->'
 	. '<div class="wp-block-query"><!-- wp:post-template -->'
 	. '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
@@ -79,25 +83,25 @@ $query_block = static fn( int $id ): string => '<!-- wp:query {"queryId":' . $id
 	. '<!-- /wp:post-template --></div>'
 	. '<!-- /wp:query -->';
 
-// Carrusel en bucle (0.5.0): uno de bloques y uno con consulta, SIN el
-// atributo loop, para probar también que el bucle es el valor por defecto.
+// Looping carousel (0.5.0): one with blocks and one with a query, WITHOUT the
+// loop attribute, to also test that looping is the default.
 $loop_content = '<!-- wp:estrategia-web/carousel {"label":"Carrusel en bucle","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $slides
 	. '<!-- /wp:estrategia-web/carousel -->'
 	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel en bucle con consulta","showDots":true,"perViewMobile":1,"perViewTablet":2,"perViewDesktop":2} -->'
 	. $query_block( 9 )
 	. '<!-- /wp:estrategia-web/carousel -->'
-	// Infinito (0.6.0): en rejilla de dos filas (la CSS la pone el hijo de
-	// prueba, clase rejilla-prueba), seis entradas = tres columnas.
+	// Infinite (0.6.0): in a two-row grid (the CSS is set by the test child,
+	// class rejilla-prueba), six posts = three columns.
 	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel en dos filas","className":"rejilla-prueba"} -->'
 	. $query_block( 10 )
 	. '<!-- /wp:estrategia-web/carousel -->'
-	// 0.7.2: tres diapositivas y 2,4 a la vista (la portada de Lavandería):
-	// ninguna rotación deja desplazar una entera y el paso se anima aparte.
+	// 0.7.2: three slides and 2.4 in view (Lavandería's home page): no
+	// rotation can shift a whole one and the step is animated separately.
 	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel con una de más","showDots":true,"perViewMobile":1,"perViewTablet":2.4,"perViewDesktop":2.4} -->'
 	. implode( '<!-- /wp:group -->', array_slice( explode( '<!-- /wp:group -->', $slides ), 0, 3 ) ) . '<!-- /wp:group -->'
 	. '<!-- /wp:estrategia-web/carousel -->'
-	// Infinito (0.6.0): con una sola diapositiva no hay nada que hacer.
+	// Infinite (0.6.0): with a single slide there is nothing to do.
 	. '<!-- wp:estrategia-web/carousel {"label":"Carrusel de una","showDots":true} -->'
 	. '<!-- wp:paragraph --><p>Única diapositiva</p><!-- /wp:paragraph -->'
 	. '<!-- /wp:estrategia-web/carousel -->';
@@ -136,10 +140,10 @@ wp_insert_post(
 	)
 );
 
-// Mapa dentro de una Consulta (0.2.0): dos entradas con su dirección en un
-// campo (prueba_direccion, registrado por el hijo de prueba) y la primera con
-// imagen destacada; el mapa enlaza la dirección con core/post-meta y, sin
-// imagen propia, usa la destacada de la entrada.
+// Map inside a Query (0.2.0): two posts with their address in a field
+// (prueba_direccion, registered by the test child) and the first one with a
+// featured image; the map binds the address with core/post-meta and, without
+// an image of its own, uses the post's featured image.
 $png        = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
 $upload     = wp_upload_bits( 'mapa-estatico-prueba.png', null, $png );
 $attachment = wp_insert_attachment(
@@ -189,10 +193,10 @@ wp_insert_post(
 	)
 );
 
-// Mapa estático (0.5.0): dos mapas. El primero con la imagen de OSM que
-// generó tools/static-map.mjs (está en esta carpeta, que Playground sirve en
-// /wp-content/estrategia-web-fixtures/); el segundo con una URL de OTRO dominio, que
-// el bloque tiene que descartar (cero peticiones a terceros).
+// Static map (0.5.0): two maps. The first with the OSM image generated by
+// tools/static-map.mjs (it is in this folder, which Playground serves at
+// /wp-content/estrategia-web-fixtures/); the second with a URL from ANOTHER
+// domain, which the block must discard (zero third-party requests).
 $embed          = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3075.5!2d2.6502!3d39.5696';
 $static_content = '<!-- wp:estrategia-web/map {"placeName":"Sede con mapa estático","address":"Plaça de Cort 1, 07001 Palma","phone":"+34 971 22 59 00","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/estrategia-web-fixtures/mapa-estatico.webp"} /-->'
 	. '<!-- wp:estrategia-web/map {"placeName":"Sede con mapa de fuera","address":"Calle de Fuera 1, Palma","embedUrl":"' . $embed . '","staticMapUrl":"https://tile.openstreetmap.org/16/33248/24911.png"} /-->';
@@ -209,9 +213,10 @@ wp_insert_post(
 	)
 );
 
-// Mapa sin su recuadro de datos (0.6.0, showDetails:false): la ficha de la
-// sede ya dice la dirección al lado. El primero con mapa estático, el segundo
-// sin imagen; los dos con la dirección enlazada (para «Abrir en Google Maps»).
+// Map without its details box (0.6.0, showDetails:false): the location's card
+// already shows the address next to it. The first with a static map, the
+// second without an image; both with the address bound (for "Open in Google
+// Maps").
 $details_content = '<!-- wp:paragraph --><p class="ficha-sede">Plaça de Cort 1, 07001 Palma</p><!-- /wp:paragraph -->'
 	. '<!-- wp:estrategia-web/map {"showDetails":false,"placeName":"Sede sin recuadro","address":"Plaça de Cort 1, 07001 Palma","embedUrl":"' . $embed . '","staticMapUrl":"/wp-content/estrategia-web-fixtures/mapa-estatico.webp"} /-->'
 	. '<!-- wp:estrategia-web/map {"showDetails":false,"placeName":"Sede sin recuadro ni imagen","address":"Calle Sin Imagen 2, Palma","embedUrl":"' . $embed . '"} /-->';
@@ -228,8 +233,8 @@ wp_insert_post(
 	)
 );
 
-// Acordeón del núcleo (0.4.0): dos preguntas, la primera con una respuesta
-// larga, para ver que la altura del panel se anima al abrir y al cerrar.
+// Core accordion (0.4.0): two questions, the first with a long answer, to see
+// that the panel height animates on opening and closing.
 $answer = str_repeat( 'Respuesta larga de prueba para ver la altura del panel moverse poco a poco. ', 12 );
 $item   = static fn( string $question, string $text ): string => '<!-- wp:accordion-item --><div class="wp-block-accordion-item">'
 	. '<!-- wp:accordion-heading --><h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle"><span class="wp-block-accordion-heading__toggle-title">' . $question . '</span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3><!-- /wp:accordion-heading -->'
@@ -253,9 +258,9 @@ wp_insert_post(
 	)
 );
 
-// Anclas (0.7.3): un enlace arriba a #destino, muy abajo, para ver que el
-// salto se desliza y que el destino no queda bajo la cabecera fija (la fija
-// el hijo de prueba solo en esta página).
+// Anchors (0.7.3): a link at the top to #destino, far below, to see that the
+// jump scrolls smoothly and that the target does not end up under the sticky
+// header (the test child makes it sticky only on this page).
 $anchors_content = '<!-- wp:paragraph --><p><a href="#destino">Ir al destino</a></p><!-- /wp:paragraph -->'
 	. '<!-- wp:spacer {"height":"2400px"} --><div style="height:2400px" aria-hidden="true" class="wp-block-spacer"></div><!-- /wp:spacer -->'
 	. '<!-- wp:heading --><h2 class="wp-block-heading" id="destino">Destino</h2><!-- /wp:heading -->'
@@ -274,12 +279,12 @@ wp_insert_post(
 	)
 );
 
-// Carrusel de fotos (0.7.4): cuatro fotos de 1920x1280 (con sus tamaños
-// intermedios, para que haya srcset) en un carrusel a todo el ancho ARRIBA
-// de la página, 1/2/3 a la vista, y otro de tres MUY ABAJO. Para ver qué
-// diapositivas llevan prioridad, cuáles van diferidas y que el sizes deja
-// elegir una foto del tamaño de su hueco. Las fotos se pintan aquí con GD:
-// un degradado con un número, nada que descargar.
+// Photo carousel (0.7.4): four 1920x1280 photos (with their intermediate
+// sizes, so that there is a srcset) in a full-width carousel at the TOP of the
+// page, 1/2/3 in view, and another one of three FAR BELOW. To see which slides
+// get priority, which are deferred and that sizes lets the browser pick a
+// photo the size of its slot. The photos are drawn here with GD: a gradient
+// with a number, nothing to download.
 require_once ABSPATH . 'wp-admin/includes/image.php';
 $photo_block = static function ( int $n ): string {
 	$name     = 'foto-carrusel-' . $n . '.jpg';
@@ -331,8 +336,8 @@ wp_insert_post(
 	)
 );
 
-// Recorte para el móvil (plugin 1.1.x, mobileRatio): las fotos 1-3, horizontales
-// (1920×1280), en un carrusel cuya caja en el móvil es 4/5. Lo mira
+// Mobile crop (plugin 1.1.x, mobileRatio): photos 1-3, landscape (1920×1280),
+// in a carousel whose box on mobile is 4/5. Checked by
 // tests/carousel-mobile-crop.test.mjs.
 $existing_crop = get_page_by_path( 'prueba-carrusel-movil' );
 wp_insert_post(

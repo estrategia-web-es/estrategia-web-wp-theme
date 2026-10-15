@@ -1,28 +1,30 @@
-// NIVEL: BANCO DE TRABAJO — no es una prueba. Levanta y para el WordPress de pruebas (Playground).
+// NIVEL: WORKBENCH — not a test. Starts and stops the test WordPress (Playground).
 /**
- * WordPress 7.1 local con Playground: el padre, el hijo de prueba y la siembra
- * montados desde este repo. Lo usa tests/run.mjs; también se puede lanzar a
- * mano para mirar la web:
+ * Local WordPress 7.1 with Playground: the parent theme, the test child theme
+ * and the seed, mounted from this repo. Used by tests/run.mjs; it can also be
+ * launched by hand to look at the site:
  *
  *     node tests/server.mjs          → http://127.0.0.1:9401/prueba-modulos/
  *
- * Cómo se mantiene / las trampas que costaron la tarde (01-10-2026):
- * - En Windows NO vale --mount=E:/ruta:/wordpress/...: los dos puntos de la
- *   unidad rompen el formato. Se usa --mount-dir <host> <vfs>.
- * - Desde Git Bash, MSYS convierte «/wordpress/...» en
- *   «C:/Program Files/Git/wordpress/...» y Playground monta en un sitio que
- *   no existe SIN dar error. Por eso se lanza desde Node con la lista de
- *   argumentos, no desde una línea de shell.
- * - Matar el proceso padre no mata a los hijos en Windows: stop() usa
- *   taskkill /T /F sobre el árbol entero.
- * - La siembra (blueprint + tests/fixtures/setup/setup.php) se ejecuta en
- *   cada arranque: Playground empieza de cero cada vez.
- * - 1.1.0: los bloques (carrusel, mapa, WhatsApp, selector de idioma) ya no
- *   son del tema: son módulos del PLUGIN Estrategia Web (repo
- *   armazon-wp-sitio), que se monta como plugins/estrategia-web y se activa
- *   con solo esos cuatro módulos (setup.php). Sus pruebas siguen aquí porque
- *   miden los bloques con el CSS del tema. Otra carpeta del plugin:
- *   ESTRATEGIA_WEB_PLUGIN=E:/otra/ruta node tests/run.mjs
+ * How to maintain it / the traps that cost an afternoon (01-10-2026):
+ * - On Windows --mount=E:/path:/wordpress/... does NOT work: the drive colon
+ *   breaks the format. --mount-dir <host> <vfs> is used instead.
+ * - From Git Bash, MSYS turns "/wordpress/..." into
+ *   "C:/Program Files/Git/wordpress/..." and Playground mounts at a place that
+ *   does not exist WITHOUT any error. That is why it is launched from Node with
+ *   an argument list, not from a shell line.
+ * - Killing the parent process does not kill its children on Windows: stop()
+ *   uses taskkill /T /F on the whole tree.
+ * - The seed (blueprint + tests/fixtures/setup/setup.php) runs on every start:
+ *   Playground starts from scratch each time.
+ * - 1.1.0: the blocks (carousel, map, WhatsApp, language switcher) no longer
+ *   belong to the theme: they are modules of the Estrategia Web PLUGIN (repo
+ *   armazon-wp-sitio), which is mounted as plugins/estrategia-web and activated
+ *   with only those four modules (setup.php). Their tests stay here because
+ *   they measure the blocks with the theme's CSS. Another plugin folder:
+ *   ESTRATEGIA_WEB_PLUGIN=E:/other/path node tests/run.mjs
+ * - Another port (to run several Playgrounds side by side):
+ *   ESTRATEGIA_WEB_PORT=9423 node tests/run.mjs
  */
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +38,7 @@ export const BASE_URL = `http://127.0.0.1:${ PORT }`;
 
 export function start( { log = false } = {} ) {
 	if ( ! fs.existsSync( path.join( PLUGIN, 'estrategia-web.php' ) ) ) {
-		throw new Error( `No encuentro el plugin Estrategia Web en ${ PLUGIN } (ESTRATEGIA_WEB_PLUGIN)` );
+		throw new Error( `Cannot find the Estrategia Web plugin in ${ PLUGIN } (ESTRATEGIA_WEB_PLUGIN)` );
 	}
 	const args = [
 		'-y',
@@ -87,7 +89,7 @@ export function stop( child ) {
 
 if ( process.argv[ 1 ] && fileURLToPath( import.meta.url ) === path.resolve( process.argv[ 1 ] ) ) {
 	const { child } = await start( { log: true } );
-	console.log( `\n${ BASE_URL }/prueba-modulos/  (Ctrl+C para parar)` );
+	console.log( `\n${ BASE_URL }/prueba-modulos/  (Ctrl+C to stop)` );
 	process.on( 'SIGINT', () => {
 		stop( child );
 		process.exit( 0 );

@@ -1,31 +1,34 @@
-// NIVEL: BANCO DE TRABAJO — no es una prueba. Herramienta de traducciones del tema.
+// NIVEL: WORKBENCH — not a test. The theme's translation tool.
 /**
- * Traducciones del tema: extrae, fusiona y genera. Sin dependencias.
+ * Theme translations: extract, merge and generate. No dependencies.
  *
  *     node tools/i18n.mjs
  *
- * 1. Extrae todas las cadenas del dominio «estrategia-web» a languages/estrategia-web.pot:
- *    PHP (__, _e, _x, esc_html__, esc_html_e, esc_attr__, esc_attr_e,
- *    esc_html_x, esc_attr_x), JS (__, _x de wp.i18n), block.json (título,
- *    descripción, palabras clave), theme.json (nombres de presets y de partes),
- *    cabeceras de patterns/*.php y de style.css. Con los contextos que usa
- *    WordPress para cada una (block-i18n.json y theme-i18n.json del núcleo).
- * 2. Fusiona en cada languages/<locale>.po: conserva lo traducido, añade lo
- *    nuevo vacío y marca como obsoleto (#~) lo que ya no existe.
- * 3. Genera languages/<locale>.l10n.php, el formato PHP de WordPress 6.5+ que
- *    se carga sin .mo. Es lo que usa el servidor Y el editor (inc/blocks.php).
+ * 1. Extracts every string of the "estrategia-web" domain into
+ *    languages/estrategia-web.pot: PHP (__, _e, _x, esc_html__, esc_html_e,
+ *    esc_attr__, esc_attr_e, esc_html_x, esc_attr_x), JS (__, _x from
+ *    wp.i18n), block.json (title, description, keywords), theme.json (preset
+ *    and template part names), headers of patterns/*.php and of style.css. With
+ *    the contexts WordPress uses for each one (core's block-i18n.json and
+ *    theme-i18n.json).
+ * 2. Merges into each languages/<locale>.po: keeps what is translated, adds
+ *    what is new as empty and marks as obsolete (#~) what no longer exists.
+ * 3. Generates languages/<locale>.l10n.php, WordPress 6.5+'s PHP format that
+ *    loads without a .mo. It is what the server AND the editor use
+ *    (inc/blocks.php).
  *
- * Cómo se mantiene:
- * - Quién: quien añada o cambie un texto de interfaz. Cuándo: en el MISMO
- *   commit que el texto. Se traduce en el .po (con cualquier editor o Poedit)
- *   y se vuelve a pasar esta herramienta para regenerar el .l10n.php.
- * - Las cadenas se reconocen solo entre COMILLAS SIMPLES y con el dominio
- *   escrito literal ('estrategia-web'). Una cadena con comillas dobles o con el
- *   dominio en una variable no se extrae, y no avisa: es la convención de
- *   WordPress y aquí se cumple siempre.
- * - La trampa: el .l10n.php NO se edita a mano. Se pisa en cada pasada.
- * - El nombre es <locale>.po dentro del tema (es_ES.po), no estrategia-web-es_ES.po:
- *   ver inc/setup.php.
+ * How to maintain:
+ * - Who: whoever adds or changes an interface text. When: in the SAME commit
+ *   as the text. It is translated in the .po (with any editor or Poedit) and
+ *   this tool is run again to regenerate the .l10n.php.
+ * - Strings are only recognised between SINGLE QUOTES and with the domain
+ *   written literally ('estrategia-web'). A string in double quotes or with the
+ *   domain in a variable is not extracted, and there is no warning: that is
+ *   the WordPress convention and it is always followed here.
+ * - The trap: the .l10n.php is NOT edited by hand. It is overwritten on every
+ *   run.
+ * - The name is <locale>.po inside the theme (es_ES.po), not
+ *   estrategia-web-es_ES.po: see inc/setup.php.
  */
 import fs from 'node:fs';
 import path from 'node:path';

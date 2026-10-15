@@ -1,53 +1,54 @@
-// NIVEL: BANCO DE TRABAJO — no es una prueba. Herramienta: imagen estática de un mapa a partir de OpenStreetMap.
+// NIVEL: WORKBENCH — not a test. Tool: static map image from OpenStreetMap.
 /**
- * Genera UNA imagen de mapa (webp o png) con un marcador del color de la marca
- * y «© OpenStreetMap» dentro, para el bloque estrategia-web/map (atributo
- * staticMapUrl, 0.5.0). Se ejecuta UNA vez al preparar el contenido de una
- * web; la imagen se guarda en el hijo y la sirve el propio sitio: el
- * visitante no hace ninguna petición a terceros hasta que acepta los mapas.
+ * Generates ONE map image (webp or png) with a marker in the brand colour and
+ * "© OpenStreetMap" inside it, for the estrategia-web/map block (attribute
+ * staticMapUrl, 0.5.0). It runs ONCE when preparing a site's content; the
+ * image is saved in the child theme and served by the site itself: the
+ * visitor makes no third-party request until they accept the maps.
  *
  *     node tools/static-map.mjs --direccion "Carrer de Sant Miquel 30, Palma" \
  *          --salida ../web-hijo/assets/maps/sede.webp --color "#0b6e4f"
  *     node tools/static-map.mjs --lat 39.5716 --lon 2.6502 --zoom 16 \
  *          --ancho 800 --alto 450 --escala 2 --salida mapa.png
- *     node tools/static-map.mjs ... --seco      dice qué pediría, sin pedir nada
+ *     node tools/static-map.mjs ... --seco      says what it would request, requests nothing
  *     node tools/static-map.mjs --ayuda
  *
- * Opciones: --lat/--lon o --direccion (geocodifica con Nominatim, UNA
- * petición) · --zoom (16) · --ancho/--alto en px CSS (800×450, 16/9 como el
- * bloque) · --escala 1|2 (2: el doble de píxeles para pantallas densas) ·
- * --color del marcador (#1a1a1a) · --salida .webp|.png (mapa.webp) ·
- * --contacto correo o URL que va en el User-Agent (lo pide la política de
- * OSM; también se puede poner en ESTRATEGIA_WEB_OSM_CONTACT).
+ * Options (the flag names are Spanish, the Armazón's tool convention):
+ * --lat/--lon or --direccion (address; geocodes with Nominatim, ONE request) ·
+ * --zoom (16) · --ancho/--alto (width/height) in CSS px (800×450, 16/9 like
+ * the block) · --escala 1|2 (scale; 2: twice the pixels for dense screens) ·
+ * --color of the marker (#1a1a1a) · --salida (output) .webp|.png (mapa.webp) ·
+ * --contacto (contact) email or URL that goes in the User-Agent (required by
+ * the OSM policy; it can also be set in ESTRATEGIA_WEB_OSM_CONTACT).
  *
- * Por qué así y no una captura de Google: Google no permite guardar sus
- * mapas como imagen (licencia) y pedirlos al visitar la página manda su IP a
- * Google sin consentimiento. Los datos de OSM son ODbL y sus teselas se
- * pueden usar citando «© OpenStreetMap»; aquí la cita va DENTRO de la imagen,
- * así viaja con el fichero vaya donde vaya.
+ * Why this way and not a Google screenshot: Google does not allow saving its
+ * maps as an image (licence) and requesting them when the page is visited
+ * sends the visitor's IP to Google without consent. OSM data is ODbL and its
+ * tiles can be used crediting "© OpenStreetMap"; here the credit goes INSIDE
+ * the image, so it travels with the file wherever it goes.
  *
- * Cómo funciona: Node descarga las teselas (tile.openstreetmap.org, de una en
- * una) y las pasa a un Chromium de Playwright (el de portal-hs, como las
- * pruebas), que las compone en un <canvas>, pinta el marcador y la cita, y
- * exporta a webp/png. Chromium hace de decodificador, de tipografía y de
- * codificador: cero dependencias propias.
+ * How it works: Node downloads the tiles (tile.openstreetmap.org, one at a
+ * time) and hands them to a Playwright Chromium (portal-hs's, like the tests),
+ * which composes them on a <canvas>, paints the marker and the credit, and
+ * exports to webp/png. Chromium acts as decoder, typography and encoder: zero
+ * dependencies of our own.
  *
- * Cómo se mantiene:
- * - Quién: quien prepare una web con mapa. Cuándo: al dar de alta o mover una
- *   sede. La imagen resultante va al REPO DEL HIJO (assets/maps/), no aquí.
- * - La política de teselas de OSM (operations.osmfoundation.org/policies/
- *   tiles) es el límite: User-Agent propio, sin descargas masivas, con caché.
- *   Por eso: tope de MAX_TILES teselas por imagen, de una en una, y caché en
- *   tools/.cache/ (ignorada por git) que se reutiliza durante 7 días. Si una
- *   imagen necesita más teselas, se baja el tamaño o la escala; NO se sube
- *   el tope.
- * - Caso frontera: --escala 2 usa teselas del zoom siguiente para la misma
- *   zona, así que los rótulos de las calles salen a la mitad de tamaño en
- *   pantalla. En una sede de ciudad (zoom 16) se leen; si no, --escala 1.
- * - La trampa: Nominatim devuelve el PRIMER resultado y a veces es otra calle
- *   con el mismo nombre en otro pueblo. La herramienta imprime lo que ha
- *   encontrado (nombre y coordenadas): se mira antes de dar la imagen por
- *   buena, y si no cuadra se pasan --lat/--lon a mano.
+ * How to maintain:
+ * - Who: whoever prepares a site with a map. When: when a location is added
+ *   or moved. The resulting image goes to the CHILD's REPO (assets/maps/), not
+ *   here.
+ * - The OSM tile policy (operations.osmfoundation.org/policies/tiles) is the
+ *   limit: own User-Agent, no bulk downloads, with a cache. Hence: a cap of
+ *   MAX_TILES tiles per image, one at a time, and a cache in tools/.cache/
+ *   (ignored by git) that is reused for 7 days. If an image needs more tiles,
+ *   lower the size or the scale; do NOT raise the cap.
+ * - Edge case: --escala 2 uses tiles from the next zoom level for the same
+ *   area, so street labels come out at half size on screen. For a city
+ *   location (zoom 16) they are readable; if not, --escala 1.
+ * - The trap: Nominatim returns the FIRST result and sometimes it is another
+ *   street with the same name in another town. The tool prints what it found
+ *   (name and coordinates): check it before accepting the image, and if it
+ *   does not match pass --lat/--lon by hand.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -61,21 +62,22 @@ const TILE_URL = ( z, x, y ) => `https://tile.openstreetmap.org/${ z }/${ x }/${
 const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
 const cacheDir = path.join( root, 'tools', '.cache', 'osm-tiles' );
 
-const HELP = `Imagen estática de un mapa (OpenStreetMap) para estrategia-web/map.
+const HELP = `Static map image (OpenStreetMap) for estrategia-web/map.
 
-  node tools/static-map.mjs (--lat N --lon N | --direccion "...") [opciones]
+  node tools/static-map.mjs (--lat N --lon N | --direccion "...") [options]
 
-  --zoom N         nivel de zoom (16)
-  --ancho N        ancho en px CSS (800)
-  --alto N         alto en px CSS (450)
-  --escala 1|2     densidad de píxeles (2)
-  --color #hex     color del marcador (#1a1a1a)
-  --salida f       fichero .webp o .png (mapa.webp)
-  --contacto c     correo o URL para el User-Agent (o ESTRATEGIA_WEB_OSM_CONTACT)
-  --seco           dice qué teselas pediría y no pide nada
-  --ayuda          esto
+  --zoom N         zoom level (16)
+  --ancho N        width in CSS px (800)
+  --alto N         height in CSS px (450)
+  --escala 1|2     pixel density (2)
+  --color #hex     marker colour (#1a1a1a)
+  --salida f       .webp or .png file (mapa.webp)
+  --contacto c     email or URL for the User-Agent (or ESTRATEGIA_WEB_OSM_CONTACT)
+  --direccion "…"  address to geocode with Nominatim (1 request)
+  --seco           dry run: says which tiles it would request and requests nothing
+  --ayuda          this help
 
-Sale con 0 si escribe la imagen y con 1 si algo falla.`;
+Exits with 0 if it writes the image and with 1 if anything fails.`;
 
 /** Parses --name value pairs and bare --flags. */
 function parseArgs( argv ) {
@@ -133,13 +135,13 @@ async function geocode( address, contact ) {
 	const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${ encodeURIComponent( address ) }`;
 	const response = await fetch( url, { headers: { 'User-Agent': userAgent( contact ), 'Accept-Language': 'es' } } );
 	if ( ! response.ok ) {
-		fail( `Nominatim respondió ${ response.status } para «${ address }»` );
+		fail( `Nominatim answered ${ response.status } for "${ address }"` );
 	}
 	const [ hit ] = await response.json();
 	if ( ! hit ) {
-		fail( `Nominatim no encuentra «${ address }». Pasa --lat y --lon.` );
+		fail( `Nominatim cannot find "${ address }". Pass --lat and --lon.` );
 	}
-	console.log( `  encontrado: ${ hit.display_name }\n  en ${ hit.lat }, ${ hit.lon } — mira que sea el sitio` );
+	console.log( `  found: ${ hit.display_name }\n  at ${ hit.lat }, ${ hit.lon } — check that it is the right place` );
 	return { lat: Number( hit.lat ), lon: Number( hit.lon ) };
 }
 
@@ -150,7 +152,7 @@ async function tile( { z, x, y }, contact ) {
 	}
 	const response = await fetch( TILE_URL( z, x, y ), { headers: { 'User-Agent': userAgent( contact ) } } );
 	if ( ! response.ok ) {
-		fail( `la tesela ${ z }/${ x }/${ y } respondió ${ response.status }` );
+		fail( `tile ${ z }/${ x }/${ y } answered ${ response.status }` );
 	}
 	const body = Buffer.from( await response.arrayBuffer() );
 	fs.mkdirSync( path.dirname( file ), { recursive: true } );
@@ -178,7 +180,7 @@ async function compose( { tiles, width, height, scale, color, type } ) {
 					await image.decode();
 					ctx.drawImage( image, Math.round( t.dx ), Math.round( t.dy ) );
 				}
-				// Marcador: una gota con la punta en el centro exacto del mapa.
+				// Marker: a drop with its tip at the exact centre of the map.
 				const cx = width / 2;
 				const cy = height / 2;
 				const r = 14 * scale;
@@ -202,7 +204,7 @@ async function compose( { tiles, width, height, scale, color, type } ) {
 				ctx.arc( cx, cy - r * 2.1, r * 0.4, 0, Math.PI * 2 );
 				ctx.fillStyle = '#ffffff';
 				ctx.fill();
-				// La cita, abajo a la derecha, como la ponen los mapas de OSM.
+				// The credit, bottom right, as OSM maps place it.
 				const text = '© OpenStreetMap';
 				ctx.font = `${ 12 * scale }px system-ui, -apple-system, "Segoe UI", sans-serif`;
 				const pad = 4 * scale;
@@ -239,17 +241,17 @@ async function main() {
 	const ext = path.extname( output ).toLowerCase();
 	const type = { '.webp': 'image/webp', '.png': 'image/png' }[ ext ];
 
-	if ( ! type ) fail( `--salida tiene que acabar en .webp o .png (es «${ ext || 'sin extensión' }»)` );
-	if ( ! [ 1, 2 ].includes( scale ) ) fail( '--escala es 1 o 2' );
-	if ( ! Number.isInteger( zoom ) || zoom < 1 || zoom + Math.log2( scale ) > 19 ) fail( '--zoom entre 1 y 19 (18 con --escala 2)' );
-	if ( ! ( width >= 64 && height >= 64 && width <= 2000 && height <= 2000 ) ) fail( '--ancho y --alto entre 64 y 2000' );
-	if ( ! /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test( color ) ) fail( `--color tiene que ser #rgb o #rrggbb («${ color }»)` );
+	if ( ! type ) fail( `--salida must end in .webp or .png (it is "${ ext || 'no extension' }")` );
+	if ( ! [ 1, 2 ].includes( scale ) ) fail( '--escala is 1 or 2' );
+	if ( ! Number.isInteger( zoom ) || zoom < 1 || zoom + Math.log2( scale ) > 19 ) fail( '--zoom between 1 and 19 (18 with --escala 2)' );
+	if ( ! ( width >= 64 && height >= 64 && width <= 2000 && height <= 2000 ) ) fail( '--ancho and --alto between 64 and 2000' );
+	if ( ! /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test( color ) ) fail( `--color must be #rgb or #rrggbb ("${ color }")` );
 
 	let lat = Number( args.lat );
 	let lon = Number( args.lon );
 	if ( args.direccion ) {
 		if ( args.seco ) {
-			console.log( `  [seco] geocodificaría «${ args.direccion }» con Nominatim (1 petición)` );
+			console.log( `  [dry run] would geocode "${ args.direccion }" with Nominatim (1 request)` );
 			lat = 39.5696;
 			lon = 2.6502;
 		} else {
@@ -257,7 +259,7 @@ async function main() {
 		}
 	}
 	if ( ! Number.isFinite( lat ) || ! Number.isFinite( lon ) || Math.abs( lat ) > 85 || Math.abs( lon ) > 180 ) {
-		fail( 'falta el sitio: --lat y --lon, o --direccion' );
+		fail( 'the place is missing: --lat and --lon, or --direccion' );
 	}
 
 	const tileZoom = zoom + Math.log2( scale );
@@ -265,12 +267,12 @@ async function main() {
 	const pxHeight = height * scale;
 	const tiles = tilesFor( project( lat, lon, tileZoom ), pxWidth, pxHeight, tileZoom );
 	if ( tiles.length > MAX_TILES ) {
-		fail( `harían falta ${ tiles.length } teselas y el tope es ${ MAX_TILES } (política de OSM): baja --ancho/--alto o --escala` );
+		fail( `${ tiles.length } tiles would be needed and the cap is ${ MAX_TILES } (OSM policy): lower --ancho/--alto or --escala` );
 	}
 	const cached = tiles.filter( ( t ) => fs.existsSync( path.join( cacheDir, String( t.z ), String( t.x ), `${ t.y }.png` ) ) ).length;
-	console.log( `  ${ pxWidth }×${ pxHeight } px, zoom ${ zoom } (teselas del ${ tileZoom }): ${ tiles.length } teselas, ${ cached } en caché` );
+	console.log( `  ${ pxWidth }×${ pxHeight } px, zoom ${ zoom } (tiles from ${ tileZoom }): ${ tiles.length } tiles, ${ cached } cached` );
 	if ( args.seco ) {
-		tiles.forEach( ( t ) => console.log( `  [seco] ${ TILE_URL( t.z, t.x, t.y ) }` ) );
+		tiles.forEach( ( t ) => console.log( `  [dry run] ${ TILE_URL( t.z, t.x, t.y ) }` ) );
 		return;
 	}
 
@@ -281,7 +283,7 @@ async function main() {
 	const image = await compose( { tiles: loaded, width: pxWidth, height: pxHeight, scale, color, type } );
 	fs.mkdirSync( path.dirname( output ), { recursive: true } );
 	fs.writeFileSync( output, image );
-	console.log( `✓ ${ output } (${ Math.round( image.length / 1024 ) } KB). Atributos del bloque: "staticMapUrl" con su URL o ruta en el hijo.` );
+	console.log( `✓ ${ output } (${ Math.round( image.length / 1024 ) } KB). Block attributes: "staticMapUrl" with its URL or path in the child.` );
 }
 
 if ( process.argv[ 1 ] && path.resolve( process.argv[ 1 ] ) === fileURLToPath( import.meta.url ) ) {

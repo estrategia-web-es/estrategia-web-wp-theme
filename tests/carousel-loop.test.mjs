@@ -1,25 +1,26 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: dar la vuelta es desplazar la pista (scrollLeft) y leer si un botón está desactivado tras hidratar, que solo existe con la página pintada.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: wrapping around means scrolling the track (scrollLeft) and reading whether a button is disabled after hydration, which only exists with the page painted.
 /**
- * estrategia-web/carousel en bucle (0.5.0, atributo loop, por defecto true):
- * 1. al cargar, las DOS flechas están activas (antes «anterior» salía gris);
- * 2. «anterior» en la primera enseña la última;
- * 3. «siguiente» en la última vuelve a la primera;
- * 4. igual con ← → del teclado, y lo mismo con un core/query dentro, donde
- *    las diapositivas son las entradas.
+ * Looping estrategia-web/carousel (0.5.0, loop attribute, true by default):
+ * 1. on load, BOTH arrows are enabled (before, "previous" came out grey);
+ * 2. "previous" on the first one shows the last one;
+ * 3. "next" on the last one goes back to the first one;
+ * 4. the same with the keyboard ← →, and the same with a core/query inside,
+ *    where the slides are the posts.
  *
- * Sobre /prueba-carrusel-bucle/ (tests/fixtures/setup/setup.php): dos
- * carruseles SIN el atributo loop, así que prueba además el valor por defecto.
- * Vista fallar el 03-10-2026 con la 0.4.0: «anterior» desactivada al cargar.
- * Las esperas son por HECHOS (scrollLeft), nunca por tiempo.
+ * On /prueba-carrusel-bucle/ (tests/fixtures/setup/setup.php): two carousels
+ * WITHOUT the loop attribute, so it also tests the default value.
+ * Seen failing on 03-10-2026 with 0.4.0: "previous" disabled on load.
+ * The waits are for FACTS (scrollLeft), never for time.
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
 
 /*
- * Se mira lo que SE VE, no scrollLeft (cambiado en 0.6.0): desde el infinito
- * la pista rota sus diapositivas y «la última» ya no es el final físico de la
- * pista. Que el bucle además no rebobine lo vigila carousel-infinite.test.mjs.
- * Las dos funciones se ejecutan DENTRO de la página (waitForFunction las
- * serializa): no pueden llamar a nada de este fichero.
+ * What IS SEEN is checked, not scrollLeft (changed in 0.6.0): since the
+ * infinite mode the track rotates its slides and "the last one" is no longer
+ * the physical end of the track. That the loop also does not rewind is
+ * guarded by carousel-infinite.test.mjs.
+ * Both functions run INSIDE the page (waitForFunction serialises them): they
+ * cannot call anything from this file.
  */
 /** The last slide is entirely in view. */
 const lastInView = ( el ) => {
@@ -46,22 +47,22 @@ run( () =>
 			const next = carousel.getByRole( 'button', { name: 'Diapositiva siguiente' } );
 			const handle = await track.elementHandle();
 			await carousel.scrollIntoViewIfNeeded();
-			assert.ok( await carousel.evaluate( ( el ) => el.classList.contains( 'is-ready' ) ), `${ name }: no se hidrató` );
+			assert.ok( await carousel.evaluate( ( el ) => el.classList.contains( 'is-ready' ) ), `${ name }: it did not hydrate` );
 
-			// 1. Las dos flechas activas al cargar.
-			assert.equal( await prev.isDisabled(), false, `${ name }: «anterior» sale desactivada al cargar` );
-			assert.equal( await next.isDisabled(), false, `${ name }: «siguiente» sale desactivada al cargar` );
+			// 1. Both arrows enabled on load.
+			assert.equal( await prev.isDisabled(), false, `${ name }: "previous" comes out disabled on load` );
+			assert.equal( await next.isDisabled(), false, `${ name }: "next" comes out disabled on load` );
 
-			// 2. «Anterior» desde la primera va al final.
+			// 2. "Previous" from the first one goes to the end.
 			await prev.click();
 			await page.waitForFunction( lastInView, handle );
 
-			// 3. «Siguiente» desde la última vuelve al principio, y la flecha sigue activa.
-			assert.equal( await next.isDisabled(), false, `${ name }: «siguiente» se desactiva en la última` );
+			// 3. "Next" from the last one goes back to the start, and the arrow stays enabled.
+			assert.equal( await next.isDisabled(), false, `${ name }: "next" gets disabled on the last one` );
 			await next.click();
 			await page.waitForFunction( firstAtStart, handle );
 
-			// 4. Teclado: ← en la primera va al final; → en la última vuelve.
+			// 4. Keyboard: ← on the first one goes to the end; → on the last one goes back.
 			await track.focus();
 			await page.keyboard.press( 'ArrowLeft' );
 			await page.waitForFunction( lastInView, handle );
@@ -69,9 +70,9 @@ run( () =>
 			await page.waitForFunction( firstAtStart, handle );
 		}
 
-		// Con consulta: cada entrada sigue siendo una diapositiva (seis puntos).
+		// With a query: each post is still a slide (six dots).
 		const dots = page.getByRole( 'region', { name: 'Carrusel en bucle con consulta', exact: true } ).locator( '.estrategia-web-carousel__dot' );
-		assert.equal( await dots.count(), 6, 'con consulta debería haber un punto por entrada' );
+		assert.equal( await dots.count(), 6, 'with a query there should be one dot per post' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 	} )
 );

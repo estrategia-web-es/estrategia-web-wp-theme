@@ -1,15 +1,17 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: una transición entre documentos solo existe al navegar de verdad (el evento pagereveal y su viewTransition), y view-transition-name es estilo calculado.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: a cross-document transition only exists when really navigating (the pagereveal event and its viewTransition), and view-transition-name is a computed style.
 /**
- * Transiciones entre páginas (0.7.5, assets/view-transitions.css):
- * - al navegar de /prueba-modulos/ a la portada por un enlace, la página
- *   nueva arranca CON transición (pagereveal trae viewTransition);
- * - la regla @view-transition { navigation: auto } está en las hojas;
- * - la cabecera (header de la plantilla) se llama estrategia-web-header y el botón
- *   de WhatsApp del pie estrategia-web-whatsapp (esta página tiene otro en el
- *   contenido: el caso que repetía el nombre), y ningún view-transition-name se repite
- *   en la página (un nombre repetido aborta la transición entera);
- * - con prefers-reduced-motion: reduce, la misma navegación va SIN transición.
- * Contra la 0.7.4 falla: no había transición ni nombres.
+ * Transitions between pages (0.7.5, assets/view-transitions.css):
+ * - when navigating from /prueba-modulos/ to the home page through a link,
+ *   the new page starts WITH a transition (pagereveal carries viewTransition);
+ * - the @view-transition { navigation: auto } rule is in the stylesheets;
+ * - the header (the template's header) is named estrategia-web-header and the
+ *   footer's WhatsApp button estrategia-web-whatsapp (this page has another
+ *   one in the content: the case that repeated the name), and no
+ *   view-transition-name repeats on the page (a repeated name aborts the
+ *   whole transition);
+ * - with prefers-reduced-motion: reduce, the same navigation goes WITHOUT a
+ *   transition.
+ * Against 0.7.4 it fails: there was neither a transition nor names.
  */
 import { withBrowser, run, assert, PAGE } from './browser.mjs';
 
@@ -52,7 +54,7 @@ run( () =>
 			}
 			return found;
 		} );
-		assert.ok( rule.some( ( r ) => r.navigation === 'auto' ), `no hay @view-transition { navigation: auto }: ${ JSON.stringify( rule ) }` );
+		assert.ok( rule.some( ( r ) => r.navigation === 'auto' ), `there is no @view-transition { navigation: auto }: ${ JSON.stringify( rule ) }` );
 
 		const names = await page.evaluate( () => {
 			const all = {};
@@ -64,22 +66,22 @@ run( () =>
 			}
 			const of = ( selector ) => {
 				const el = document.querySelector( selector );
-				return el ? getComputedStyle( el ).viewTransitionName : 'NO EXISTE';
+				return el ? getComputedStyle( el ).viewTransitionName : 'MISSING';
 			};
 			return { all, header: of( '.wp-site-blocks > header' ), whatsapp: of( 'footer.wp-block-template-part .estrategia-web-whatsapp' ) };
 		} );
-		assert.equal( names.header, 'estrategia-web-header', 'la cabecera no lleva view-transition-name: estrategia-web-header' );
-		assert.equal( names.whatsapp, 'estrategia-web-whatsapp', 'el WhatsApp no lleva view-transition-name: estrategia-web-whatsapp' );
+		assert.equal( names.header, 'estrategia-web-header', 'the header does not have view-transition-name: estrategia-web-header' );
+		assert.equal( names.whatsapp, 'estrategia-web-whatsapp', 'WhatsApp does not have view-transition-name: estrategia-web-whatsapp' );
 		for ( const [ name, count ] of Object.entries( names.all ) ) {
-			assert.equal( count, 1, `view-transition-name «${ name }» repetido ${ count } veces: la transición se aborta` );
+			assert.equal( count, 1, `view-transition-name "${ name }" repeated ${ count } times: the transition is aborted` );
 		}
 
-		assert.equal( await navigateHome( page ), 'yes', 'al navegar a la portada no hubo transición' );
+		assert.equal( await navigateHome( page ), 'yes', 'navigating to the home page had no transition' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 
 		const calm = await newPage( { viewport: { width: 1200, height: 900 }, reducedMotion: 'reduce' } );
 		await recordReveal( calm.context() );
 		await calm.goto( PAGE, { waitUntil: 'networkidle' } );
-		assert.equal( await navigateHome( calm ), 'no', 'con prefers-reduced-motion hubo transición' );
+		assert.equal( await navigateHome( calm ), 'no', 'with prefers-reduced-motion there was a transition' );
 	} )
 );

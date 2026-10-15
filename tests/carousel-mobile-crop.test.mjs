@@ -1,19 +1,19 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: qué fichero baja (el recorte vertical o la foto horizontal) lo decide el navegador con el media del <source> y el ancho de la ventana; sin pintar no hay currentSrc.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: which file is downloaded (the vertical crop or the landscape photo) is decided by the browser with the <source>'s media and the window width; without painting there is no currentSrc.
 /**
- * Recorte para el móvil del carrusel (plugin Estrategia Web 1.1.x, atributo
- * mobileRatio; modules/carousel/includes/carousel-mobile-crop.php), en
- * /prueba-carrusel-movil/ (fotos de 1920×1280 en un carrusel con
- * mobileRatio «4/5»):
- * - cada <img> va dentro de un <picture> con un <source media="(max-width: 781px)">;
- * - a 402 px (2x) la foto que baja es el RECORTE: proporción 4/5, del
- *   ancho que pide la caja (≥ 804 px) y no la horizontal de 1536;
- * - a 1512 px baja la horizontal de siempre;
- * - la primera conserva fetchpriority="high" (la prioridad es del <img>,
- *   valga la fuente que valga) y la página no da errores;
- * - idempotente: la segunda visita sirve los mismos ficheros (no los rehace
- *   con otro nombre).
- * Vista en rojo (14-10-2026) antes de escribir carousel-mobile-crop.php: no
- * había <picture> y a 402 bajaba la de 1536.
+ * The carousel's mobile crop (Estrategia Web plugin 1.1.x, mobileRatio
+ * attribute; modules/carousel/includes/carousel-mobile-crop.php), on
+ * /prueba-carrusel-movil/ (1920×1280 photos in a carousel with mobileRatio
+ * "4/5"):
+ * - each <img> is inside a <picture> with a <source media="(max-width: 781px)">;
+ * - at 402 px (2x) the downloaded photo is the CROP: 4/5 ratio, as wide as the
+ *   box asks for (≥ 804 px), and not the 1536 landscape one;
+ * - at 1512 px the usual landscape one is downloaded;
+ * - the first one keeps fetchpriority="high" (priority belongs to the <img>,
+ *   whatever source applies) and the page gives no errors;
+ * - idempotent: the second visit serves the same files (it does not remake
+ *   them under another name).
+ * Seen red (14-10-2026) before carousel-mobile-crop.php was written: there was
+ * no <picture> and at 402 it downloaded the 1536 one.
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
 
@@ -46,27 +46,27 @@ run( () =>
 		const mobile = await inspect( phone );
 		assert.equal( mobile.length, 3 );
 		mobile.forEach( ( img, i ) => {
-			assert.ok( img.inPicture, `diapositiva ${ i + 1 } sin <picture>` );
+			assert.ok( img.inPicture, `slide ${ i + 1 } without <picture>` );
 			assert.equal( img.media, '(max-width: 781px)' );
 		} );
 		const first = mobile[ 0 ];
-		assert.equal( first.priority, 'high', 'la primera perdió fetchpriority="high"' );
-		// Del NOMBRE del fichero (…-960x1200.webp): naturalWidth viene corregido
-		// por la densidad del srcset (960w con sizes 100vw a 402 → 402).
+		assert.equal( first.priority, 'high', 'the first one lost fetchpriority="high"' );
+		// From the file NAME (…-960x1200.webp): naturalWidth comes corrected by
+		// the srcset density (960w with sizes 100vw at 402 → 402).
 		const [ w, h ] = ( first.src.match( /-(\d+)x(\d+)\.\w+$/ ) || [ 0, 0, 1 ] ).slice( 1 ).map( Number );
-		assert.ok( Math.abs( w / h - 0.8 ) < 0.01, `a 402 baja una foto de ${ w }×${ h }, no el recorte 4/5 (${ first.src })` );
-		assert.ok( w >= first.box * 2 - 1 && w <= 1200, `el recorte (${ w }) no casa con la caja (${ first.box } px a 2x)` );
+		assert.ok( Math.abs( w / h - 0.8 ) < 0.01, `at 402 a ${ w }×${ h } photo is downloaded, not the 4/5 crop (${ first.src })` );
+		assert.ok( w >= first.box * 2 - 1 && w <= 1200, `the crop (${ w }) does not match the box (${ first.box } px at 2x)` );
 		assert.deepEqual( phone.errors, [], phone.errors.join( '\n' ) );
 
 		const again = await newPage( { viewport: { width: 402, height: 874 }, deviceScaleFactor: 2 } );
 		await again.goto( URL, { waitUntil: 'load' } );
-		assert.deepEqual( ( await inspect( again ) ).map( ( i ) => i.srcset ), mobile.map( ( i ) => i.srcset ), 'la segunda visita sirve otros ficheros' );
+		assert.deepEqual( ( await inspect( again ) ).map( ( i ) => i.srcset ), mobile.map( ( i ) => i.srcset ), 'the second visit serves other files' );
 
 		const desk = await newPage( { viewport: { width: 1512, height: 900 } } );
 		await desk.goto( URL, { waitUntil: 'load' } );
 		await loaded( desk );
 		const [ wide ] = await inspect( desk );
-		assert.ok( ! /-m\d+x\d+-/.test( wide.src ) && wide.natural[ 0 ] / wide.natural[ 1 ] > 1.4, `en escritorio baja ${ wide.natural.join( '×' ) }, no la horizontal (${ wide.src })` );
+		assert.ok( ! /-m\d+x\d+-/.test( wide.src ) && wide.natural[ 0 ] / wide.natural[ 1 ] > 1.4, `on desktop ${ wide.natural.join( '×' ) } is downloaded, not the landscape one (${ wide.src })` );
 		assert.deepEqual( desk.errors, [], desk.errors.join( '\n' ) );
 	} )
 );

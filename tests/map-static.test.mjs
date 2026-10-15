@@ -1,22 +1,23 @@
-// NIVEL: 3 — navegador. NECESITA NAVEGADOR PORQUE: lo que se prueba son las PETICIONES de red (a quién se le pide qué) y dónde queda pintado el recuadro sobre la imagen, y eso solo existe al ejecutar la página.
+// NIVEL: 3 — browser. NEEDS A BROWSER BECAUSE: what is tested are the network REQUESTS (who is asked for what) and where the card ends up painted over the image, and that only exists when the page runs.
 /**
- * estrategia-web/map con mapa estático (0.5.0, atributo staticMapUrl):
- * 1. sin aceptar mapas, se ve la imagen de OSM servida por el PROPIO sitio,
- *    con el recuadro de datos encima (a la izquierda), y la página no pide
- *    NADA a otro dominio;
- * 2. un staticMapUrl de otro dominio se descarta: ese mapa no lleva imagen;
- * 3. «Ver mapa» carga Google para ESE mapa. Sin el plugin del aviso de
- *    cookies (0.7.0) no concede nada: el otro mapa sigue sin cargar y no hay
- *    cookie. Con el plugin, «Ver mapa» concede «maps» y los demás cargan: eso
- *    lo prueba la web (Lavandería, tests/consent-maps.test.mjs);
- * 4. en un bloque estrecho, el recuadro va DEBAJO del mapa, no encima.
+ * estrategia-web/map with a static map (0.5.0, staticMapUrl attribute):
+ * 1. without accepting maps, the OSM image served by the site ITSELF is seen,
+ *    with the details card on top (on the left), and the page requests
+ *    NOTHING from another domain;
+ * 2. a staticMapUrl from another domain is discarded: that map has no image;
+ * 3. "Ver mapa" (show map) loads Google for THAT map. Without the cookie
+ *    notice plugin (0.7.0) it grants nothing: the other map stays unloaded and
+ *    there is no cookie. With the plugin, "Ver mapa" grants "maps" and the
+ *    others load: the site tests that (Lavandería,
+ *    tests/consent-maps.test.mjs);
+ * 4. in a narrow block, the card goes BELOW the map, not on top.
  *
- * Página sembrada en tests/fixtures/setup/setup.php (/prueba-mapa-estatico/);
- * la imagen es tests/fixtures/setup/mapa-estatico.webp, hecha con
- * tools/static-map.mjs. Google se corta con page.route: la prueba no sale a
- * Internet, mira que se PIDE.
- * Vista fallar el 03-10-2026 con la 0.4.0: sin imagen estática (el atributo
- * no existía) y «maps» sin conceder tras «Ver mapa».
+ * Page seeded in tests/fixtures/setup/setup.php (/prueba-mapa-estatico/); the
+ * image is tests/fixtures/setup/mapa-estatico.webp, made with
+ * tools/static-map.mjs. Google is cut off with page.route: the test does not
+ * go out to the Internet, it checks what is REQUESTED.
+ * Seen failing on 03-10-2026 with 0.4.0: no static image (the attribute did
+ * not exist) and "maps" not granted after "Ver mapa".
  */
 import { withBrowser, run, assert, BASE_URL } from './browser.mjs';
 
@@ -39,38 +40,38 @@ run( () =>
 		const first = page.locator( '.estrategia-web-map' ).nth( 0 );
 		const second = page.locator( '.estrategia-web-map' ).nth( 1 );
 
-		// 1. Imagen propia, cargada, con el recuadro encima a la izquierda.
+		// 1. Own image, loaded, with the card on top on the left.
 		const image = first.locator( 'img.estrategia-web-map__static' );
 		await image.scrollIntoViewIfNeeded();
 		await page.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await image.elementHandle() );
 		const src = await image.getAttribute( 'src' );
-		assert.equal( new globalThis.URL( src ).host, own, `la imagen no es del sitio: ${ src }` );
-		assert.match( await image.getAttribute( 'alt' ), /Pla(ç|c)a de Cort/, 'el texto alternativo no dice la dirección' );
+		assert.equal( new globalThis.URL( src ).host, own, `the image is not from the site: ${ src }` );
+		assert.match( await image.getAttribute( 'alt' ), /Pla(ç|c)a de Cort/, 'the alternative text does not give the address' );
 		const card = first.locator( '.estrategia-web-map__card' );
-		assert.ok( await card.isVisible(), 'con mapa estático el recuadro de datos tiene que seguir' );
+		assert.ok( await card.isVisible(), 'with a static map the details card must stay' );
 		assert.match( await card.innerText(), /Sede con mapa estático/ );
 		const imageBox = await image.boundingBox();
 		const cardBox = await card.boundingBox();
-		assert.ok( cardBox.y < imageBox.y + imageBox.height && cardBox.y >= imageBox.y, 'en ancho, el recuadro va ENCIMA del mapa' );
-		assert.ok( cardBox.x + cardBox.width < imageBox.x + imageBox.width / 2, 'el recuadro tapa el centro (el marcador)' );
+		assert.ok( cardBox.y < imageBox.y + imageBox.height && cardBox.y >= imageBox.y, 'when wide, the card goes ON TOP of the map' );
+		assert.ok( cardBox.x + cardBox.width < imageBox.x + imageBox.width / 2, 'the card covers the centre (the marker)' );
 
-		// 2. La URL de otro dominio se descarta.
-		assert.equal( await second.locator( 'img' ).count(), 0, 'un staticMapUrl de otro dominio no se descarta' );
-		assert.deepEqual( foreign, [], `peticiones a terceros sin consentimiento: ${ foreign.join( ' ' ) }` );
+		// 2. The URL from another domain is discarded.
+		assert.equal( await second.locator( 'img' ).count(), 0, 'a staticMapUrl from another domain is not discarded' );
+		assert.deepEqual( foreign, [], `third-party requests without consent: ${ foreign.join( ' ' ) }` );
 
-		// 3. Sin el plugin del aviso (0.7.0): «Ver mapa» carga ESTE mapa y solo
-		// este; no hay consentimiento que conceder ni cookie que guardar.
+		// 3. Without the notice plugin (0.7.0): "Ver mapa" loads THIS map and
+		// only this one; there is no consent to grant nor cookie to store.
 		await first.getByRole( 'button', { name: 'Ver mapa' } ).click();
 		await page.waitForFunction( () => {
 			const frame = document.querySelectorAll( '.estrategia-web-map__iframe' )[ 0 ];
 			return frame && ! frame.hidden && /google\.com/.test( frame.src );
 		} );
-		assert.ok( await image.isHidden(), 'cargado el mapa, la imagen estática sigue a la vista' );
-		assert.ok( ! ( await second.locator( '.estrategia-web-map__iframe' ).getAttribute( 'src' ) ), 'sin aviso, el clic en un mapa no debería cargar los demás' );
-		assert.equal( ( await page.context().cookies() ).find( ( c ) => c.name === 'estrategia_web_consent' ), undefined, 'sin plugin no hay cookie de consentimiento' );
+		assert.ok( await image.isHidden(), 'once the map is loaded, the static image is still in view' );
+		assert.ok( ! ( await second.locator( '.estrategia-web-map__iframe' ).getAttribute( 'src' ) ), 'without the notice, clicking one map should not load the others' );
+		assert.equal( ( await page.context().cookies() ).find( ( c ) => c.name === 'estrategia_web_consent' ), undefined, 'without the plugin there is no consent cookie' );
 		assert.deepEqual( page.errors, [], page.errors.join( '\n' ) );
 
-		// 4. Estrecho: el recuadro debajo del mapa.
+		// 4. Narrow: the card below the map.
 		const narrow = await newPage( { viewport: { width: 375, height: 800 } } );
 		await narrow.goto( URL, { waitUntil: 'networkidle' } );
 		const narrowImage = narrow.locator( '.estrategia-web-map' ).nth( 0 ).locator( 'img.estrategia-web-map__static' );
@@ -78,7 +79,7 @@ run( () =>
 		await narrow.waitForFunction( ( el ) => el.complete && el.naturalWidth > 0, await narrowImage.elementHandle() );
 		const a = await narrowImage.boundingBox();
 		const b = await narrow.locator( '.estrategia-web-map' ).nth( 0 ).locator( '.estrategia-web-map__card' ).boundingBox();
-		assert.ok( a.height > 100, `en estrecho el mapa mide ${ a.height } px de alto` );
-		assert.ok( b.y >= a.y + a.height - 1, `en estrecho el recuadro (y=${ b.y }) no va debajo del mapa (acaba en ${ a.y + a.height })` );
+		assert.ok( a.height > 100, `when narrow the map is ${ a.height } px high` );
+		assert.ok( b.y >= a.y + a.height - 1, `when narrow the card (y=${ b.y }) does not go below the map (which ends at ${ a.y + a.height })` );
 	} )
 );
