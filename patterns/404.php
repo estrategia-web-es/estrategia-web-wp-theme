@@ -4,8 +4,8 @@
  * Slug: estrategia-web/404
  * Inserter: no
  *
- * Contenido de templates/404.html. Patrón y no texto en la plantilla porque
- * las plantillas .html no pasan por gettext (fila 11 del Armazón).
+ * Content of templates/404.html. A pattern and not text in the template
+ * because .html templates do not go through gettext (row 11 of the Armazón).
  *
  * @package estrategia-web
  */

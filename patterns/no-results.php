@@ -4,9 +4,9 @@
  * Slug: estrategia-web/no-results
  * Inserter: no
  *
- * Texto de «sin resultados» de los listados. Es un patrón y no texto en la
- * plantilla porque las plantillas .html no pasan por gettext: solo un .php
- * puede traducir (fila 11 del Armazón).
+ * The "no results" text of the listings. It is a pattern and not text in the
+ * template because .html templates do not go through gettext: only a .php
+ * can translate (row 11 of the Armazón).
  *
  * @package estrategia-web
  */

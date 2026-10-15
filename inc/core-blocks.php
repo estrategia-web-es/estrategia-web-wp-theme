@@ -1,22 +1,23 @@
 <?php
 /**
- * Comportamiento común de bloques DEL NÚCLEO (0.4.0): lo que todas las webs
- * quieren igual en un bloque de WordPress y el núcleo no trae.
+ * Shared behaviour for CORE blocks (0.4.0): what every site wants the same way
+ * in a WordPress block and core does not provide.
  *
- * Una hoja por bloque en assets/core-blocks/<bloque>.css, cargada con
- * wp_enqueue_block_style: solo llega a la página si el bloque está en ella, y
- * también al editor. Hoy: accordion.css (abrir y cerrar con la altura
- * animada; ver su cabecera).
+ * One stylesheet per block in assets/core-blocks/<block>.css, loaded with
+ * wp_enqueue_block_style: it only reaches the page if the block is on it, and
+ * the editor too. Today: accordion.css (open and close with an animated
+ * height; see its header).
  *
- * Cómo se mantiene:
- * - Quién: quien toque el padre. Una hoja nueva = un fichero en
- *   assets/core-blocks/ con el nombre del bloque sin «core/»; se carga sola.
- * - Caso frontera: lo que es ASPECTO de una web (colores, el icono del «+»)
- *   va en el hijo, como estilo del bloque; aquí solo comportamiento y
- *   tokens (settings.custom del theme.json del padre).
- * - La trampa: el hijo carga sus hojas DESPUÉS y puede pisar una transición
- *   sin querer (un «transition: none» o un «transition: transform …» suelto
- *   en el icono); si una web no anima, mirar primero las hojas del hijo.
+ * How to maintain:
+ * - Who: whoever touches the parent. A new stylesheet = a file in
+ *   assets/core-blocks/ named after the block without "core/"; it loads itself.
+ * - Edge case: what is a site's LOOK (colours, the "+" icon) goes in the
+ *   child, as a block style; here only behaviour and tokens
+ *   (settings.custom in the parent's theme.json).
+ * - The trap: the child loads its stylesheets AFTER and can override a
+ *   transition by accident (a stray "transition: none" or
+ *   "transition: transform …" on the icon); if a site does not animate, look
+ *   at the child's stylesheets first.
  *
  * @package estrategia-web
  */

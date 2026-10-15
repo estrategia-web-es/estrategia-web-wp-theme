@@ -1,65 +1,73 @@
 <?php
 /**
- * CSS que no bloquea el primer pintado (0.7.8): las hojas pequeñas, dentro
- * del HTML; las grandes, diferidas detrás de su CSS crítico.
+ * CSS that does not block the first paint (0.7.8): small stylesheets go inside
+ * the HTML; large ones are deferred behind their critical CSS.
  *
- * Qué resuelve (PageSpeed de Lavandería, 06-10-2026, móvil): «solicitudes que
- * bloquean el renderizado», ~300 ms. Bloqueaban CINCO hojas: la del bloque de
- * navegación del núcleo (21 KB), la de imagen (9 KB), los style.css del padre
- * y del hijo (3 y 4 KB) y la hoja juntada del hijo (61 KB). El navegador no
- * pinta nada hasta tenerlas todas, aunque la foto principal ya haya llegado.
+ * What it solves (Lavandería's PageSpeed, 06-10-2026, mobile): "render-blocking
+ * requests", ~300 ms. FIVE stylesheets were blocking: the core navigation
+ * block's (21 KB), the image block's (9 KB), the parent's and the child's
+ * style.css (3 and 4 KB) and the child's combined stylesheet (61 KB). The
+ * browser paints nothing until it has them all, even if the main photo has
+ * already arrived.
  *
- * Tres piezas, de la más general a la más particular:
+ * Three pieces, from the most general to the most specific:
  *
- * 1. Límite de CSS en línea (120.000 bytes; el del núcleo es 20.000).
- *    WordPress ya mete en el HTML las hojas de bloque pequeñas
- *    (wp_maybe_inline_styles), de menor a mayor hasta el límite. Con 20.000
- *    se quedaban fuera navegación e imagen, que hacen falta para pintar la
- *    cabecera y la portada. Medido en Lavandería: lo que entra por esta vía
- *    suma ~61.000 en el inicio y ~96.000 en Hostelería, con la navegación
- *    (la mayor, 20.776, entra la última: con 80.000 se quedaba fuera allí).
- *    Es CSS sin comprimir; en la red va con gzip, ~1/5. Filtro
+ * 1. Inline CSS limit (120,000 bytes; core's is 20,000).
+ *    WordPress already puts small block stylesheets into the HTML
+ *    (wp_maybe_inline_styles), smallest to largest up to the limit. With 20,000
+ *    navigation and image were left out, and they are needed to paint the
+ *    header and the hero. Measured on Lavandería: what gets in this way adds up
+ *    to ~61,000 on the home page and ~96,000 on Hostelería, navigation included
+ *    (the largest, 20,776, gets in last: with 80,000 it was left out there).
+ *    This is uncompressed CSS; over the network it goes gzipped, ~1/5. Filter
  *    estrategia_web_styles_inline_size_limit.
- * 2. Las hojas del tema (padre e hijo) y de los plugins encoladas por URL
- *    pasan por ese mismo mecanismo: se les pone la ruta del fichero
- *    (wp_style_add_data 'path') y WordPress las mete en línea si caben,
- *    reescribiendo sus url() relativas. Es lo que el núcleo ya hace con las
- *    hojas de bloque; aquí solo se le dice dónde está el fichero. Caso real:
- *    la de estrategia-web-forms, que solo sale donde hay formulario (Contacto) y
- *    bloqueaba allí. Las que estén en estrategia_web_deferred_styles no (pieza 3).
- * 3. Hojas diferidas: los handles que un hijo devuelva en el filtro
- *    estrategia_web_deferred_styles se piden con <link rel="preload" as="style">
- *    y pasan a hoja al llegar (onload), con <noscript> por si no hay JS. SOLO
- *    si existe el CSS crítico (assets/css/dist/critical.css del hijo, o del
- *    padre; filtro estrategia_web_critical_css_file): se pinta en un <style
- *    id="estrategia-web-critical-css"> justo DONDE iba la primera hoja diferida.
- *    Sin crítico no se difiere nada: sería pintar la página sin estilos.
+ * 2. The theme's stylesheets (parent and child) and plugins' stylesheets
+ *    enqueued by URL go through that same mechanism: they are given the file
+ *    path (wp_style_add_data 'path') and WordPress inlines them if they fit,
+ *    rewriting their relative url()s. Core already does this with block
+ *    stylesheets; here it is only told where the file is. Real case:
+ *    estrategia-web-forms, which only appears where there is a form (Contacto)
+ *    and was blocking there. Not those in estrategia_web_deferred_styles
+ *    (piece 3).
+ * 3. Deferred stylesheets: the handles a child returns in the
+ *    estrategia_web_deferred_styles filter are requested with
+ *    <link rel="preload" as="style"> and become a stylesheet on arrival
+ *    (onload), with <noscript> in case there is no JS. ONLY if the critical
+ *    CSS exists (the child's assets/css/dist/critical.css, or the parent's;
+ *    filter estrategia_web_critical_css_file): it is printed in a <style
+ *    id="estrategia-web-critical-css"> exactly WHERE the first deferred
+ *    stylesheet was. Without critical CSS nothing is deferred: that would mean
+ *    painting the page without styles.
  *
- * Por qué preload y no media="print": una hoja print se pide con la prioridad
- * más baja, detrás de todas las imágenes; preload la pide alta y no bloquea.
+ * Why preload and not media="print": a print stylesheet is requested with the
+ * lowest priority, behind all the images; preload requests it high and does
+ * not block.
  *
- * La cascada no cambia: la hoja diferida sigue en su sitio del <head> y, al
- * llegar, aplica en el mismo orden que antes. El crítico va antes que ella y
- * repite reglas suyas, así que cuando llega la completa no cambia nada de lo
- * que ya estaba pintado. ESO es lo que hay que vigilar (la trampa de abajo).
+ * The cascade does not change: the deferred stylesheet stays in its place in
+ * the <head> and, on arrival, applies in the same order as before. The
+ * critical CSS goes before it and repeats some of its rules, so when the full
+ * one arrives nothing that was already painted changes. THAT is what must be
+ * watched (the trap below).
  *
- * Cómo se mantiene:
- * - Quién: quien toque el padre (piezas 1-3) o la hoja de un hijo (su crítico).
- * - El crítico lo GENERA el hijo (Lavandería: tools/juntar-css.mjs, a la vez
- *   que la hoja completa); el padre solo lo pinta.
- * - Caso frontera: una hoja de fuera (otro dominio, un CDN) no tiene fichero
- *   aquí: sigue como <link>, bloqueando. Una hoja que NO deba ir en línea (por
- *   grande, o porque se cachea entre páginas y compensa) se excluye con el
- *   filtro estrategia_web_inline_style( bool, $handle ).
- * - LA TRAMPA: un crítico que se desfasa de la hoja completa. Lo que se ve
- *   arriba se pinta con el crítico y, al llegar la completa, SALTA (CLS). No
- *   da error en ningún sitio. Lo vigila la prueba del hijo
- *   (tests/render-blocking.test.mjs en Lavandería): pinta cada página SIN la
- *   hoja diferida y compara la posición de lo que se ve arriba con la página
- *   completa.
- * - Otra: el límite de la pieza 1 se cuenta por página; si un día una página
- *   lleva muchos bloques con hoja, las más grandes vuelven a ir como <link>.
- *   No rompe nada: bloquean, como antes.
+ * How to maintain:
+ * - Who: whoever touches the parent (pieces 1-3) or a child's stylesheet (its
+ *   critical CSS).
+ * - The critical CSS is GENERATED by the child (Lavandería:
+ *   tools/juntar-css.mjs, together with the full stylesheet); the parent only
+ *   prints it.
+ * - Edge case: an external stylesheet (another domain, a CDN) has no file
+ *   here: it stays as a <link>, blocking. A stylesheet that must NOT be inlined
+ *   (because it is large, or because it is cached across pages and that pays
+ *   off) is excluded with the filter estrategia_web_inline_style( bool, $handle ).
+ * - THE TRAP: a critical CSS that drifts out of sync with the full stylesheet.
+ *   What is above the fold is painted with the critical CSS and, when the full
+ *   one arrives, it JUMPS (CLS). There is no error anywhere. The child's test
+ *   guards it (tests/render-blocking.test.mjs in Lavandería): it paints each
+ *   page WITHOUT the deferred stylesheet and compares the position of what is
+ *   above the fold with the full page.
+ * - Another: the limit of piece 1 is counted per page; if one day a page has
+ *   many blocks with stylesheets, the largest go back to being <link>s.
+ *   Nothing breaks: they block, as before.
  *
  * @package estrategia-web
  */

@@ -16,12 +16,12 @@ Tags: full-site-editing, block-patterns, translation-ready
 */
 
 /*
- * Solo lo que theme.json no sabe expresar. Cada regla dice por qué está aquí.
- * Cómo se mantiene: si una regla de este fichero llega a poder escribirse en
- * theme.json (nueva versión de WordPress), se muda allí y se borra de aquí.
+ * Only what theme.json cannot express. Each rule says why it is here.
+ * How to maintain: if a rule in this file can one day be written in
+ * theme.json (new WordPress version), it moves there and is deleted from here.
  */
 
-/* Salto al contenido: theme.json no estiliza clases que no son de bloques. */
+/* Skip to content: theme.json does not style classes that are not blocks. */
 .skip-link.screen-reader-text:focus {
 	background: var(--wp--preset--color--base);
 	color: var(--wp--preset--color--contrast);
@@ -29,35 +29,35 @@ Tags: full-site-editing, block-patterns, translation-ready
 	z-index: 100000;
 }
 
-/* Foco visible y coherente en todo: theme.json no tiene estado :focus-visible global. */
+/* Visible, consistent focus everywhere: theme.json has no global :focus-visible state. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
 	outline: 2px solid currentColor;
 	outline-offset: 2px;
 }
 
 /*
- * Anclas de la misma página (0.7.3): el salto a #algo DESLIZA, y el destino
- * queda a la vista bajo la cabecera fija. theme.json no tiene ni
- * scroll-behavior ni scroll-padding.
- * - scroll-padding-top en el raíz, no scroll-margin-top en cada destino: vale
- *   para cualquier id sin saber cuáles hay, al entrar con #ancla en la URL,
- *   al pulsar un enlace interno y también cuando el TABULADOR lleva el foco a
- *   algo que quedaría debajo de la cabecera.
- * - El alto: el token --wp--custom--layout--cabecera, que pone el hijo cuya
- *   cabecera es fija (settings.custom.layout.cabecera en su theme.json; en
- *   Lavandería, clamp(80px … 113px)). El padre no la fija: sin token, 0. Más
- *   la barra de administración, que empuja la cabecera fija hacia abajo.
- * - :root y no html: un hijo que ya tenía `html { scroll-padding-top: … }`
- *   (Lavandería) queda pisado por esta, que además suma la barra.
- * - Sin JavaScript: al entrar con el hash, Chromium también desliza desde
- *   arriba hasta el destino y respeta scroll-padding (medido en Lavandería
- *   el 06-10-2026: /autoservicio/#pasos, de 0 a 1355 en ~35 fotogramas,
- *   destino a 106 px con la cabecera hasta 106). Lo prueba
+ * Same-page anchors (0.7.3): jumping to #something SCROLLS smoothly, and the
+ * target stays in view below the sticky header. theme.json has neither
+ * scroll-behavior nor scroll-padding.
+ * - scroll-padding-top on the root, not scroll-margin-top on each target: it
+ *   works for any id without knowing which ones exist, when arriving with
+ *   #anchor in the URL, when clicking an internal link and also when the TAB
+ *   key moves focus to something that would end up under the header.
+ * - The height: the token --wp--custom--layout--cabecera, set by the child
+ *   whose header is sticky (settings.custom.layout.cabecera in its theme.json;
+ *   in Lavandería, clamp(80px … 113px)). The parent does not make it sticky:
+ *   no token, 0. Plus the admin bar, which pushes the sticky header down.
+ * - :root and not html: a child that already had `html { scroll-padding-top: … }`
+ *   (Lavandería) is overridden by this one, which also adds the bar.
+ * - No JavaScript: when arriving with the hash, Chromium also scrolls smoothly
+ *   from the top to the target and honours scroll-padding (measured on
+ *   Lavandería on 06-10-2026: /autoservicio/#pasos, from 0 to 1355 in ~35
+ *   frames, target at 106 px with the header up to 106). Tested by
  *   tests/anchors.test.mjs.
- * Cómo se mantiene: si un hijo cambia el alto de su cabecera, cambia su
- * token y aquí nada. La trampa: smooth en el raíz anima TAMBIÉN cada
- * window.scrollTo() de cualquier script; quien necesite un salto seco lo pide
- * con behavior: 'instant'.
+ * How to maintain: if a child changes its header height, it changes its token
+ * and nothing changes here. The trap: smooth on the root ALSO animates every
+ * window.scrollTo() from any script; whoever needs an instant jump asks for it
+ * with behavior: 'instant'.
  */
 :root {
 	scroll-padding-top: calc(var(--wp--custom--layout--cabecera, 0px) + var(--wp-admin--admin-bar--height, 0px));

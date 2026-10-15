@@ -1,41 +1,42 @@
 <?php
 /**
- * Precarga de las fuentes del texto (0.7.8).
+ * Preloading of the text fonts (0.7.8).
  *
- * Qué resuelve (PageSpeed de Lavandería, 06-10-2026, móvil): las fuentes de
- * theme.json se piden TARDE. Sus @font-face van en los estilos globales, pero
- * el navegador no pide un fichero de fuente hasta que sabe que un texto la
- * usa, y eso lo sabe al calcular estilos: después de que llegue TODO el CSS
- * que bloquea. Medido en local: las hojas acaban en 1708 ms y las dos fuentes
- * se piden en 1760; las imágenes, que están en el HTML, se pidieron en 1704.
- * Con <link rel="preload" as="font"> salen con el HTML, en paralelo.
+ * What it solves (Lavandería's PageSpeed, 06-10-2026, mobile): theme.json fonts
+ * are requested LATE. Their @font-face rules are in the global styles, but the
+ * browser does not request a font file until it knows some text uses it, and
+ * it knows that when computing styles: after ALL the blocking CSS has arrived.
+ * Measured locally: the stylesheets finish at 1708 ms and the two fonts are
+ * requested at 1760; the images, which are in the HTML, were requested at 1704.
+ * With <link rel="preload" as="font"> they go out with the HTML, in parallel.
  *
- * Qué precarga: las caras de las familias que usan el TEXTO y los TÍTULOS en
- * los estilos globales (styles.typography.fontFamily y
- * styles.elements.heading/h1…h6), de estilo normal, en woff2 y sin
- * unicodeRange (una cara con unicodeRange solo se baja si sale ese carácter:
- * precargarla sería bajarla siempre). En Lavandería: Humanist 521 regular y
- * bold. Las URL salen del theme.json fusionado (hijo sobre padre), así que un
- * hijo que cambia de fuente no toca nada aquí. Va por wp_preload_resources,
- * el mecanismo del núcleo (6.1+), que las pinta al principio del <head> con
- * crossorigin (sin él, el navegador baja la fuente DOS veces: la precarga va
- * sin CORS y la de @font-face con CORS).
+ * What it preloads: the faces of the families used by BODY TEXT and HEADINGS
+ * in the global styles (styles.typography.fontFamily and
+ * styles.elements.heading/h1…h6), normal style, woff2 and without
+ * unicodeRange (a face with unicodeRange is only downloaded if that character
+ * appears: preloading it would mean always downloading it). On Lavandería:
+ * Humanist 521 regular and bold. The URLs come from the merged theme.json
+ * (child over parent), so a child that changes font touches nothing here. It
+ * goes through wp_preload_resources, the core mechanism (6.1+), which prints
+ * them at the start of the <head> with crossorigin (without it, the browser
+ * downloads the font TWICE: the preload goes without CORS and the @font-face
+ * one with CORS).
  *
- * Cómo se mantiene:
- * - Quién: quien toque el padre. Cuándo: si WordPress cambia cómo guarda
- *   fontFamilies en los ajustes globales (hoy, por origen: theme / custom).
- * - Ajuste: filtro estrategia_web_preload_fonts( string[] $urls ). Devolver array()
- *   apaga la precarga; un hijo que use una tercera fuente arriba del todo
- *   (la de un antetítulo, por ejemplo) la añade ahí.
- * - Caso frontera: una familia con cinco pesos precargaría cinco ficheros y
- *   competiría con la foto principal. Se corta en MAX caras (4); el resto se
- *   pide como siempre.
- * - La trampa: una precarga que no se usa en 3 s sale como aviso en la
- *   consola («preloaded but not used»). Pasa si la familia del texto tiene
- *   una cara que ninguna página pinta (un 700 que nadie usa): se quita con el
- *   filtro, no tocando esto.
- * - Prueba: tests/page-loads.test.mjs no la mira; la mira el hijo
- *   (Lavandería, tests/render-blocking.test.mjs, nivel 3).
+ * How to maintain:
+ * - Who: whoever touches the parent. When: if WordPress changes how it stores
+ *   fontFamilies in the global settings (today, by origin: theme / custom).
+ * - Tuning: filter estrategia_web_preload_fonts( string[] $urls ). Returning
+ *   array() turns preloading off; a child that uses a third font at the very
+ *   top (an eyebrow heading's, for example) adds it there.
+ * - Edge case: a family with five weights would preload five files and compete
+ *   with the main photo. It is capped at MAX faces (4); the rest are requested
+ *   as usual.
+ * - The trap: a preload not used within 3 s shows up as a console warning
+ *   ("preloaded but not used"). It happens if the text family has a face that
+ *   no page paints (a 700 nobody uses): remove it with the filter, not by
+ *   touching this.
+ * - Test: tests/page-loads.test.mjs does not check it; the child does
+ *   (Lavandería, tests/render-blocking.test.mjs, level 3).
  *
  * @package estrategia-web
  */

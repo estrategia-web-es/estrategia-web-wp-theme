@@ -1,23 +1,23 @@
 <?php
 /**
- * Estrategia Web — tema padre de bloques.
+ * Estrategia Web — parent block theme.
  *
- * Este fichero solo carga inc/*.php. La lógica vive allí, un fichero por
- * asunto (setup, bloques del núcleo, transiciones, rendimiento). Desde la
- * 1.1.0 el tema no registra bloques: el carrusel, el mapa, el WhatsApp y el
- * selector de idioma son módulos del plugin Estrategia Web, igual que el
- * aviso de cookies (que se fue en la 0.7.0). Un bloque nuevo va allí.
+ * This file only loads inc/*.php. The logic lives there, one file per concern
+ * (setup, core blocks, transitions, performance). Since 1.1.0 the theme
+ * registers no blocks: the carousel, the map, WhatsApp and the language
+ * switcher are modules of the Estrategia Web plugin, just like the cookie
+ * notice (which moved out in 0.7.0). A new block goes there.
  *
- * Cómo se mantiene:
- * - Un asunto nuevo es un fichero nuevo en inc/, no un bloque más aquí.
- * - Se cargan en orden alfabético. Si uno depende de otro, el nombre manda
- *   (por eso las funciones que otros usan viven en ficheros que se cargan
- *   antes o se llaman dentro de hooks, nunca al cargar el fichero).
- * - La trampa: el hijo tiene su propio functions.php y WordPress carga el del
- *   HIJO ANTES que el del padre. Un hijo que llame a una función estrategia_web_* al
- *   cargar su fichero revienta; tiene que hacerlo dentro de un hook (init,
- *   after_setup_theme...). Por eso aquí no hay funciones «pluggable»
- *   (if ! function_exists): el hijo cambia el comportamiento con filtros.
+ * How to maintain:
+ * - A new concern is a new file in inc/, not one more block here.
+ * - They load in alphabetical order. If one depends on another, the name rules
+ *   (that is why functions used by others live in files that load earlier or
+ *   are called inside hooks, never when the file loads).
+ * - The trap: the child theme has its own functions.php and WordPress loads the
+ *   CHILD's BEFORE the parent's. A child that calls an estrategia_web_* function
+ *   when its file loads blows up; it must do it inside a hook (init,
+ *   after_setup_theme...). That is why there are no "pluggable" functions here
+ *   (if ! function_exists): the child changes behaviour with filters.
  *
  * @package estrategia-web
  */

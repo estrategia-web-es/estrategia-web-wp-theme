@@ -1,52 +1,51 @@
 /*
- * Transiciones entre páginas (0.7.5) — View Transitions entre documentos,
- * solo CSS. La página nueva entra con un fundido corto; la cabecera y el
- * botón de WhatsApp se quedan QUIETOS (no se funden: se ven fijos de una
- * página a la otra).
+ * Transitions between pages (0.7.5) — cross-document View Transitions, CSS
+ * only. The new page comes in with a short fade; the header and the WhatsApp
+ * button stay STILL (they do not fade: they look fixed from one page to the
+ * next).
  *
- * Se mete en línea detrás de style.css (inc/view-transitions.php) y SOLO si
- * settings.custom.motion.page.enabled no es false: una regla @view-transition
- * no se puede apagar con una variable, así que el interruptor está en PHP.
+ * It is inlined after style.css (inc/view-transitions.php) and ONLY if
+ * settings.custom.motion.page.enabled is not false: an @view-transition rule
+ * cannot be turned off with a variable, so the switch is in PHP.
  *
- * Tokens que afina un hijo (settings.custom.motion.page en su theme.json):
- *   enabled   true | false   false: ni se imprime esta hoja
- *   duration  "0.22s"        lo que dura el fundido de la página
- *   easing    "ease"         su curva
+ * Tokens a child tunes (settings.custom.motion.page in its theme.json):
+ *   enabled   true | false   false: this stylesheet is not even printed
+ *   duration  "0.22s"        how long the page fade lasts
+ *   easing    "ease"         its curve
  *
- * Decisiones:
- * - Con prefers-reduced-motion: reduce no hay transición: la regla entera va
- *   dentro de (prefers-reduced-motion: no-preference).
- * - Cabecera: la del template part «header» que cuelga de .wp-site-blocks, y
- *   solo la PRIMERA (:first-of-type). Un view-transition-name repetido en la
- *   página aborta la transición entera, así que no se nombra nada que pueda
- *   salir dos veces (el overlay de navegación vive DENTRO de la cabecera y va
- *   con ella).
- * - WhatsApp: solo el del PIE (footer.wp-block-template-part), que es el que
- *   sale en todas las páginas y donde lo pone parts/footer.html. Uno más en
- *   el contenido de una página (la de pruebas lo tiene) se funde con ella:
- *   nombrar los dos repetiría el nombre. Medido el 06-10-2026: con
- *   .estrategia-web-whatsapp a secas, /prueba-modulos/ tenía dos y no había
- *   transición.
- * - Quietos: de su pareja de imágenes se quita la vieja y la nueva entra sin
- *   animación. Si la cabecera cambia (el enlace activo del menú), se ve ya
- *   cambiada, sin fundido.
- * - El aviso de cookies NO es de aquí: se nombra a sí mismo en su plugin
- *   (estrategia-web-site), que es quien sabe si está a la vista.
+ * Decisions:
+ * - With prefers-reduced-motion: reduce there is no transition: the whole rule
+ *   goes inside (prefers-reduced-motion: no-preference).
+ * - Header: the "header" template part hanging from .wp-site-blocks, and only
+ *   the FIRST one (:first-of-type). A view-transition-name repeated on the page
+ *   aborts the whole transition, so nothing that can appear twice is named
+ *   (the navigation overlay lives INSIDE the header and goes with it).
+ * - WhatsApp: only the FOOTER one (footer.wp-block-template-part), which is
+ *   the one on every page and where parts/footer.html puts it. One more in a
+ *   page's content (the test page has one) fades with the page: naming both
+ *   would repeat the name. Measured on 06-10-2026: with plain
+ *   .estrategia-web-whatsapp, /prueba-modulos/ had two and there was no
+ *   transition.
+ * - Still: of their image pair the old one is removed and the new one comes in
+ *   without animation. If the header changes (the menu's active link), it
+ *   shows already changed, without a fade.
+ * - The cookie notice does NOT belong here: it names itself in its plugin
+ *   (estrategia-web-site), which is what knows whether it is in view.
  *
- * Cómo se mantiene:
- * - Quién: quien toque el padre. Cuándo: si cambia la estructura de la
- *   plantilla (otra etiqueta para la cabecera) o el marcado del WhatsApp.
- * - Caso frontera: un hijo que pone el WhatsApp fuera del pie (en la
- *   cabecera, en una plantilla) no lo tiene quieto: se funde con la página.
- *   Si lo quiere quieto, lo nombra él en su CSS, una sola vez.
- * - LA TRAMPA, medida en Lavandería el 06-10-2026: si lo que se ve de la
- *   cabecera es un hijo con position: fixed (.lm-header) dentro del <header>
- *   de la plantilla, el <header> mide 0 de alto y su captura sale VACÍA: a
- *   mitad de transición la cabecera desaparece, que es justo el parpadeo que
- *   se quería evitar. Para eso está la clase estrategia-web-vt-header: el hijo se
- *   la pone al elemento fijo (en el bloque, «Clase CSS adicional») y el
- *   nombre pasa a él. Solo UNO por cabecera, o el nombre se repite.
- *   tests/view-transitions.test.mjs cuenta los nombres de la página.
+ * How to maintain:
+ * - Who: whoever touches the parent. When: if the template structure changes
+ *   (another tag for the header) or the WhatsApp markup.
+ * - Edge case: a child that puts WhatsApp outside the footer (in the header,
+ *   in a template) does not get it still: it fades with the page. If it wants
+ *   it still, it names it itself in its CSS, only once.
+ * - THE TRAP, measured on Lavandería on 06-10-2026: if what is visible of the
+ *   header is a child with position: fixed (.lm-header) inside the template's
+ *   <header>, the <header> is 0 high and its snapshot comes out EMPTY: midway
+ *   through the transition the header disappears, which is exactly the flicker
+ *   this wanted to avoid. That is what the estrategia-web-vt-header class is
+ *   for: the child puts it on the fixed element (in the block, "Additional CSS
+ *   class") and the name moves to it. Only ONE per header, or the name
+ *   repeats. tests/view-transitions.test.mjs counts the names on the page.
  */
 @media (prefers-reduced-motion: no-preference) {
 	@view-transition {
