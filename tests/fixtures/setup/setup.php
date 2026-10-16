@@ -338,7 +338,9 @@ wp_insert_post(
 
 // Mobile crop (plugin 1.1.x, mobileRatio): photos 1-3, landscape (1920×1280),
 // in a carousel whose box on mobile is 4/5. Checked by
-// tests/carousel-mobile-crop.test.mjs.
+// tests/carousel-mobile-crop.test.mjs. Since plugin 1.4.2 it also asks for the
+// desktop preload of slide 2 (preloadSlides 2, Lavandería's case: crop on
+// mobile + two slides visible on desktop): tests/carousel-preload.test.mjs.
 $existing_crop = get_page_by_path( 'prueba-carrusel-movil' );
 wp_insert_post(
 	array(
@@ -348,7 +350,7 @@ wp_insert_post(
 		'post_title'   => 'Prueba de carrusel con recorte para el móvil',
 		'post_name'    => 'prueba-carrusel-movil',
 		'post_content' => wp_slash(
-			'<!-- wp:estrategia-web/carousel {"label":"Fotos recortadas","align":"full","perViewMobile":1,"perViewTablet":2,"perViewDesktop":3,"mobileRatio":"4/5","mobileImageSizes":"100vw"} -->'
+			'<!-- wp:estrategia-web/carousel {"label":"Fotos recortadas","align":"full","perViewMobile":1,"perViewTablet":2,"perViewDesktop":3,"mobileRatio":"4/5","mobileImageSizes":"100vw","preloadSlides":2} -->'
 			. $photo_block( 1 ) . $photo_block( 2 ) . $photo_block( 3 )
 			. '<!-- /wp:estrategia-web/carousel -->'
 		),
