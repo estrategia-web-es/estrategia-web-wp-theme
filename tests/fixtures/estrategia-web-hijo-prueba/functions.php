@@ -33,6 +33,9 @@ add_action(
 	'wp_head',
 	static function () {
 		echo '<style>.rejilla-prueba .estrategia-web-carousel__track{display:grid;grid-template-columns:repeat(3,70%);}</style>';
+		// 23 cards in 12 columns (tests/carousel-any-count.test.mjs): the
+		// bottom row has 11, like Lavandería's strip with its 23 clients.
+		echo '<style>.rejilla-impar .estrategia-web-carousel__track{display:grid;grid-template-columns:repeat(12,170px);gap:12px}</style>';
 	}
 );
 

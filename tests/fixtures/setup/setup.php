@@ -357,5 +357,60 @@ wp_insert_post(
 	)
 );
 
+// Any number of slides (plugin 1.4.3): counts that are NOT a multiple of
+// what is in view or of the columns. 23 posts like Lavandería's 23 clients:
+// in a single row with 4.5 in view, and in a two-row grid of 12 columns (the
+// child's CSS, class rejilla-impar), where the bottom row has 11 and the
+// last column one card. And 7 slides with 3 in view. Checked by
+// tests/carousel-any-count.test.mjs.
+for ( $i = 1; $i <= 23; $i++ ) {
+	$slug = sprintf( 'cliente-impar-%02d', $i );
+	$post = get_page_by_path( $slug, OBJECT, 'post' );
+	wp_insert_post(
+		array(
+			'ID'          => $post ? $post->ID : 0,
+			'post_type'   => 'post',
+			'post_status' => 'publish',
+			'post_title'  => sprintf( 'Cliente impar %02d', $i ),
+			'post_name'   => $slug,
+		)
+	);
+}
+$odd_query = static fn( int $id ): string => '<!-- wp:query {"queryId":' . $id . ',"query":{"perPage":50,"pages":0,"offset":0,"postType":"post","order":"asc","orderBy":"title","search":"cliente impar","inherit":false}} -->'
+	. '<div class="wp-block-query"><!-- wp:post-template -->'
+	. '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|24","bottom":"var:preset|spacing|24","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
+	. '<div class="wp-block-group has-surface-background-color has-background"><!-- wp:post-title /--></div>'
+	. '<!-- /wp:group -->'
+	. '<!-- /wp:post-template --></div>'
+	. '<!-- /wp:query -->';
+$seven = '';
+for ( $i = 1; $i <= 7; $i++ ) {
+	$seven .= '<!-- wp:group {"backgroundColor":"surface","style":{"spacing":{"padding":{"top":"var:preset|spacing|48","bottom":"var:preset|spacing|48","left":"var:preset|spacing|24","right":"var:preset|spacing|24"}}}} -->'
+		. '<div class="wp-block-group has-surface-background-color has-background">'
+		. '<!-- wp:paragraph --><p>Siete ' . $i . '</p><!-- /wp:paragraph -->'
+		. '</div><!-- /wp:group -->';
+}
+$existing_odd = get_page_by_path( 'prueba-carrusel-impar' );
+wp_insert_post(
+	array(
+		'ID'           => $existing_odd ? $existing_odd->ID : 0,
+		'post_type'    => 'page',
+		'post_status'  => 'publish',
+		'post_title'   => 'Prueba de carrusel con cualquier número',
+		'post_name'    => 'prueba-carrusel-impar',
+		'post_content' => wp_slash(
+			'<!-- wp:estrategia-web/carousel {"label":"Siete de tres","showDots":true,"perViewMobile":1,"perViewTablet":3,"perViewDesktop":3} -->'
+			. $seven
+			. '<!-- /wp:estrategia-web/carousel -->'
+			. '<!-- wp:estrategia-web/carousel {"label":"Veintitrés en una fila","showDots":true,"perViewMobile":1,"perViewTablet":4.5,"perViewDesktop":4.5} -->'
+			. $odd_query( 11 )
+			. '<!-- /wp:estrategia-web/carousel -->'
+			. '<!-- wp:estrategia-web/carousel {"label":"Veintitrés en dos filas","className":"rejilla-impar"} -->'
+			. $odd_query( 12 )
+			. '<!-- /wp:estrategia-web/carousel -->'
+		),
+	)
+);
+
 flush_rewrite_rules();
 echo 'estrategia-web-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";
