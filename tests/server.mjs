@@ -20,8 +20,11 @@
  * - 1.1.0: the blocks (carousel, map, WhatsApp, language switcher) no longer
  *   belong to the theme: they are modules of the Estrategia Web PLUGIN (repo
  *   armazon-wp-sitio), which is mounted as plugins/estrategia-web and activated
- *   with only those four modules (setup.php). Their tests stay here because
- *   they measure the blocks with the theme's CSS. Another plugin folder:
+ *   with only those four modules (setup.php). Since 17-10-2026 their tests
+ *   live in the plugin (modules/<block>/tests/); the plugin is still mounted
+ *   here because the theme's templates use its blocks and the theme's tests
+ *   (page-loads, view-transitions) look at them inside the theme. Another
+ *   plugin folder:
  *   ESTRATEGIA_WEB_PLUGIN=E:/other/path node tests/run.mjs
  * - Another port (to run several Playgrounds side by side):
  *   ESTRATEGIA_WEB_PORT=9423 node tests/run.mjs
