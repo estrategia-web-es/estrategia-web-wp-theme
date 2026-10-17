@@ -168,9 +168,10 @@ cached: locally, `WP_DEVELOPMENT_MODE='theme'`.
 **Since 1.1.0 these blocks live in the Estrategia Web plugin**, each in its
 module (`armazon-wp-sitio/modules/<block>/`), with its code, its
 `render.php` and its documentation. The summary and the notes stay here
-because the theme uses them in its templates and because **their tests are
-still in this repo** (`tests/`): they measure the blocks rendered with the
-theme's CSS, and the test server mounts the plugin (see `tests/server.mjs`).
+because the theme uses them in its templates. Their tests moved to the plugin
+on 17-10-2026 (armazon-wp-sitio, `modules/<block>/tests/`); the test server
+still mounts the plugin so that the theme's own tests (page-loads,
+view-transitions) see the blocks inside the theme.
 The `tools/static-map.mjs` tool has not moved either.
 
 The full documentation of each one (decisions, who, when, borderline case
@@ -204,7 +205,7 @@ contract it had here. The parent only USES it, and only via JS:
 `estrategia-web/map` checks `window.estrategiaWebConsent?.has( 'maps' )`,
 listens to `estrategia-web:consent` and, on clicking «Show map», calls
 `window.estrategiaWebConsent?.grant( 'maps' )`. Without the plugin, those
-calls do nothing and the map works in two clicks (`tests/map.test.mjs`).
+calls do nothing and the map works in two clicks (the plugin's `modules/map/tests/map.test.mjs`).
 
 ## Strings and translations (row 11)
 
@@ -227,14 +228,17 @@ there, has the right size and is not loaded (see `inc/setup.php`).
     node tests/run.mjs                 starts WordPress 7.1, runs everything and stops it
     node tests/server.mjs              only WordPress, to look at it:
                                        http://127.0.0.1:9401/prueba-modulos/
-    ESTRATEGIA_WEB_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs carousel
+    ESTRATEGIA_WEB_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs accordion
 
 All are **level 3** (browser, Playwright taken from `portal-hs`) and each one
 says why in its first line. The test WordPress activates the **test child**,
 so everything is tested with the parent working as a parent, and since 1.1.0
 **the Estrategia Web plugin** (mounted from `E:/Repositories/armazon-wp-sitio`,
 or `ESTRATEGIA_WEB_PLUGIN`) with only the block modules switched on (without
-`consent`, to keep testing the map without a cookie notice).
+`consent`: the cookie notice belongs to the plugin).
+
+What tests the blocks themselves lives in the plugin; what stays here is what
+measures the theme around them (its CSS, templates, transitions, translations).
 
 Playground traps on Windows, all measured on 01-10-2026 and detailed in the
 header of `tests/server.mjs`: `--mount=E:/…:/…` does not work (`--mount-dir`
