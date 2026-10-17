@@ -1,7 +1,7 @@
 // NIVEL: WORKBENCH — not a test. Test runner by levels (row 7 of the Armazón).
 /**
  *     node tests/run.mjs            starts Playground, runs everything, stops it
- *     node tests/run.mjs carousel   only the tests whose name contains "carousel"
+ *     node tests/run.mjs accordion  only the tests whose name contains "accordion"
  *     ESTRATEGIA_WEB_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs
  *                                   uses a WordPress that is already running (node tests/server.mjs)
  *
