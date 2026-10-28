@@ -5,7 +5,7 @@ a **child theme** copied from a template, and the child belongs to the project
 from day one. The decision and its three conditions are in
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requires **WordPress 7.1** and **PHP 8.1**. Current version: **1.1.0**
+- Requires **WordPress 7.1** and **PHP 8.1**. Current version: **1.2.0**
   (changelog in «Versions», at the end).
 - **Design only since 1.1.0** (14-10-2026, «one theme + one plugin»): it
   registers no block, a WordPress.org requirement. The blocks its templates
@@ -252,6 +252,33 @@ and killing the parent does not kill the children (`taskkill /T`).
 One entry per version, newest on top: what changes and whether any child
 needs touching. Whoever bumps the version (`style.css` header and `version`
 of the `block.json` that changes) writes their entry here in the same commit.
+
+### 1.2.0 — 28-10-2026 (the blog templates, for the first site with a blog; no child needs touching)
+
+Branch `ew-web2026`, made while building estrategiaweb.es (the first site of
+the stack with posts). Not merged into `main` yet.
+
+- **Listings** (`index.html`, `archive.html`, `search.html`): the three use
+  the new pattern **`estrategia-web/posts-grid`**: a grid of cards with the
+  featured image, category, title, excerpt, date and reading time
+  (`core/post-time-to-read`), and numbered pagination with real links.
+  Archives and search get a heading area (`core/breadcrumbs`, title,
+  description / search box).
+- **Single post** (`single.html` → pattern **`estrategia-web/single-post`**):
+  breadcrumbs, title, byline (author, date, reading time), wide featured
+  image, content with an aside (author bio and **related posts**: same
+  category, never the current one, `inc/related-posts.php`),
+  previous/next links and the **comments** block (renders nothing when
+  comments are closed: closes the GAP of `docs/web-nueva.md` 8.5 in the
+  plugin repo).
+- Two new strings («About the author», «Related posts»), in `es_ES.po` and
+  `ca.po`.
+- **What to change in a child: nothing.** A child that styled the old
+  listing (title + date + excerpt) sees cards now; the classes to dress are
+  in the header of each pattern. WordPress 7.1 is already required (it has
+  `core/breadcrumbs` and `core/post-time-to-read`).
+- Tests: `tests/blog.test.mjs` (level 3) checks a listing card, the single
+  byline and that the related list never contains the post itself.
 
 ### 1.1.0 — 14-10-2026 (the blocks move to the plugin: the Estrategia Web plugin 1.1.0 MUST be installed)
 
