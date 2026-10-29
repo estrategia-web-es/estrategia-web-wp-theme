@@ -5,7 +5,7 @@ a **child theme** copied from a template, and the child belongs to the project
 from day one. The decision and its three conditions are in
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requires **WordPress 7.1** and **PHP 8.1**. Current version: **1.1.0**
+- Requires **WordPress 7.1** and **PHP 8.1**. Current version: **1.2.0**
   (changelog in «Versions», at the end).
 - **Design only since 1.1.0** (14-10-2026, «one theme + one plugin»): it
   registers no block, a WordPress.org requirement. The blocks its templates
@@ -252,6 +252,19 @@ and killing the parent does not kill the children (`taskkill /T`).
 One entry per version, newest on top: what changes and whether any child
 needs touching. Whoever bumps the version (`style.css` header and `version`
 of the `block.json` that changes) writes their entry here in the same commit.
+
+### 1.2.0 — 29-10-2026 (sticky header by default)
+
+- **The header template part is sticky** (`style.css`, with the why and the
+  edge cases): below the admin bar, above the content (z-index 20), on the
+  base colour. Asked by David for Gastronòmicament, «al tema padre por defecto».
+- **What a child must do:** set its header height in
+  `settings.custom.layout.cabecera` (theme.json) so that anchors land below
+  the header; a child that wants a header that scrolls away sets
+  `position: static` on `.wp-site-blocks > header.wp-block-template-part`.
+- **Lavandería:** nothing visible changes (its header is `position: fixed`
+  inside the part, whose wrapper has height 0). Its header now stacks at 20
+  instead of 40 against the page.
 
 ### 1.1.0 — 14-10-2026 (the blocks move to the plugin: the Estrategia Web plugin 1.1.0 MUST be installed)
 

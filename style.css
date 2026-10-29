@@ -7,7 +7,7 @@ Description: Shared parent block theme: templates, template parts, patterns and 
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.1
-Version: 1.1.0
+Version: 1.2.0
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: estrategia-web
@@ -45,8 +45,10 @@ Tags: full-site-editing, block-patterns, translation-ready
  *   key moves focus to something that would end up under the header.
  * - The height: the token --wp--custom--layout--cabecera, set by the child
  *   whose header is sticky (settings.custom.layout.cabecera in its theme.json;
- *   in Lavandería, clamp(80px … 113px)). The parent does not make it sticky:
- *   no token, 0. Plus the admin bar, which pushes the sticky header down.
+ *   in Lavandería, clamp(80px … 113px)). Since 1.2.0 the parent makes the
+ *   header sticky (below), so a child with a header sets its token; without
+ *   one it counts 0 and anchors land under the header. Plus the admin bar,
+ *   which pushes the sticky header down.
  * - :root and not html: a child that already had `html { scroll-padding-top: … }`
  *   (Lavandería) is overridden by this one, which also adds the bar.
  * - No JavaScript: when arriving with the hash, Chromium also scrolls smoothly
@@ -65,5 +67,39 @@ Tags: full-site-editing, block-patterns, translation-ready
 @media (prefers-reduced-motion: no-preference) {
 	:root {
 		scroll-behavior: smooth;
+	}
+}
+
+/*
+ * Sticky header by default (1.2.0, David, 29-10-2026, for Gastronòmicament:
+ * «sticky header y añade al tema padre por defecto»). theme.json has no
+ * position for a template part.
+ * - On the template part's wrapper (header.wp-block-template-part, direct
+ *   child of .wp-site-blocks), not on the group inside it: a sticky element
+ *   only sticks while its PARENT lasts, and the wrapper's parent is the whole
+ *   page, while the inner group's parent is the wrapper itself.
+ * - top: below the admin bar. Under 600 px WordPress makes the bar scroll
+ *   away (position: absolute), so there the header sticks at 0.
+ * - z-index 20 and the base colour: so the page scrolls UNDER it and its
+ *   dropdowns open above the content (without z-index the content after it
+ *   painted over the menu: seen on Gastronòmicament, 29-10-2026).
+ * - Edge case, Lavandería: its header is position: fixed inside this wrapper,
+ *   which therefore has height 0; sticky changes nothing there. The z-index
+ *   does: its header now competes at 20 with the rest of the page instead of
+ *   its own 40 (nothing on the page goes above 20 today).
+ * How to maintain: a child that wants a header that scrolls away writes
+ * `.wp-site-blocks > header.wp-block-template-part { position: static; }`
+ * and keeps its token at 0. The trap: sticky does nothing, silently, if an
+ * ancestor has overflow other than visible; .wp-site-blocks and body must keep it.
+ */
+.wp-site-blocks > header.wp-block-template-part {
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 0px);
+	z-index: 20;
+	background: var(--wp--preset--color--base);
+}
+@media (max-width: 600px) {
+	.wp-site-blocks > header.wp-block-template-part {
+		top: 0;
 	}
 }
