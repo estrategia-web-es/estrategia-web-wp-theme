@@ -1,4 +1,6 @@
 node_modules/
 *.zip
+# The WordPress.org zip, its Theme Check run and the screenshot's Playground (tools/wporg.mjs).
+dist/
 # Tile cache for tools/static-map.mjs (OSM policy: reuse, do not request again).
 tools/.cache/
