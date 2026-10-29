@@ -184,7 +184,7 @@ is where whoever touches it lands. Here, the summary.
 | `estrategia-web/map` | image + address; the Google iframe only after «Show map» or with «maps» accepted; «Open in Google Maps» link; without a photo, a box with the place's details (0.3.0); OSM static map under the box (`staticMapUrl`, 0.5.0); no details box if the listing already shows them alongside (`showDetails:false`, 0.6.0); inside a Query, details via bindings (0.2.0) | classic `edit.js` (media library picker) + ServerSideRender | Interactivity API |
 | `estrategia-web/whatsapp` | floating link to `wa.me` with a message; number from the block or from the site option | `autoRegister` | none (it is a link) |
 | `estrategia-web/language-switcher` | current language («ES») in a button with `aria-expanded` and the list of the other languages (links to the same translated page, with `hreflang` and `lang`); provided by WPML (`wpml_active_languages`); **without WPML or with a single language it renders nothing** (0.7.6) | `autoRegister` (attribute `display`: code or name; `layout`: `dropdown`, the default, or `inline`, «EN – ES» inline without a dropdown, 0.7.7) | Interactivity API: opens, closes with Escape (focus back to the button) and when clicking outside |
-| `core/accordion` (core) | open and close by sliding, with motion tokens (0.4.0); the answer fades and rises, the «+» rotates 135° (0.7.3); the stylesheet states the technique and the trap | the core one | the core store + `assets/core-blocks/accordion.css` |
+| `core/accordion` (core) | open and close by sliding, with motion tokens (0.4.0); the answer fades and rises, the «+» rotates 135° (0.7.3); the stylesheet states the technique and the trap; block style «FAQ (list)», `is-style-faq-list` (1.2.2) | the core one | the core store + `assets/core-blocks/accordion.css` |
 
 **Why classic `edit.js` and not a module:** WordPress 7.1 does not accept ES
 modules as `editorScript` (there is no `editorScriptModule`). Without a build,
@@ -252,6 +252,24 @@ and killing the parent does not kill the children (`taskkill /T`).
 One entry per version, newest on top: what changes and whether any child
 needs touching. Whoever bumps the version (`style.css` header and `version`
 of the `block.json` that changes) writes their entry here in the same commit.
+
+### 1.2.2 — 29-10-2026 (the «FAQ (list)» style of the accordion; no child needs touching)
+
+Branch `ew-web2026`, from the 2e mockup v2 of estrategiaweb.es. Closes the
+pending item «FAQ style for `core/accordion`» of `main` (Pending decisions).
+
+- New block style **`faq-list`** for `core/accordion`
+  (`styles/block/faq-list.json`, CSS at the end of
+  `assets/core-blocks/accordion.css`): rows with a line between them, a
+  chevron in `primary` that turns 180°, the question in `contrast` and the
+  answer in `muted`. Only palette presets, so each child paints it with its
+  brand.
+- It is NOT called «faq» on purpose: Lavandería's child already has a «faq»
+  of its own (cards) and the two must not mix when this reaches `main`.
+- The first question open is core's own `openByDefault` on the item.
+- GAP: `tools/i18n.mjs` does not extract the titles of `styles/block/*.json`,
+  so the editor shows «FAQ (list)» untranslated. Only the editor's label; it
+  closes when the tool learns that folder.
 
 ### 1.2.0 — 28-10-2026 (the blog templates, for the first site with a blog; no child needs touching)
 

@@ -123,6 +123,64 @@
 	transform: rotate(var(--wp--custom--motion--accordion--turn, 135deg));
 }
 
+/*
+ * «FAQ (list)» block style (styles/block/faq-list.json, 1.2.2, 29-10-2026):
+ * questions as rows separated by a thin line, a chevron in the action colour
+ * that turns 180° when open, and the answer in the muted text colour. From
+ * the 2e mockup v2 of estrategiaweb.es (David: what every site uses goes in
+ * the parent). Only palette presets: each child paints it with its own brand.
+ * Edge case, with a name: Lavandería's CHILD has its own «faq» style (cards).
+ * This one is called «faq-list» on purpose so the two never mix; a child that
+ * wants this look and has a «faq» of its own keeps both.
+ * The chevron is an SVG mask, not the Material Symbols font (the parent's
+ * icons are SVG). Core's «+» stays in the span (aria-hidden) at font-size 0.
+ */
+.wp-block-accordion.is-style-faq-list {
+	--wp--custom--motion--accordion--turn: 180deg;
+	border-top: 1px solid var(--wp--preset--color--border);
+}
+.is-style-faq-list .wp-block-accordion-item {
+	border-bottom: 1px solid var(--wp--preset--color--border);
+	padding-block: 1.125rem;
+}
+.is-style-faq-list .wp-block-accordion-heading {
+	margin: 0;
+	font-family: inherit;
+	font-size: 1.125rem;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--wp--preset--color--contrast);
+}
+.is-style-faq-list .wp-block-accordion-heading__toggle {
+	gap: 1rem;
+	padding: 0;
+	text-align: left;
+}
+.is-style-faq-list .wp-block-accordion-heading__toggle:hover .wp-block-accordion-heading__toggle-title {
+	text-decoration: none;
+}
+.is-style-faq-list .wp-block-accordion-heading__toggle-icon {
+	flex: 0 0 auto;
+	width: 1.375rem;
+	height: 1.375rem;
+	font-size: 0;
+	background-color: var(--wp--preset--color--primary);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'%3E%3Cpath d='M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960'%3E%3Cpath d='M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.is-style-faq-list .wp-block-accordion-panel {
+	font-size: 1rem;
+	line-height: 1.7;
+	color: var(--wp--preset--color--muted);
+}
+.is-style-faq-list .wp-block-accordion-panel > * {
+	margin-block: 0;
+}
+/* The gap under the question only when open: closed, the panel adds nothing (the [hidden] trap above). */
+.is-style-faq-list .wp-block-accordion-panel:not([hidden]) {
+	margin-top: 0.75rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.wp-block-accordion-panel,
 	.wp-block-accordion-panel > *,
