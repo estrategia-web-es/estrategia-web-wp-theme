@@ -253,6 +253,14 @@ One entry per version, newest on top: what changes and whether any child
 needs touching. Whoever bumps the version (`style.css` header and `version`
 of the `block.json` that changes) writes their entry here in the same commit.
 
+### 1.2.3 — 29-10-2026 (the «FAQ (list)» rows without extra gaps; no child needs touching)
+
+- No block gap between rows (core's flow layout put 24 px above each item),
+  and the question keeps its look inside a post: the single template's
+  heading rule (0,2,1) was winning. Measured on estrategiaweb.es: row height
+  104 px in the post and 62 in a page before; the trap is written in
+  `assets/core-blocks/accordion.css`.
+
 ### 1.2.2 — 29-10-2026 (the «FAQ (list)» style of the accordion; no child needs touching)
 
 Branch `ew-web2026`, from the 2e mockup v2 of estrategiaweb.es. Closes the
