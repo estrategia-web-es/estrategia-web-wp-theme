@@ -714,3 +714,10 @@ missing. They are removed in **2.0.0**, once every site has run the migrator
 - **Child theme template:** separate repo yet to be created; meanwhile the
   minimum is `tests/fixtures/estrategia-web-hijo-prueba/`.
 - **PHP build (row 6):** still open; this theme does not need it.
+- **FAQ style for `core/accordion` (29-10-2026):** the «faq» block style
+  (`is-style-faq`: rows with separators, a visible «+») lives in Lavandería's
+  CHILD (`theme/assets/css/faq.css`, `styles/block/faq.json`). estrategiaweb.es
+  now has two FAQ blocks (SEO plan) with the plain accordion, which looks
+  bare. It moves here, with the child's brand values as presets, so every
+  site gets it; then Lavandería's child keeps only its overrides. David: what
+  applies to every site goes in the plugin or the parent theme.
