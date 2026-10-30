@@ -64,6 +64,30 @@
 	view-transition-name: estrategia-web-header;
 }
 
+/*
+ * view-transition-name makes the element a STACKING CONTEXT, so everything
+ * inside the header (the mobile menu overlay with its z-index 100000, the
+ * desktop submenus) can rise no higher than the header itself. With a static
+ * header that is "z-index 0 in DOM order": the <main> that comes after paints
+ * over it. Measured on estrategiaweb.es on 29-10-2026: the hamburger opened
+ * (is-menu-open, display flex) but only the overlay's top bar showed, with the
+ * page on top. Lifting the named header fixes it. A child whose header is a
+ * fixed element with its own z-index (Lavandería, .lm-header z 40, which
+ * carries estrategia-web-vt-header) does not need it, and this does not touch
+ * it: the selector only matches a header that carries the name itself.
+ * Only z-index, no position (1.3.0): the header is already positioned, it is
+ * sticky since 1.2.0 (style.css). Until 1.3.0 this rule also set
+ * position: relative and, being (0,4,1) against style.css's (0,2,1), it
+ * silently turned the sticky header back into a static one on every site with
+ * view transitions (estrategiaweb.es's child had to override it with «html»
+ * in front). A child that wants a header that scrolls away sets
+ * position: relative, NOT static: with static this z-index does nothing and
+ * the menu opens under the page again.
+ */
+.wp-site-blocks > header.wp-block-template-part:first-of-type:not(:has(.estrategia-web-vt-header)) {
+	z-index: 100;
+}
+
 footer.wp-block-template-part .estrategia-web-whatsapp {
 	view-transition-name: estrategia-web-whatsapp;
 }

@@ -25,7 +25,12 @@
  * @package estrategia-web
  */
 
-update_option( 'permalink_structure', '/%postname%/' );
+// set_permalink_structure() and not only update_option (28-10-2026, blog
+// test): with the option alone, $wp_rewrite keeps the structure it read at
+// the start of this request and flush_rewrite_rules() below writes rules
+// without the post rule; /<post-slug>/ then served the home page.
+global $wp_rewrite;
+$wp_rewrite->set_permalink_structure( '/%postname%/' );
 update_option( 'estrategia_web_whatsapp_phone', '34611223344' );
 update_option( 'estrategia_web_whatsapp_message', 'Mensaje desde la opción del sitio' );
 
@@ -108,6 +113,31 @@ wp_insert_post(
 		'post_content' => wp_slash( $anchors_content ),
 	)
 );
+
+// The blog (1.2.0): three posts in two categories, for tests/blog.test.mjs.
+// «prueba-blog-a» and «-b» share a category (each is the other's related
+// post); «-c» is in another one (it must never appear as related to them).
+$blog_cats = array();
+foreach ( array( 'prueba-uno' => 'Categoría uno', 'prueba-dos' => 'Categoría dos' ) as $slug => $name ) {
+	$term                = term_exists( $slug, 'category' ) ?: wp_insert_term( $name, 'category', array( 'slug' => $slug ) );
+	$blog_cats[ $slug ] = (int) $term['term_id'];
+}
+$blog_text = '<!-- wp:paragraph --><p>' . str_repeat( 'Texto de una entrada de prueba para medir el tiempo de lectura. ', 40 ) . '</p><!-- /wp:paragraph -->';
+foreach ( array( 'a' => 'prueba-uno', 'b' => 'prueba-uno', 'c' => 'prueba-dos' ) as $letter => $cat ) {
+	$existing_post = get_page_by_path( 'prueba-blog-' . $letter, OBJECT, 'post' );
+	wp_insert_post(
+		array(
+			'ID'            => $existing_post ? $existing_post->ID : 0,
+			'post_type'     => 'post',
+			'post_status'   => 'publish',
+			'post_title'    => 'Entrada de prueba ' . strtoupper( $letter ),
+			'post_name'     => 'prueba-blog-' . $letter,
+			'post_content'  => wp_slash( $blog_text ),
+			'post_category' => array( $blog_cats[ $cat ] ),
+			'post_author'   => 1,
+		)
+	);
+}
 
 flush_rewrite_rules();
 echo 'estrategia-web-setup page_id=' . (int) $page_id . ' locale=' . get_locale() . ' theme=' . get_stylesheet() . "\n";

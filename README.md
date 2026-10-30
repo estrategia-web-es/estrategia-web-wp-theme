@@ -5,7 +5,7 @@ a **child theme** copied from a template, and the child belongs to the project
 from day one. The decision and its three conditions are in
 `E:\Repositories\armazon\decisiones\2026-10-01-wordpress-tema-padre-compartido.md`.
 
-- Requires **WordPress 7.1** and **PHP 8.1**. Current version: **1.1.0**
+- Requires **WordPress 7.1** and **PHP 8.1**. Current version: **1.2.0**
   (changelog in «Versions», at the end).
 - **Design only since 1.1.0** (14-10-2026, «one theme + one plugin»): it
   registers no block, a WordPress.org requirement. The blocks its templates
@@ -184,7 +184,7 @@ is where whoever touches it lands. Here, the summary.
 | `estrategia-web/map` | image + address; the Google iframe only after «Show map» or with «maps» accepted; «Open in Google Maps» link; without a photo, a box with the place's details (0.3.0); OSM static map under the box (`staticMapUrl`, 0.5.0); no details box if the listing already shows them alongside (`showDetails:false`, 0.6.0); inside a Query, details via bindings (0.2.0) | classic `edit.js` (media library picker) + ServerSideRender | Interactivity API |
 | `estrategia-web/whatsapp` | floating link to `wa.me` with a message; number from the block or from the site option | `autoRegister` | none (it is a link) |
 | `estrategia-web/language-switcher` | current language («ES») in a button with `aria-expanded` and the list of the other languages (links to the same translated page, with `hreflang` and `lang`); provided by WPML (`wpml_active_languages`); **without WPML or with a single language it renders nothing** (0.7.6) | `autoRegister` (attribute `display`: code or name; `layout`: `dropdown`, the default, or `inline`, «EN – ES» inline without a dropdown, 0.7.7) | Interactivity API: opens, closes with Escape (focus back to the button) and when clicking outside |
-| `core/accordion` (core) | open and close by sliding, with motion tokens (0.4.0); the answer fades and rises, the «+» rotates 135° (0.7.3); the stylesheet states the technique and the trap | the core one | the core store + `assets/core-blocks/accordion.css` |
+| `core/accordion` (core) | open and close by sliding, with motion tokens (0.4.0); the answer fades and rises, the «+» rotates 135° (0.7.3); the stylesheet states the technique and the trap; block style «FAQ (list)», `is-style-faq-list` (1.2.2) | the core one | the core store + `assets/core-blocks/accordion.css` |
 
 **Why classic `edit.js` and not a module:** WordPress 7.1 does not accept ES
 modules as `editorScript` (there is no `editorScriptModule`). Without a build,
@@ -252,6 +252,90 @@ and killing the parent does not kill the children (`taskkill /T`).
 One entry per version, newest on top: what changes and whether any child
 needs touching. Whoever bumps the version (`style.css` header and `version`
 of the `block.json` that changes) writes their entry here in the same commit.
+
+### 1.3.0 — 30-10-2026 (the `ew-web2026` branch joins `main`; a child with a sticky header of its own can drop it)
+
+Two lines had both reached a «1.2.0»: `main` (sticky header, for
+Gastronòmicament) and the `ew-web2026` branch (blog templates, 1.2.0 to
+1.2.3, for estrategiaweb.es). This version is both, so the two 1.2.0 entries
+below are kept with the line they came from.
+
+- **Fix that only shows after the merge:** the 1.2.1 rule of
+  `assets/view-transitions.css` set `position: relative` on the header and
+  weighed more than the sticky rule of `style.css`, so with view transitions
+  on the header stopped being sticky. It now sets only `z-index`. Tested in
+  `tests/view-transitions.test.mjs` (the header must be `sticky`).
+- **What to change in a child:** nothing. estrategiaweb.es's child overrides
+  the same rule with `html` in front to make it sticky; it still works and
+  can be removed. A child that wants a header that scrolls away uses
+  `position: relative`, not `static` (see `style.css`).
+
+### 1.2.3 — 29-10-2026 (the «FAQ (list)» rows without extra gaps; no child needs touching)
+
+- No block gap between rows (core's flow layout put 24 px above each item),
+  and the question keeps its look inside a post: the single template's
+  heading rule (0,2,1) was winning. Measured on estrategiaweb.es: row height
+  104 px in the post and 62 in a page before; the trap is written in
+  `assets/core-blocks/accordion.css`.
+
+### 1.2.2 — 29-10-2026 (the «FAQ (list)» style of the accordion; no child needs touching)
+
+Branch `ew-web2026`, from the 2e mockup v2 of estrategiaweb.es. Closes the
+pending item «FAQ style for `core/accordion`» of `main` (Pending decisions).
+
+- New block style **`faq-list`** for `core/accordion`
+  (`styles/block/faq-list.json`, CSS at the end of
+  `assets/core-blocks/accordion.css`): rows with a line between them, a
+  chevron in `primary` that turns 180°, the question in `contrast` and the
+  answer in `muted`. Only palette presets, so each child paints it with its
+  brand.
+- It is NOT called «faq» on purpose: Lavandería's child already has a «faq»
+  of its own (cards) and the two must not mix when this reaches `main`.
+- The first question open is core's own `openByDefault` on the item.
+- GAP: `tools/i18n.mjs` does not extract the titles of `styles/block/*.json`,
+  so the editor shows «FAQ (list)» untranslated. Only the editor's label; it
+  closes when the tool learns that folder.
+
+### 1.2.0 (`ew-web2026`) — 28-10-2026 (the blog templates, for the first site with a blog; no child needs touching)
+
+Branch `ew-web2026`, made while building estrategiaweb.es (the first site of
+the stack with posts). Merged into `main` with 1.3.0.
+
+- **Listings** (`index.html`, `archive.html`, `search.html`): the three use
+  the new pattern **`estrategia-web/posts-grid`**: a grid of cards with the
+  featured image, category, title, excerpt, date and reading time
+  (`core/post-time-to-read`), and numbered pagination with real links.
+  Archives and search get a heading area (`core/breadcrumbs`, title,
+  description / search box).
+- **Single post** (`single.html` → pattern **`estrategia-web/single-post`**):
+  breadcrumbs, title, byline (author, date, reading time), wide featured
+  image, content with an aside (author bio and **related posts**: same
+  category, never the current one, `inc/related-posts.php`),
+  previous/next links and the **comments** block (renders nothing when
+  comments are closed: closes the GAP of `docs/web-nueva.md` 8.5 in the
+  plugin repo).
+- Two new strings («About the author», «Related posts»), in `es_ES.po` and
+  `ca.po`.
+- **What to change in a child: nothing.** A child that styled the old
+  listing (title + date + excerpt) sees cards now; the classes to dress are
+  in the header of each pattern. WordPress 7.1 is already required (it has
+  `core/breadcrumbs` and `core/post-time-to-read`).
+- Tests: `tests/blog.test.mjs` (level 3) checks a listing card, the single
+  byline and that the related list never contains the post itself.
+
+### 1.2.0 (`main`) — 29-10-2026 (sticky header by default)
+
+- **The header template part is sticky** (`style.css`, with the why and the
+  edge cases): below the admin bar, above the content (z-index 20), on the
+  base colour. Asked by David for Gastronòmicament, «al tema padre por defecto».
+- **What a child must do:** set its header height in
+  `settings.custom.layout.cabecera` (theme.json) so that anchors land below
+  the header; a child that wants a header that scrolls away sets
+  `position: relative` (since 1.3.0; it said `static`) on
+  `.wp-site-blocks > header.wp-block-template-part`.
+- **Lavandería:** nothing visible changes (its header is `position: fixed`
+  inside the part, whose wrapper has height 0). Its header now stacks at 20
+  instead of 40 against the page.
 
 ### 1.1.0 — 14-10-2026 (the blocks move to the plugin: the Estrategia Web plugin 1.1.0 MUST be installed)
 
