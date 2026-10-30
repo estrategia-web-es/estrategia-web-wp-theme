@@ -33,6 +33,11 @@ No. The plugin adds blocks the theme can use (WhatsApp button, map, carousel, la
 
 == Changelog ==
 
+= 1.3.0 =
+* Blog templates: post cards in listings, single post with author box, related posts and comments.
+* The header is sticky by default.
+* New "FAQ (list)" style for the Accordion block.
+
 = 1.1.0 =
 * The theme no longer registers blocks: they moved to the Estrategia Web plugin.
 
