@@ -75,9 +75,16 @@
  * fixed element with its own z-index (Lavandería, .lm-header z 40, which
  * carries estrategia-web-vt-header) does not need it, and this does not touch
  * it: the selector only matches a header that carries the name itself.
+ * Only z-index, no position (1.3.0): the header is already positioned, it is
+ * sticky since 1.2.0 (style.css). Until 1.3.0 this rule also set
+ * position: relative and, being (0,4,1) against style.css's (0,2,1), it
+ * silently turned the sticky header back into a static one on every site with
+ * view transitions (estrategiaweb.es's child had to override it with «html»
+ * in front). A child that wants a header that scrolls away sets
+ * position: relative, NOT static: with static this z-index does nothing and
+ * the menu opens under the page again.
  */
 .wp-site-blocks > header.wp-block-template-part:first-of-type:not(:has(.estrategia-web-vt-header)) {
-	position: relative;
 	z-index: 100;
 }
 

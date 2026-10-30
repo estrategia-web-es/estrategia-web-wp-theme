@@ -253,6 +253,23 @@ One entry per version, newest on top: what changes and whether any child
 needs touching. Whoever bumps the version (`style.css` header and `version`
 of the `block.json` that changes) writes their entry here in the same commit.
 
+### 1.3.0 — 30-10-2026 (the `ew-web2026` branch joins `main`; a child with a sticky header of its own can drop it)
+
+Two lines had both reached a «1.2.0»: `main` (sticky header, for
+Gastronòmicament) and the `ew-web2026` branch (blog templates, 1.2.0 to
+1.2.3, for estrategiaweb.es). This version is both, so the two 1.2.0 entries
+below are kept with the line they came from.
+
+- **Fix that only shows after the merge:** the 1.2.1 rule of
+  `assets/view-transitions.css` set `position: relative` on the header and
+  weighed more than the sticky rule of `style.css`, so with view transitions
+  on the header stopped being sticky. It now sets only `z-index`. Tested in
+  `tests/view-transitions.test.mjs` (the header must be `sticky`).
+- **What to change in a child:** nothing. estrategiaweb.es's child overrides
+  the same rule with `html` in front to make it sticky; it still works and
+  can be removed. A child that wants a header that scrolls away uses
+  `position: relative`, not `static` (see `style.css`).
+
 ### 1.2.3 — 29-10-2026 (the «FAQ (list)» rows without extra gaps; no child needs touching)
 
 - No block gap between rows (core's flow layout put 24 px above each item),
@@ -279,10 +296,10 @@ pending item «FAQ style for `core/accordion`» of `main` (Pending decisions).
   so the editor shows «FAQ (list)» untranslated. Only the editor's label; it
   closes when the tool learns that folder.
 
-### 1.2.0 — 28-10-2026 (the blog templates, for the first site with a blog; no child needs touching)
+### 1.2.0 (`ew-web2026`) — 28-10-2026 (the blog templates, for the first site with a blog; no child needs touching)
 
 Branch `ew-web2026`, made while building estrategiaweb.es (the first site of
-the stack with posts). Not merged into `main` yet.
+the stack with posts). Merged into `main` with 1.3.0.
 
 - **Listings** (`index.html`, `archive.html`, `search.html`): the three use
   the new pattern **`estrategia-web/posts-grid`**: a grid of cards with the
@@ -305,6 +322,20 @@ the stack with posts). Not merged into `main` yet.
   `core/breadcrumbs` and `core/post-time-to-read`).
 - Tests: `tests/blog.test.mjs` (level 3) checks a listing card, the single
   byline and that the related list never contains the post itself.
+
+### 1.2.0 (`main`) — 29-10-2026 (sticky header by default)
+
+- **The header template part is sticky** (`style.css`, with the why and the
+  edge cases): below the admin bar, above the content (z-index 20), on the
+  base colour. Asked by David for Gastronòmicament, «al tema padre por defecto».
+- **What a child must do:** set its header height in
+  `settings.custom.layout.cabecera` (theme.json) so that anchors land below
+  the header; a child that wants a header that scrolls away sets
+  `position: relative` (since 1.3.0; it said `static`) on
+  `.wp-site-blocks > header.wp-block-template-part`.
+- **Lavandería:** nothing visible changes (its header is `position: fixed`
+  inside the part, whose wrapper has height 0). Its header now stacks at 20
+  instead of 40 against the page.
 
 ### 1.1.0 — 14-10-2026 (the blocks move to the plugin: the Estrategia Web plugin 1.1.0 MUST be installed)
 
@@ -767,3 +798,10 @@ missing. They are removed in **2.0.0**, once every site has run the migrator
 - **Child theme template:** separate repo yet to be created; meanwhile the
   minimum is `tests/fixtures/estrategia-web-hijo-prueba/`.
 - **PHP build (row 6):** still open; this theme does not need it.
+- **FAQ style for `core/accordion` (29-10-2026):** the «faq» block style
+  (`is-style-faq`: rows with separators, a visible «+») lives in Lavandería's
+  CHILD (`theme/assets/css/faq.css`, `styles/block/faq.json`). estrategiaweb.es
+  now has two FAQ blocks (SEO plan) with the plain accordion, which looks
+  bare. It moves here, with the child's brand values as presets, so every
+  site gets it; then Lavandería's child keeps only its overrides. David: what
+  applies to every site goes in the plugin or the parent theme.

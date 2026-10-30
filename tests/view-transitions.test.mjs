@@ -69,12 +69,15 @@ run( () =>
 				return el ? getComputedStyle( el ).viewTransitionName : 'MISSING';
 			};
 			const h = document.querySelector( '.wp-site-blocks > header' );
-			return { all, header: of( '.wp-site-blocks > header' ), headerZ: h ? getComputedStyle( h ).zIndex : 'MISSING', whatsapp: of( 'footer.wp-block-template-part .estrategia-web-whatsapp' ) };
+			return { all, header: of( '.wp-site-blocks > header' ), headerZ: h ? getComputedStyle( h ).zIndex : 'MISSING', headerPosition: h ? getComputedStyle( h ).position : 'MISSING', whatsapp: of( 'footer.wp-block-template-part .estrategia-web-whatsapp' ) };
 		} );
 		assert.equal( names.header, 'estrategia-web-header', 'the header does not have view-transition-name: estrategia-web-header' );
 		// The name makes the header a stacking context: without a z-index the
 		// <main> paints over the mobile menu overlay (29-10-2026).
 		assert.notEqual( names.headerZ, 'auto', 'the named header has no z-index: the mobile menu opens UNDER the page' );
+		// ...but lifting it must not undo the sticky header (1.3.0: this file's
+		// rule set position: relative and outweighed style.css's sticky).
+		assert.equal( names.headerPosition, 'sticky', 'the named header is no longer sticky: view-transitions.css overrides style.css' );
 		assert.equal( names.whatsapp, 'estrategia-web-whatsapp', 'WhatsApp does not have view-transition-name: estrategia-web-whatsapp' );
 		for ( const [ name, count ] of Object.entries( names.all ) ) {
 			assert.equal( count, 1, `view-transition-name "${ name }" repeated ${ count } times: the transition is aborted` );
