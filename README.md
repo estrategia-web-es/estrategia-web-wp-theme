@@ -187,6 +187,17 @@ one to use**:
   some from an old theme (gastronomicament.cat has eight from
   `spectra-one-child`), and those do not hide anything.
 
+**Where this is going: WordPress.org, for native deployment** (David,
+05-11-2026). The theme is being published there (slug `estrategia-web`) so
+that sites update it from their own dashboard, like any other theme,
+instead of each site's deployer pushing a package. On 05-11-2026 it is
+**not published yet** (the WordPress.org API answers «Theme not found»).
+Until it is, the table above is how it gets there. `node tools/wporg.mjs zip`
+builds the package uploaded there, and `node tools/wporg.mjs check` runs
+Theme Check on it. Once it is published, a site switches to it when the
+installed copy is replaced by the one from WordPress.org; its row then says
+«WordPress.org» and its deployer stops packing the parent.
+
 How it is maintained: whoever deploys the parent to a site updates the
 «Installed» column, in a commit of this repo. A new site using the parent
 gets a row the day it is first deployed. The edge case: a site where the
