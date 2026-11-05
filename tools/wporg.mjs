@@ -29,8 +29,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { load } from "../tests/deps.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -119,7 +119,7 @@ function check() {
 
 async function screenshot() {
   ensureCli();
-  const { chromium } = createRequire("E:/Repositories/portal-hs/package.json")("playwright");
+  const { chromium } = load("playwright");
   const work = path.join(DIST, ".shot");
   fs.mkdirSync(work, { recursive: true });
   const bp = path.join(work, "blueprint.json");

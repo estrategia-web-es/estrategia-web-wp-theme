@@ -1,4 +1,6 @@
 node_modules/
+# Playwright for the tests and tools (tests/deps.mjs).
+tests/.cache/
 *.zip
 # The WordPress.org zip, its Theme Check run and the screenshot's Playground (tools/wporg.mjs).
 dist/

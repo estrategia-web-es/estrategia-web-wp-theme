@@ -1,13 +1,12 @@
 // NIVEL: WORKBENCH — not a test. Utilities shared by the browser tests.
 /**
- * Playwright without its own node_modules: it takes portal-hs's copy and the
- * browsers from the shared cache (~/AppData/Local/ms-playwright).
- * If portal-hs moves, the path is changed here and only here.
+ * Playwright without node_modules in the repo: tests/deps.mjs installs it once
+ * and the browsers go to the shared cache (~/AppData/Local/ms-playwright).
  */
-import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
+import { load } from './deps.mjs';
 
-const { chromium } = createRequire( 'E:/Repositories/portal-hs/package.json' )( 'playwright' );
+const { chromium } = load( 'playwright' );
 
 export const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:9401';
 export const PAGE = `${ BASE_URL }/prueba-modulos/`;

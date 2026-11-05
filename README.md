@@ -266,6 +266,41 @@ obsolete. **Inside a theme the file is named after the locale
 (`es_ES.l10n.php`), not `estrategia-web-es_ES`**: with the long name it is
 there, has the right size and is not loaded (see `inc/setup.php`).
 
+## Working on this repo
+
+### On a new machine (Windows)
+
+    winget install OpenJS.NodeJS.22
+
+Node 22, not `OpenJS.NodeJS.LTS`: that one is Node 26, where Playwright hangs
+installing Chromium ([tests/deps.mjs](tests/deps.mjs)). Then a NEW terminal,
+so that it sees the PATH. The tests mount the plugin, so
+its repo goes next to this one, in the same folder:
+
+    git clone https://github.com/estrategia-web-es/estrategia-web-wp-theme.git armazon-wp-padre
+    git clone https://github.com/estrategia-web-es/estrategia-web-wp-plugin.git armazon-wp-sitio
+    cd armazon-wp-padre
+    node tests/run.mjs
+
+Nothing else is installed by hand: the first run brings Playwright, Chromium
+and WordPress ([tests/deps.mjs](tests/deps.mjs)).
+
+### How a change gets in
+
+`main` is protected on GitHub: it takes a pull request with one approval, no
+force push and no deleting it. David, as admin, can skip that.
+
+1. A branch from an up-to-date `main` and the change, with its test.
+2. `node tests/run.mjs` in green.
+3. The pull request says what changes and how it was tested.
+4. David reviews, runs the whole suite on his machine and merges.
+5. **Production is touched after the merge, never before**, with a copy first.
+   A file changed by hand on a site makes it a version no repo has.
+
+Maintaining this: whoever changes the rule of `main` on GitHub changes this
+section in the same commit. Edge case: a typo in a README goes through a pull
+request too; David's direct pushes are the only way around it.
+
 ## Tests (row 7)
 
     node tests/run.mjs                 starts WordPress 7.1, runs everything and stops it
@@ -273,10 +308,10 @@ there, has the right size and is not loaded (see `inc/setup.php`).
                                        http://127.0.0.1:9401/prueba-modulos/
     ESTRATEGIA_WEB_BASE_URL=http://127.0.0.1:9401 node tests/run.mjs accordion
 
-All are **level 3** (browser, Playwright taken from `portal-hs`) and each one
+All are **level 3** (browser, Playwright from `tests/deps.mjs`) and each one
 says why in its first line. The test WordPress activates the **test child**,
 so everything is tested with the parent working as a parent, and since 1.1.0
-**the Estrategia Web plugin** (mounted from `E:/Repositories/armazon-wp-sitio`,
+**the Estrategia Web plugin** (mounted from the plugin's repo next to this one,
 or `ESTRATEGIA_WEB_PLUGIN`) with only the block modules switched on (without
 `consent`: the cookie notice belongs to the plugin).
 

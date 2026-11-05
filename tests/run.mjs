@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { ensureTestDeps } from './deps.mjs';
 import { start, stop, BASE_URL } from './server.mjs';
 
 const dir = path.dirname( fileURLToPath( import.meta.url ) );
@@ -37,6 +38,8 @@ const tests = fs
 		return { file, level: Number( match[ 1 ] ) };
 	} )
 	.sort( ( a, b ) => a.level - b.level || a.file.localeCompare( b.file ) );
+
+ensureTestDeps();
 
 let server = null;
 let baseUrl = process.env.ESTRATEGIA_WEB_BASE_URL;
