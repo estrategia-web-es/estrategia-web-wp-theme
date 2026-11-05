@@ -163,6 +163,38 @@ update is not visible on a site with that part customised. Before each
 deployment those customisations are checked and deleted. And `theme.json` is
 cached: locally, `WP_DEVELOPMENT_MODE='theme'`.
 
+## Where it is installed and how it gets there
+
+Remote: `estrategia-web-es/estrategia-web-wp-theme` on GitHub (public). The
+theme reaches each site as a package built with `git archive` from `main`,
+never from the working folder (another session may be editing it), and with
+`tests`, `tools`, `blocks`, `.gitignore`, `.gitattributes` and `README.md`
+left out. Each site deploys it with its own tool, and **that tool is the
+one to use**:
+
+| Site | Child theme | How it is deployed | Installed (05-11-2026) |
+|---|---|---|---|
+| estrategiaweb.es (and `web2026.`) | in `estrategiaweb-es/theme` | `estrategiaweb-es/tools/desplegar.mjs`, log in `docs/despliegues.md` | 1.3.0 |
+| lavanderiamallorca.com (and `lavanderiamallorca.es`, `lavanderiasmallorca.com`; not `lavanderiasmallorca.es`) | `lavanderia-mallorca` | `lavanderia-mallorca/despliegue/desplegar.mjs`, log in `despliegue/registro.md` | 1.3.0 |
+| gastronomicament.cat | `gastronomicament-cat` | by hand, steps in that repo's `CLAUDE.md` | **1.2.0** |
+
+- Both `desplegar.mjs` refuse to publish without `--ok "<David's literal
+  OK>"` (a hook enforces it); `--seco` is a dry run.
+- To check what a site really has (over SSH, in its `public_html`):
+  `grep -m1 Version: wp-content/themes/estrategia-web/style.css`.
+- Before deploying, the Site Editor trap above: list the saved
+  `wp_template`/`wp_template_part` **of the active theme**. A site can have
+  some from an old theme (gastronomicament.cat has eight from
+  `spectra-one-child`), and those do not hide anything.
+
+How it is maintained: whoever deploys the parent to a site updates the
+«Installed» column, in a commit of this repo. A new site using the parent
+gets a row the day it is first deployed. The edge case: a site where the
+parent is installed but another theme is active (not counted: it is not
+using it). The trap: each deployer keeps its own list of exclusions; if one
+changes, the other two (and gastronomicament-cat's `CLAUDE.md`) change
+with it.
+
 ## The blocks it uses (and are no longer its own)
 
 **Since 1.1.0 these blocks live in the Estrategia Web plugin**, each in its
@@ -793,8 +825,11 @@ missing. They are removed in **2.0.0**, once every site has run the migrator
 
 ## Pending decisions
 
-- **Repo remote (row 24):** no remote for now. It must be decided where it
-  lives and how it reaches each site (zip per version or updater).
+- **Repo remote (row 24):** decided. It lives in
+  `estrategia-web-es/estrategia-web-wp-theme` and reaches each site as a
+  `git archive` package through that site's deployer: see «Where it is
+  installed and how it gets there». An updater (sites pulling new versions
+  on their own) is still not decided.
 - **Child theme template:** separate repo yet to be created; meanwhile the
   minimum is `tests/fixtures/estrategia-web-hijo-prueba/`.
 - **PHP build (row 6):** still open; this theme does not need it.
