@@ -13,6 +13,9 @@
  *   "C:/Program Files/Git/wordpress/..." and Playground mounts at a place that
  *   does not exist WITHOUT any error. That is why it is launched from Node with
  *   an argument list, not from a shell line.
+ * - No shell and no npx: through a shell, a space in a path («C:/Users/Juan
+ *   Pérez/…») splits the --mount-dir argument and Playground says «Host path
+ *   does not exist». The pinned CLI (tests/deps.mjs) runs with node directly.
  * - Killing the parent process does not kill its children on Windows: stop()
  *   uses taskkill /T /F on the whole tree.
  * - The seed (blueprint + tests/fixtures/setup/setup.php) runs on every start:
@@ -24,7 +27,7 @@
  *   live in the plugin (modules/<block>/tests/); the plugin is still mounted
  *   here because the theme's templates use its blocks and the theme's tests
  *   (page-loads, view-transitions) look at them inside the theme. Another
- *   plugin folder:
+ *   plugin folder (by default, the plugin's repo next to this one):
  *   ESTRATEGIA_WEB_PLUGIN=E:/other/path node tests/run.mjs
  * - Another port (to run several Playgrounds side by side):
  *   ESTRATEGIA_WEB_PORT=9423 node tests/run.mjs
@@ -33,9 +36,13 @@ import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
+import { playgroundCli } from './deps.mjs';
 
 const repo = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
-const PLUGIN = process.env.ESTRATEGIA_WEB_PLUGIN || 'E:/Repositories/armazon-wp-sitio';
+// The plugin's repo next to this one, under either of its two names (the local
+// folder here, the GitHub name after a plain git clone).
+const SIBLINGS = [ 'armazon-wp-sitio', 'estrategia-web-wp-plugin' ].map( ( name ) => path.resolve( repo, '..', name ) );
+const PLUGIN = process.env.ESTRATEGIA_WEB_PLUGIN || SIBLINGS.find( ( folder ) => fs.existsSync( path.join( folder, 'estrategia-web.php' ) ) ) || SIBLINGS[ 0 ];
 export const PORT = Number( process.env.ESTRATEGIA_WEB_PORT || 9401 );
 export const BASE_URL = `http://127.0.0.1:${ PORT }`;
 
@@ -44,8 +51,7 @@ export function start( { log = false } = {} ) {
 		throw new Error( `Cannot find the Estrategia Web plugin in ${ PLUGIN } (ESTRATEGIA_WEB_PLUGIN)` );
 	}
 	const args = [
-		'-y',
-		'@wp-playground/cli@latest',
+		playgroundCli(),
 		'server',
 		'--wp=7.1',
 		'--php=8.3',
@@ -57,9 +63,8 @@ export function start( { log = false } = {} ) {
 		`--blueprint=${ path.join( repo, 'tests/fixtures/blueprint.json' ) }`,
 		'--login',
 	];
-	const child = spawn( process.platform === 'win32' ? 'npx.cmd' : 'npx', args, {
+	const child = spawn( process.execPath, args, {
 		cwd: repo,
-		shell: process.platform === 'win32',
 		env: { ...process.env, MSYS_NO_PATHCONV: '1' },
 	} );
 	let output = '';

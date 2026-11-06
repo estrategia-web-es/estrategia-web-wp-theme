@@ -28,7 +28,7 @@
  * the image, so it travels with the file wherever it goes.
  *
  * How it works: Node downloads the tiles (tile.openstreetmap.org, one at a
- * time) and hands them to a Playwright Chromium (portal-hs's, like the tests),
+ * time) and hands them to a Playwright Chromium (tests/deps.mjs, like the tests),
  * which composes them on a <canvas>, paints the marker and the credit, and
  * exports to webp/png. Chromium acts as decoder, typography and encoder: zero
  * dependencies of our own.
@@ -52,8 +52,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { load } from '../tests/deps.mjs';
 
 const VERSION = '0.5.0';
 const MAX_TILES = 40;
@@ -162,7 +162,7 @@ async function tile( { z, x, y }, contact ) {
 
 /** Composes tiles, marker and attribution in Chromium and returns the encoded image. */
 async function compose( { tiles, width, height, scale, color, type } ) {
-	const { chromium } = createRequire( 'E:/Repositories/portal-hs/package.json' )( 'playwright' );
+	const { chromium } = load( 'playwright' );
 	const browser = await chromium.launch();
 	try {
 		const page = await browser.newPage();
